@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>중부유럽 자가용 일주 7박 8일 · 여행 가이드</title>
+<title>문경자매부부 유럽중부 여행 · 여행 가이드</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://cdn.tailwindcss.com"></script>
@@ -30,7 +30,7 @@
   <!-- 좌: 지도 -->
   <div class="relative min-w-0 h-[46vh] md:h-auto md:flex-1">
     <div id="map"></div>
-    <div class="absolute z-[1000] top-3.5 left-3.5 right-3.5 bg-slate-900/80 backdrop-blur text-white px-4 py-3 rounded-xl pointer-events-none">
+    <div class="absolute z-[1000] top-3.5 left-1/2 -translate-x-1/2 w-[calc(100%-1.75rem)] max-w-[560px] bg-slate-900/80 backdrop-blur text-white px-4 py-3 rounded-xl pointer-events-none text-center">
       <h1 id="t-title" class="text-[18px] font-semibold tracking-tight"></h1>
       <p id="t-sub" class="text-[12.5px] opacity-80 mt-0.5"></p>
       <div id="t-meta" class="text-[11.5px] opacity-70 mt-1.5"></div>
@@ -60,7 +60,7 @@
 <script>
 /* ===== 임베드 데이터 (Phase1·2 산출물) ===== */
 const ROUTE = {
-  "trip": { "title": "중부유럽 자가용 일주 7박 8일", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 A8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
+  "trip": { "title": "문경자매부부 유럽중부 여행", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 A8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
   "stops": [
     { "id": "budapest", "name": "부다페스트 (출발)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-06", "type": "start", "nights": 0 },
     { "id": "hallstatt", "name": "할슈타트", "country": "오스트리아", "lat": 47.5622, "lng": 13.6493, "day": "2026-07-06", "type": "waypoint", "nights": 0 },
@@ -303,20 +303,21 @@ function selectStop(id){
   document.getElementById('p-name').textContent = s.name;
   document.getElementById('p-sub').textContent = s.country;
 
+  const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
   let html='';
   if(p.hotels && p.hotels.length){
     html += sec('🏨 추천 숙소', p.hotels.length, p.hotels.map(h=>card(h.name,h.price,h.note,
-      [h.parking?`🅿 ${h.parking}`:''])).join(''));
+      [h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country))).join(''));
   }
   if(p.restaurants && p.restaurants.length){
-    const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
     html += sec('🍽 추천 식당', p.restaurants.length, p.restaurants.map(r=>card(r.name,r.price,r.note,
       [r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country))).join(''));
   }
   if(p.highlights && p.highlights.length){
     html += `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5">📍 가볼 만한 곳</h3>
       <div class="flex flex-wrap gap-1.5">${
-      p.highlights.map(h=>`<span class="bg-slate-100 rounded-lg px-2.5 py-1.5 text-[12.5px]">${h}</span>`).join('')}</div></div>`;
+      p.highlights.map(h=>`<a href="${gmaps(h, city, s.country)}" target="_blank" rel="noopener"
+        class="bg-slate-100 hover:bg-sky-100 hover:text-accent2 rounded-lg px-2.5 py-1.5 text-[12.5px] transition">${h}</a>`).join('')}</div></div>`;
   }
   document.getElementById('p-body').innerHTML = html ||
     '<div class="mt-5 text-slate-500 text-[13px]">이 지점은 이동 경유지입니다.</div>';
@@ -334,15 +335,17 @@ function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
 }
 function card(nm,price,note,tags,mapUrl){
+  const nameHtml = mapUrl
+    ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="구글 지도에서 보기"
+        class="font-bold text-[14.5px] text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[11px] align-middle opacity-70">📍</span></a>`
+    : `<span class="font-bold text-[14.5px]">${nm}</span>`;
   return `<div class="border border-slate-200 rounded-xl px-3.5 py-3 mb-2.5 hover:border-slate-300 hover:shadow-md transition">
     <div class="flex justify-between items-baseline gap-2">
-      <span class="font-bold text-[14.5px]">${nm}</span>${
+      ${nameHtml}${
       price?`<span class="text-xs font-bold text-amber-600 whitespace-nowrap">${price}</span>`:''}</div>${
     note?`<div class="text-slate-500 text-[12.8px] mt-1 leading-relaxed">${note}</div>`:''}
     <div class="mt-1.5">${
-    (tags||[]).filter(Boolean).map(t=>`<span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded mr-1.5">${t}</span>`).join('')}</div>${
-    mapUrl?`<a href="${mapUrl}" target="_blank" rel="noopener"
-      class="inline-block mt-2 text-xs font-semibold text-accent2 border border-sky-200 bg-sky-50 px-2.5 py-1 rounded-md hover:bg-sky-100 transition">📍 구글 지도에서 보기</a>`:''}</div>`;
+    (tags||[]).filter(Boolean).map(t=>`<span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded mr-1.5">${t}</span>`).join('')}</div></div>`;
 }
 function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
 function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
