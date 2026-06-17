@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>중부유럽 자가용 일주 7박 8일 · 여행 가이드</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+  :root{
+    --bg:#0f1720; --panel:#fff; --ink:#1c2733; --muted:#6b7785;
+    --accent:#c0392b; --accent2:#2c6e8f; --line:#e6e9ec; --chip:#f2f5f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Helvetica Neue',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--ink);background:var(--bg)}
+  #app{display:flex;height:100vh;overflow:hidden}
+  /* 좌측 지도 */
+  #map-wrap{flex:1 1 62%;position:relative}
+  #map{position:absolute;inset:0}
+  .map-header{position:absolute;z-index:1000;top:14px;left:14px;right:14px;
+    background:rgba(15,23,32,.82);backdrop-filter:blur(6px);color:#fff;
+    padding:12px 16px;border-radius:12px;pointer-events:none}
+  .map-header h1{font-size:18px;letter-spacing:-.3px}
+  .map-header p{font-size:12.5px;opacity:.82;margin-top:3px}
+  .map-header .meta{font-size:11.5px;opacity:.7;margin-top:6px}
+  /* 우측 패널 */
+  #panel{flex:0 0 38%;max-width:480px;background:var(--panel);overflow-y:auto;
+    box-shadow:-6px 0 24px rgba(0,0,0,.25);display:flex;flex-direction:column}
+  .p-head{padding:18px 20px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:5}
+  .p-head .day-chip{display:inline-block;background:var(--accent);color:#fff;font-size:11.5px;
+    font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+  .p-head h2{font-size:21px;letter-spacing:-.4px}
+  .p-head .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .p-body{padding:6px 20px 30px}
+  .section{margin-top:20px}
+  .section h3{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent2);
+    margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .card{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px;transition:.15s}
+  .card:hover{border-color:#c9d3da;box-shadow:0 3px 12px rgba(0,0,0,.05)}
+  .card .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .card .nm{font-weight:700;font-size:14.5px}
+  .card .price{font-size:12px;color:#b8860b;font-weight:700;white-space:nowrap}
+  .card .nt{color:var(--muted);font-size:12.8px;margin-top:4px;line-height:1.5}
+  .card .tag{display:inline-block;background:var(--chip);color:#54616e;font-size:11px;
+    padding:2px 8px;border-radius:6px;margin-top:7px;margin-right:5px}
+  .hl{display:flex;flex-wrap:wrap;gap:7px}
+  .hl span{background:var(--chip);border-radius:8px;padding:6px 11px;font-size:12.5px}
+  /* 일자 리스트 */
+  .daylist{padding:10px 14px;border-bottom:1px solid var(--line);background:#fafbfc}
+  .daylist h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:4px 6px 8px}
+  .dl-item{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:8px;cursor:pointer}
+  .dl-item:hover{background:#eef2f5}
+  .dl-item.active{background:#fbe9e7}
+  .dl-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .dl-num.wp{background:#9aa7b1;width:18px;height:18px;font-size:0}
+  .dl-txt{font-size:13px}
+  .dl-txt b{display:block;font-size:13.5px}
+  .dl-txt small{color:var(--muted)}
+  /* 팁 */
+  .tips{margin:18px 20px 28px;background:#fff8e1;border:1px solid #ffe082;border-radius:11px;padding:14px 16px}
+  .tips h3{color:#b7791f;font-size:13px;margin-bottom:9px}
+  .tips li{font-size:12.6px;line-height:1.6;margin-left:16px;margin-bottom:6px;color:#5d4d22}
+  .leaflet-marker-num{background:var(--accent);color:#fff;border-radius:50%;text-align:center;
+    font-weight:700;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+  .leaflet-marker-wp{background:#fff;border:2px solid #9aa7b1;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+  @media(max-width:820px){
+    #app{flex-direction:column}
+    #map-wrap{flex:0 0 46vh}
+    #panel{flex:1 1 auto;max-width:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div class="map-header">
+      <h1 id="t-title"></h1>
+      <p id="t-sub"></p>
+      <div class="meta" id="t-meta"></div>
+    </div>
+  </div>
+  <aside id="panel">
+    <div class="p-head">
+      <span class="day-chip" id="p-chip"></span>
+      <h2 id="p-name"></h2>
+      <div class="sub" id="p-sub"></div>
+    </div>
+    <div class="daylist" id="daylist"><h3>전체 일정 · 클릭하여 이동</h3></div>
+    <div class="p-body" id="p-body"></div>
+    <div class="tips" id="tips"></div>
+  </aside>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/* ===== 임베드 데이터 (Phase1·2 산출물) ===== */
+const ROUTE = {
+  "trip": { "title": "중부유럽 자가용 일주 7박 8일", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 A8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
+  "stops": [
+    { "id": "budapest", "name": "부다페스트 (출발)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-06", "type": "start", "nights": 0 },
+    { "id": "hallstatt", "name": "할슈타트", "country": "오스트리아", "lat": 47.5622, "lng": 13.6493, "day": "2026-07-06", "type": "waypoint", "nights": 0 },
+    { "id": "salzburg", "name": "잘츠부르크", "country": "오스트리아", "lat": 47.8095, "lng": 13.0550, "day": "2026-07-06", "type": "stay", "nights": 1 },
+    { "id": "feldkirch", "name": "펠트키르히", "country": "오스트리아", "lat": 47.2382, "lng": 9.5985, "day": "2026-07-07", "type": "stay", "nights": 1 },
+    { "id": "lucerne", "name": "루체른", "country": "스위스", "lat": 47.0502, "lng": 8.3093, "day": "2026-07-08", "type": "stay", "nights": 1 },
+    { "id": "jungfraujoch", "name": "융프라우요흐", "country": "스위스", "lat": 46.5474, "lng": 7.9853, "day": "2026-07-09", "type": "waypoint", "nights": 0 },
+    { "id": "interlaken", "name": "인터라켄", "country": "스위스", "lat": 46.6863, "lng": 7.8632, "day": "2026-07-09", "type": "stay", "nights": 1 },
+    { "id": "zermatt", "name": "체르마트 (마터호른)", "country": "스위스", "lat": 46.0207, "lng": 7.7491, "day": "2026-07-10", "type": "waypoint", "nights": 0 },
+    { "id": "milan", "name": "밀라노", "country": "이탈리아", "lat": 45.4642, "lng": 9.1900, "day": "2026-07-10", "type": "stay", "nights": 2 },
+    { "id": "bled", "name": "블레드 호수", "country": "슬로베니아", "lat": 46.3683, "lng": 14.0931, "day": "2026-07-12", "type": "stay", "nights": 1 },
+    { "id": "budapest_end", "name": "부다페스트 (도착)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-13", "type": "end", "nights": 0 }
+  ],
+  "legs": [
+    { "from": "budapest", "to": "hallstatt", "km": 330, "hours": 3.5 },
+    { "from": "hallstatt", "to": "salzburg", "km": 75, "hours": 1.2 },
+    { "from": "salzburg", "to": "feldkirch", "km": 310, "hours": 3.2 },
+    { "from": "feldkirch", "to": "lucerne", "km": 140, "hours": 1.8 },
+    { "from": "lucerne", "to": "interlaken", "km": 70, "hours": 1.2 },
+    { "from": "interlaken", "to": "zermatt", "km": 150, "hours": 2.5 },
+    { "from": "zermatt", "to": "milan", "km": 230, "hours": 3.2 },
+    { "from": "milan", "to": "bled", "km": 500, "hours": 5.0 },
+    { "from": "bled", "to": "budapest_end", "km": 460, "hours": 4.5 }
+  ],
+  "tips": [
+    "오스트리아·스위스·슬로베니아는 고속도로 비네트(Vignette) 필수. 스위스는 연간권(40 CHF)만 판매되니 국경 전 구매. 슬로베니아·오스트리아는 전자 비네트(e-vignette) 단기권 구매 가능.",
+    "이탈리아 밀라노 도심은 ZTL(Area C) 진입 제한 구역. 호텔 주차장 또는 외곽 주차 후 대중교통 권장. 위반 시 카메라 자동 과태료.",
+    "체르마트는 휘발유 차량 진입 금지. 인근 테쉬(Täsch) 주차장에 차를 두고 셔틀열차로 이동.",
+    "융프라우요흐는 인터라켄/그린델발트에서 산악열차로 오른다. 정상 주차장 없음 — 차는 산기슭에 주차.",
+    "스위스·이탈리아 알프스 구간은 일부 산악 패스/카트레인(Lötschberg 등) 이용 시 시간 단축. 한여름에도 고지대는 방한 준비.",
+    "주차: 잘츠부르크·루체른 구시가는 보행자 구역이라 외곽 P&R 주차 후 도보 권장."
+  ]
+};
+const POI = {
+  "budapest": {
+    "restaurants": [
+      { "name": "Gettó Gulyás", "note": "정통 헝가리 굴라쉬와 가정식, 출발 전 든든한 한 끼", "price": "€€", "cuisine": "헝가리" },
+      { "name": "New York Café", "note": "세계에서 가장 아름다운 카페, 아침/커피", "price": "€€€", "cuisine": "카페" }
+    ],
+    "highlights": ["부다 성", "어부의 요새", "세체니 다리"]
+  },
+  "hallstatt": {
+    "restaurants": [
+      { "name": "Restaurant zum Salzbaron", "note": "호숫가 전망, 송어 요리", "price": "€€", "cuisine": "오스트리아" },
+      { "name": "Bräugasthof Hallstatt", "note": "호수 바로 앞 전통 식당", "price": "€€", "cuisine": "오스트리아" }
+    ],
+    "highlights": ["할슈타트 호수 전망 포인트", "마르크트 광장", "소금 광산(잘츠벨텐)"]
+  },
+  "salzburg": {
+    "hotels": [
+      { "name": "Hotel Sacher Salzburg", "note": "잘자흐 강변 5성 클래식 호텔", "price": "€€€", "parking": "발레파킹 제공" },
+      { "name": "Hotel Goldgasse", "note": "구시가 부티크 호텔, 위치 최고", "price": "€€", "parking": "인근 공영주차장(Mönchsberg) 이용" }
+    ],
+    "restaurants": [
+      { "name": "St. Peter Stiftskulinarium", "note": "유럽에서 가장 오래된 레스토랑(803년~)", "price": "€€€", "cuisine": "오스트리아" },
+      { "name": "Augustiner Bräustübl", "note": "수도원 맥주 양조장, 현지 분위기", "price": "€", "cuisine": "맥주/안주" }
+    ],
+    "highlights": ["미라벨 정원", "호엔잘츠부르크 성", "모차르트 생가", "게트라이데 거리"]
+  },
+  "feldkirch": {
+    "hotels": [
+      { "name": "Hotel Montfort", "note": "구시가 인접 모던 호텔", "price": "€€", "parking": "자체 주차장" },
+      { "name": "Gasthof Lingg", "note": "중세 구시가 가족 운영 게스트하우스", "price": "€", "parking": "인근 주차 가능" }
+    ],
+    "restaurants": [
+      { "name": "Rauch Café", "note": "현지 인기 브런치/카페", "price": "€€", "cuisine": "카페" },
+      { "name": "Dogana", "note": "포어아를베르크식 향토 요리", "price": "€€", "cuisine": "오스트리아" }
+    ],
+    "highlights": ["샤텐부르크 성", "중세 구시가 골목", "스위스/리히텐슈타인 당일치기 거점"]
+  },
+  "lucerne": {
+    "hotels": [
+      { "name": "Hotel des Balances", "note": "로이스 강변, 카펠교 도보 1분", "price": "€€€", "parking": "인근 주차장(Altstadt) 제휴" },
+      { "name": "Hotel Waldstätterhof", "note": "역 앞, 호수·구시가 접근 편리", "price": "€€", "parking": "발레파킹" }
+    ],
+    "restaurants": [
+      { "name": "Wirtshaus Galliker", "note": "100년 전통 루체른 향토 요리", "price": "€€", "cuisine": "스위스" },
+      { "name": "Restaurant Old Swiss House", "note": "테이블에서 굽는 비너슈니첼로 유명", "price": "€€€", "cuisine": "스위스" }
+    ],
+    "highlights": ["카펠교(Kapellbrücke)", "빈사의 사자상", "필라투스/리기산 케이블카", "루체른 호수 유람선"]
+  },
+  "jungfraujoch": {
+    "restaurants": [
+      { "name": "Restaurant Crystal (Top of Europe)", "note": "해발 3,454m 정상 전망 레스토랑", "price": "€€", "cuisine": "스위스" }
+    ],
+    "highlights": ["유럽 최고봉 기차역(3,454m)", "알레치 빙하 전망", "스핑크스 전망대", "얼음 궁전(Ice Palace)"]
+  },
+  "interlaken": {
+    "hotels": [
+      { "name": "Victoria Jungfrau Grand Hotel & Spa", "note": "융프라우 전망 5성 랜드마크", "price": "€€€", "parking": "자체 주차장" },
+      { "name": "Hotel Interlaken", "note": "역사적 부티크, 가성비 좋은 4성", "price": "€€", "parking": "자체 주차장" }
+    ],
+    "restaurants": [
+      { "name": "Restaurant Taverne (Hotel Interlaken)", "note": "스위스 퐁뒤·라클렛", "price": "€€", "cuisine": "스위스" },
+      { "name": "Husi Bierhaus", "note": "현지 맥주와 캐주얼 메뉴", "price": "€€", "cuisine": "스위스/펍" }
+    ],
+    "highlights": ["융프라우요흐(유럽의 지붕)", "하더쿨름 전망대", "그린델발트 피르스트", "투어/브리엔츠 호수"]
+  },
+  "zermatt": {
+    "restaurants": [
+      { "name": "Chez Vrony", "note": "마터호른 전망 산장 레스토랑(스키장 위)", "price": "€€€", "cuisine": "스위스" },
+      { "name": "Restaurant Schäferstube", "note": "양고기·라클렛 전문", "price": "€€", "cuisine": "스위스" }
+    ],
+    "highlights": ["마터호른 전망(고르너그라트 등산열차)", "체르마트 마을 산책", "테쉬 주차 후 셔틀열차 이용"]
+  },
+  "milan": {
+    "hotels": [
+      { "name": "Hotel Spadari al Duomo", "note": "두오모 도보 2분 디자인 호텔", "price": "€€€", "parking": "ZTL 내 — 발레파킹 예약 필수" },
+      { "name": "NH Milano Touring", "note": "ZTL 경계 밖, 자가용 접근 수월", "price": "€€", "parking": "자체 주차장(유료)" }
+    ],
+    "restaurants": [
+      { "name": "Trattoria Milanese", "note": "리소토 알라 밀라네제·코톨레타 정통", "price": "€€", "cuisine": "이탈리아" },
+      { "name": "Luini Panzerotti", "note": "두오모 옆 명물 판제로티(간편식)", "price": "€", "cuisine": "이탈리아/길거리" }
+    ],
+    "highlights": ["두오모 대성당", "비토리오 에마누엘레 2세 갤러리아", "스포르체스코 성", "최후의 만찬(예약 필수)", "코모 호수 당일치기"]
+  },
+  "bled": {
+    "hotels": [
+      { "name": "Grand Hotel Toplice", "note": "블레드 호수 정면 클래식 5성", "price": "€€€", "parking": "자체 주차장" },
+      { "name": "Hotel Triglav Bled", "note": "호수 전망 부티크, 조용한 입지", "price": "€€", "parking": "자체 주차장" }
+    ],
+    "restaurants": [
+      { "name": "Vila Prešeren", "note": "호숫가 테라스, 블레드 크림케이크(크렘슈니타)", "price": "€€", "cuisine": "슬로베니아" },
+      { "name": "Ostarija Peglez'n", "note": "현지 인기 생선·전통 요리", "price": "€€", "cuisine": "슬로베니아" }
+    ],
+    "highlights": ["블레드 섬(플레트나 보트)", "블레드 성", "빈트가르 협곡", "보힌 호수"]
+  },
+  "budapest_end": {
+    "restaurants": [
+      { "name": "Mazel Tov", "note": "유대인 지구의 분위기 좋은 마무리 만찬", "price": "€€", "cuisine": "중동/지중해" },
+      { "name": "Central Market Hall", "note": "중앙시장에서 마지막 헝가리 먹거리·기념품", "price": "€", "cuisine": "시장/헝가리" }
+    ],
+    "highlights": ["국회의사당 야경", "세체니 온천", "도나우 강 유람"]
+  }
+};
+
+/* ===== 지도 초기화 ===== */
+const map = L.map('map',{zoomControl:true}).setView([46.8,11.5],6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19, attribution:'© OpenStreetMap'
+}).addTo(map);
+
+/* 루트 폴리라인 (방문 순서) */
+const latlngs = ROUTE.stops.map(s=>[s.lat,s.lng]);
+L.polyline(latlngs,{color:'#c0392b',weight:3,opacity:.75,dashArray:'1,0'}).addTo(map);
+map.fitBounds(L.latLngBounds(latlngs).pad(0.12));
+
+/* 마커 */
+const markers = {};
+let stayNo = 0;
+ROUTE.stops.forEach(s=>{
+  const isStay = s.type==='stay';
+  if(isStay) stayNo++;
+  const label = isStay? String(stayNo) : '';
+  const size = isStay?28:14;
+  const icon = L.divIcon({
+    className:'', html:`<div class="${isStay?'leaflet-marker-num':'leaflet-marker-wp'}"
+      style="width:${size}px;height:${size}px;line-height:${size-4}px;font-size:13px">${label}</div>`,
+    iconSize:[size,size], iconAnchor:[size/2,size/2]
+  });
+  const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
+  m.bindPopup(`<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>`);
+  m.on('click',()=>selectStop(s.id));
+  markers[s.id]=m;
+});
+
+/* 헤더 */
+document.getElementById('t-title').textContent = ROUTE.trip.title;
+document.getElementById('t-sub').textContent = ROUTE.trip.subtitle;
+document.getElementById('t-meta').textContent =
+  `🚗 ${ROUTE.trip.car} · 📅 ${ROUTE.trip.start} ~ ${ROUTE.trip.end} · 총 ${sumKm()}km`;
+
+/* 일자 리스트 */
+const dl = document.getElementById('daylist');
+let nStay=0;
+ROUTE.stops.forEach(s=>{
+  if(s.type==='stay') nStay++;
+  const num = s.type==='stay'? nStay : '';
+  const leg = legTo(s.id);
+  const el = document.createElement('div');
+  el.className='dl-item'; el.dataset.id=s.id;
+  el.innerHTML = `<div class="dl-num ${s.type!=='stay'?'wp':''}">${num}</div>
+    <div class="dl-txt"><b>${s.name}</b>
+    <small>${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?` · ${leg.km}km ${leg.hours}h`:''}</small></div>`;
+  el.onclick=()=>selectStop(s.id);
+  dl.appendChild(el);
+});
+
+/* 팁 */
+document.getElementById('tips').innerHTML =
+  `<h3>🚘 자가용 여행 필수 팁</h3><ul>${ROUTE.tips.map(t=>`<li>${t}</li>`).join('')}</ul>`;
+
+/* ===== 선택 동작 ===== */
+function selectStop(id){
+  const s = ROUTE.stops.find(x=>x.id===id);
+  const p = POI[id] || {};
+  map.flyTo([s.lat,s.lng], s.type==='stay'?12:11, {duration:.8});
+  markers[id].openPopup();
+
+  document.getElementById('p-chip').textContent =
+    (s.type==='start'?'출발':s.type==='end'?'도착':s.type==='waypoint'?'경유·관광':`숙박 ${s.nights}박`) + ' · ' + fmtDay(s.day);
+  document.getElementById('p-name').textContent = s.name;
+  document.getElementById('p-sub').textContent = s.country;
+
+  let html='';
+  if(p.hotels && p.hotels.length){
+    html += sec('🏨 추천 숙소', p.hotels.map(h=>card(h.name,h.price,h.note,
+      [h.parking?`🅿 ${h.parking}`:''])).join(''));
+  }
+  if(p.restaurants && p.restaurants.length){
+    html += sec('🍽 추천 식당', p.restaurants.map(r=>card(r.name,r.price,r.note,
+      [r.cuisine?r.cuisine:''])).join(''));
+  }
+  if(p.highlights && p.highlights.length){
+    html += `<div class="section"><h3>📍 가볼 만한 곳</h3><div class="hl">${
+      p.highlights.map(h=>`<span>${h}</span>`).join('')}</div></div>`;
+  }
+  document.getElementById('p-body').innerHTML = html ||
+    '<div class="section" style="color:#6b7785;font-size:13px">이 지점은 이동 경유지입니다.</div>';
+
+  document.querySelectorAll('.dl-item').forEach(e=>e.classList.toggle('active',e.dataset.id===id));
+}
+function sec(t,inner){return `<div class="section"><h3>${t}</h3>${inner}</div>`}
+function card(nm,price,note,tags){
+  return `<div class="card"><div class="row"><span class="nm">${nm}</span>${
+    price?`<span class="price">${price}</span>`:''}</div>${
+    note?`<div class="nt">${note}</div>`:''}${
+    (tags||[]).filter(Boolean).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+}
+function fmtDay(d){const[,,dd]=d.split('-');const[ , mm]=d.split('-');return `7/${+dd}`}
+function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
+function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
+
+/* 첫 화면: 출발지 */
+selectStop(ROUTE.stops[0].id);
+</script>
+</body>
+</html>
