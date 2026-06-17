@@ -60,7 +60,7 @@
 <script>
 /* ===== 임베드 데이터 (Phase1·2 산출물) ===== */
 const ROUTE = {
-  "trip": { "title": "문경자매부부 유럽중부 여행", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 A8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
+  "trip": { "title": "문경자매부부 유럽중부 여행", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 Q8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
   "stops": [
     { "id": "budapest", "name": "부다페스트 (출발)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-06", "type": "start", "nights": 0 },
     { "id": "hallstatt", "name": "할슈타트", "country": "오스트리아", "lat": 47.5622, "lng": 13.6493, "day": "2026-07-06", "type": "waypoint", "nights": 0 },
@@ -100,7 +100,9 @@ const POI = {
       { "name": "Gettó Gulyás", "note": "정통 헝가리 굴라쉬와 가정식, 출발 전 든든한 한 끼", "price": "€€", "cuisine": "헝가리" },
       { "name": "New York Café", "note": "세계에서 가장 아름다운 카페, 아침/커피", "price": "€€€", "cuisine": "카페" },
       { "name": "Hungarikum Bisztró", "note": "전통 헝가리 가정식, 푸짐한 양과 라이브 음악", "price": "€€", "cuisine": "헝가리" },
-      { "name": "Bors GasztroBár", "note": "줄 서는 수프·바게트 맛집, 빠른 한 끼", "price": "€", "cuisine": "길거리/퓨전" }
+      { "name": "Bors GasztroBár", "note": "줄 서는 수프·바게트 맛집, 빠른 한 끼", "price": "€", "cuisine": "길거리/퓨전" },
+      { "name": "Stand25 Bisztró", "note": "비브구르망 셰프의 모던 헝가리 비스트로", "price": "€€", "cuisine": "헝가리/모던" },
+      { "name": "Belvárosi Disznótoros", "note": "현지인 줄서는 헝가리식 정육·구이 식당", "price": "€", "cuisine": "헝가리/구이" }
     ],
     "highlights": ["부다 성", "어부의 요새", "세체니 다리", "성 이슈트반 대성당"]
   },
@@ -108,7 +110,8 @@ const POI = {
     "restaurants": [
       { "name": "Restaurant zum Salzbaron", "note": "호숫가 전망, 송어 요리", "price": "€€", "cuisine": "오스트리아" },
       { "name": "Bräugasthof Hallstatt", "note": "호수 바로 앞 전통 식당", "price": "€€", "cuisine": "오스트리아" },
-      { "name": "Café Derbl", "note": "수제 케이크와 커피로 잠깐 쉬기 좋은 곳", "price": "€", "cuisine": "카페" }
+      { "name": "Café Derbl", "note": "수제 케이크와 커피로 잠깐 쉬기 좋은 곳", "price": "€", "cuisine": "카페" },
+      { "name": "Restaurant Rudolfsturm", "note": "마을 위 전망탑 레스토랑, 호수 파노라마", "price": "€€€", "cuisine": "오스트리아" }
     ],
     "highlights": ["할슈타트 호수 전망 포인트", "마르크트 광장", "소금 광산(잘츠벨텐)", "스카이워크 전망대"]
   },
@@ -117,13 +120,17 @@ const POI = {
       { "name": "Hotel Sacher Salzburg", "note": "잘자흐 강변 5성 클래식 호텔", "price": "€€€", "parking": "발레파킹 제공" },
       { "name": "Hotel Goldgasse", "note": "구시가 부티크 호텔, 위치 최고", "price": "€€", "parking": "인근 공영주차장(Mönchsberg) 이용" },
       { "name": "Arte Hotel Salzburg", "note": "역 인근 모던 호텔, 자가용 접근 편리", "price": "€€", "parking": "자체 주차장(유료)" },
-      { "name": "Meininger Hotel Salzburg", "note": "가성비 좋은 가족·그룹 숙소", "price": "€", "parking": "자체 주차장" }
+      { "name": "Meininger Hotel Salzburg", "note": "가성비 좋은 가족·그룹 숙소", "price": "€", "parking": "자체 주차장" },
+      { "name": "Hotel Schloss Mönchstein", "note": "묀히스베르크 언덕 위 성채 럭셔리 호텔", "price": "€€€", "parking": "자체 주차장" },
+      { "name": "Star Inn Hotel Zentrum", "note": "역·구시가 중간, 합리적 3성", "price": "€", "parking": "인근 주차장" }
     ],
     "restaurants": [
       { "name": "St. Peter Stiftskulinarium", "note": "유럽에서 가장 오래된 레스토랑(803년~)", "price": "€€€", "cuisine": "오스트리아" },
       { "name": "Augustiner Bräustübl", "note": "수도원 맥주 양조장, 현지 분위기", "price": "€", "cuisine": "맥주/안주" },
       { "name": "Zum Fidelen Affen", "note": "현지인 단골 향토 선술집", "price": "€€", "cuisine": "오스트리아" },
-      { "name": "Café Tomaselli", "note": "1700년대부터 이어진 오스트리아 최고(古) 카페", "price": "€€", "cuisine": "카페/디저트" }
+      { "name": "Café Tomaselli", "note": "1700년대부터 이어진 오스트리아 최고(古) 카페", "price": "€€", "cuisine": "카페/디저트" },
+      { "name": "Gasthof Goldgasse", "note": "구시가 골목의 모던 향토 요리", "price": "€€", "cuisine": "오스트리아" },
+      { "name": "Triangel", "note": "축제극장 옆 지역 식재료 비스트로", "price": "€€", "cuisine": "오스트리아/모던" }
     ],
     "highlights": ["미라벨 정원", "호엔잘츠부르크 성", "모차르트 생가", "게트라이데 거리"]
   },
@@ -131,12 +138,16 @@ const POI = {
     "hotels": [
       { "name": "Hotel Montfort", "note": "구시가 인접 모던 호텔", "price": "€€", "parking": "자체 주차장" },
       { "name": "Gasthof Lingg", "note": "중세 구시가 가족 운영 게스트하우스", "price": "€", "parking": "인근 주차 가능" },
-      { "name": "Hotel Bären", "note": "전통 가옥 분위기의 4성, 조식 평 좋음", "price": "€€", "parking": "자체 주차장" }
+      { "name": "Hotel Bären", "note": "전통 가옥 분위기의 4성, 조식 평 좋음", "price": "€€", "parking": "자체 주차장" },
+      { "name": "Hotel Central Löwen", "note": "기차역 근처 비즈니스 4성", "price": "€€", "parking": "자체 주차장" },
+      { "name": "Gasthof Schäfle", "note": "수상 경력의 향토 다이닝 결합 숙소", "price": "€€", "parking": "주차 가능" }
     ],
     "restaurants": [
       { "name": "Rauch Café", "note": "현지 인기 브런치/카페", "price": "€€", "cuisine": "카페" },
       { "name": "Dogana", "note": "포어아를베르크식 향토 요리", "price": "€€", "cuisine": "오스트리아" },
-      { "name": "Schäfle", "note": "지역 식재료를 쓰는 모던 오스트리아 다이닝", "price": "€€€", "cuisine": "오스트리아" }
+      { "name": "Schäfle", "note": "지역 식재료를 쓰는 모던 오스트리아 다이닝", "price": "€€€", "cuisine": "오스트리아" },
+      { "name": "Pizzeria Don Camillo", "note": "가족 단위 인기 화덕 피자", "price": "€", "cuisine": "이탈리아" },
+      { "name": "Gasthaus zum Hirschen", "note": "지역 맥주와 푸짐한 전통 메뉴", "price": "€€", "cuisine": "오스트리아" }
     ],
     "highlights": ["샤텐부르크 성", "중세 구시가 골목", "스위스/리히텐슈타인 당일치기 거점"]
   },
@@ -145,20 +156,25 @@ const POI = {
       { "name": "Hotel des Balances", "note": "로이스 강변, 카펠교 도보 1분", "price": "€€€", "parking": "인근 주차장(Altstadt) 제휴" },
       { "name": "Hotel Waldstätterhof", "note": "역 앞, 호수·구시가 접근 편리", "price": "€€", "parking": "발레파킹" },
       { "name": "Hotel des Alpes", "note": "구시가 강변 전망의 합리적 4성", "price": "€€", "parking": "인근 공영주차장" },
-      { "name": "Bürgenstock Resort", "note": "호수 위 절벽 럭셔리 리조트(차로 30분)", "price": "€€€", "parking": "자체 주차장" }
+      { "name": "Bürgenstock Resort", "note": "호수 위 절벽 럭셔리 리조트(차로 30분)", "price": "€€€", "parking": "자체 주차장" },
+      { "name": "Hotel Schweizerhof Luzern", "note": "호숫가 역사적 5성 그랜드 호텔", "price": "€€€", "parking": "자체 주차장" },
+      { "name": "Ibis Styles Luzern City", "note": "역 근처 가성비 모던 숙소", "price": "€", "parking": "인근 주차장" }
     ],
     "restaurants": [
       { "name": "Wirtshaus Galliker", "note": "100년 전통 루체른 향토 요리", "price": "€€", "cuisine": "스위스" },
       { "name": "Restaurant Old Swiss House", "note": "테이블에서 굽는 비너슈니첼로 유명", "price": "€€€", "cuisine": "스위스" },
       { "name": "Stadtkeller", "note": "알프호른·요들 라이브가 있는 전통 레스토랑", "price": "€€", "cuisine": "스위스/공연" },
-      { "name": "Bachmann Confiserie", "note": "루체른 명물 초콜릿·페이스트리", "price": "€", "cuisine": "카페/디저트" }
+      { "name": "Bachmann Confiserie", "note": "루체른 명물 초콜릿·페이스트리", "price": "€", "cuisine": "카페/디저트" },
+      { "name": "Restaurant Schiff", "note": "강변 테라스의 치즈 퐁뒤·라클렛", "price": "€€", "cuisine": "스위스" },
+      { "name": "KKL Seebar & Lounge", "note": "호수 전망 모던 다이닝·바", "price": "€€€", "cuisine": "모던/스위스" }
     ],
     "highlights": ["카펠교(Kapellbrücke)", "빈사의 사자상", "필라투스/리기산 케이블카", "루체른 호수 유람선"]
   },
   "jungfraujoch": {
     "restaurants": [
       { "name": "Restaurant Crystal (Top of Europe)", "note": "해발 3,454m 정상 전망 레스토랑", "price": "€€", "cuisine": "스위스" },
-      { "name": "Bollywood Restaurant", "note": "정상 건물 내 인도식 뷔페(따뜻한 식사)", "price": "€€", "cuisine": "인도/뷔페" }
+      { "name": "Bollywood Restaurant", "note": "정상 건물 내 인도식 뷔페(따뜻한 식사)", "price": "€€", "cuisine": "인도/뷔페" },
+      { "name": "Aletsch Self-Service", "note": "빠르고 합리적인 셀프서비스 코너", "price": "€", "cuisine": "셀프서비스" }
     ],
     "highlights": ["유럽 최고봉 기차역(3,454m)", "알레치 빙하 전망", "스핑크스 전망대", "얼음 궁전(Ice Palace)"]
   },
@@ -167,13 +183,17 @@ const POI = {
       { "name": "Victoria Jungfrau Grand Hotel & Spa", "note": "융프라우 전망 5성 랜드마크", "price": "€€€", "parking": "자체 주차장" },
       { "name": "Hotel Interlaken", "note": "역사적 부티크, 가성비 좋은 4성", "price": "€€", "parking": "자체 주차장" },
       { "name": "Hotel Bellevue", "note": "아레 강변 조용한 입지, 가성비", "price": "€€", "parking": "자체 주차장" },
-      { "name": "Backpackers Villa Sonnenhof", "note": "전망 좋은 가성비 게스트하우스", "price": "€", "parking": "주차 가능" }
+      { "name": "Backpackers Villa Sonnenhof", "note": "전망 좋은 가성비 게스트하우스", "price": "€", "parking": "주차 가능" },
+      { "name": "Lindner Grand Hotel Beau Rivage", "note": "아레강변 클래식 그랜드 호텔", "price": "€€€", "parking": "자체 주차장" },
+      { "name": "Hotel Krebs", "note": "역 인근 가족경영 4성, 좋은 조식", "price": "€€", "parking": "자체 주차장" }
     ],
     "restaurants": [
       { "name": "Restaurant Taverne (Hotel Interlaken)", "note": "스위스 퐁뒤·라클렛", "price": "€€", "cuisine": "스위스" },
       { "name": "Husi Bierhaus", "note": "현지 맥주와 캐주얼 메뉴", "price": "€€", "cuisine": "스위스/펍" },
       { "name": "Restaurant Schuh", "note": "1818년부터의 카페·테라스, 알프스 전망", "price": "€€", "cuisine": "카페/스위스" },
-      { "name": "Sapori d'Italia", "note": "화덕 피자와 파스타, 가족 외식", "price": "€€", "cuisine": "이탈리아" }
+      { "name": "Sapori d'Italia", "note": "화덕 피자와 파스타, 가족 외식", "price": "€€", "cuisine": "이탈리아" },
+      { "name": "Restaurant Bären", "note": "전통 스위스 가정식·뢰스티", "price": "€€", "cuisine": "스위스" },
+      { "name": "Little Thai", "note": "여행자에게 인기 있는 캐주얼 타이 음식", "price": "€", "cuisine": "타이" }
     ],
     "highlights": ["융프라우요흐(유럽의 지붕)", "하더쿨름 전망대", "그린델발트 피르스트", "투어/브리엔츠 호수"]
   },
@@ -182,7 +202,8 @@ const POI = {
       { "name": "Chez Vrony", "note": "마터호른 전망 산장 레스토랑(스키장 위)", "price": "€€€", "cuisine": "스위스" },
       { "name": "Restaurant Schäferstube", "note": "양고기·라클렛 전문", "price": "€€", "cuisine": "스위스" },
       { "name": "Findlerhof", "note": "마터호른을 마주 보는 테라스 산장식당", "price": "€€€", "cuisine": "스위스" },
-      { "name": "Bayard's Bäckerei", "note": "산행 전 간단한 빵·커피", "price": "€", "cuisine": "베이커리" }
+      { "name": "Bayard's Bäckerei", "note": "산행 전 간단한 빵·커피", "price": "€", "cuisine": "베이커리" },
+      { "name": "Whymper-Stube", "note": "마을 중심의 정통 치즈 퐁뒤 전문", "price": "€€", "cuisine": "스위스/퐁뒤" }
     ],
     "highlights": ["마터호른 전망(고르너그라트 등산열차)", "체르마트 마을 산책", "테쉬 주차 후 셔틀열차 이용"]
   },
@@ -191,14 +212,18 @@ const POI = {
       { "name": "Hotel Spadari al Duomo", "note": "두오모 도보 2분 디자인 호텔", "price": "€€€", "parking": "ZTL 내 — 발레파킹 예약 필수" },
       { "name": "NH Milano Touring", "note": "ZTL 경계 밖, 자가용 접근 수월", "price": "€€", "parking": "자체 주차장(유료)" },
       { "name": "Room Mate Giulia", "note": "갤러리아 옆 감각적 부티크 호텔", "price": "€€€", "parking": "제휴 주차장" },
-      { "name": "B&B Hotel Milano Sesto", "note": "외곽 가성비 숙소, 주차 무료·지하철 연결", "price": "€", "parking": "무료 주차장" }
+      { "name": "B&B Hotel Milano Sesto", "note": "외곽 가성비 숙소, 주차 무료·지하철 연결", "price": "€", "parking": "무료 주차장" },
+      { "name": "Hotel Berna", "note": "중앙역 근처, 주차·접근성 좋은 4성", "price": "€€", "parking": "자체 주차장(유료)" },
+      { "name": "Mandarin Oriental Milano", "note": "몬테나폴레오네 명품거리 럭셔리 호텔", "price": "€€€", "parking": "발레파킹" }
     ],
     "restaurants": [
       { "name": "Trattoria Milanese", "note": "리소토 알라 밀라네제·코톨레타 정통", "price": "€€", "cuisine": "이탈리아" },
       { "name": "Luini Panzerotti", "note": "두오모 옆 명물 판제로티(간편식)", "price": "€", "cuisine": "이탈리아/길거리" },
       { "name": "Ristorante Cracco", "note": "갤러리아 내 미슐랭 파인다이닝", "price": "€€€", "cuisine": "이탈리아/파인다이닝" },
       { "name": "Pizzeria Spontini", "note": "두툼한 밀라노식 조각 피자", "price": "€", "cuisine": "피자" },
-      { "name": "Navigli 운하 아페리티보 바", "note": "운하변에서 즐기는 저녁 아페리티보", "price": "€€", "cuisine": "바/아페리티보" }
+      { "name": "Navigli 운하 아페리티보 바", "note": "운하변에서 즐기는 저녁 아페리티보", "price": "€€", "cuisine": "바/아페리티보" },
+      { "name": "Ratanà", "note": "전통 밀라노 요리를 모던하게 푼 인기 식당", "price": "€€", "cuisine": "이탈리아/모던" },
+      { "name": "Trattoria del Nuovo Macello", "note": "현지인 사랑하는 미슐랭 비브구르망", "price": "€€", "cuisine": "이탈리아" }
     ],
     "highlights": ["두오모 대성당", "비토리오 에마누엘레 2세 갤러리아", "스포르체스코 성", "최후의 만찬(예약 필수)", "코모 호수 당일치기"]
   },
@@ -207,13 +232,17 @@ const POI = {
       { "name": "Grand Hotel Toplice", "note": "블레드 호수 정면 클래식 5성", "price": "€€€", "parking": "자체 주차장" },
       { "name": "Hotel Triglav Bled", "note": "호수 전망 부티크, 조용한 입지", "price": "€€", "parking": "자체 주차장" },
       { "name": "Vila Bled", "note": "티토 전 별장을 개조한 역사적 호텔", "price": "€€€", "parking": "자체 주차장" },
-      { "name": "Garden Village Bled", "note": "글램핑·트리하우스 이색 숙소", "price": "€€", "parking": "주차 가능" }
+      { "name": "Garden Village Bled", "note": "글램핑·트리하우스 이색 숙소", "price": "€€", "parking": "주차 가능" },
+      { "name": "Hotel Park Bled", "note": "원조 블레드 크림케이크 카페가 있는 호숫가 호텔", "price": "€€", "parking": "자체 주차장" },
+      { "name": "Penzion Berc", "note": "목조 가족 게스트하우스, 가성비 좋음", "price": "€", "parking": "자체 주차장" }
     ],
     "restaurants": [
       { "name": "Vila Prešeren", "note": "호숫가 테라스, 블레드 크림케이크(크렘슈니타)", "price": "€€", "cuisine": "슬로베니아" },
       { "name": "Ostarija Peglez'n", "note": "현지 인기 생선·전통 요리", "price": "€€", "cuisine": "슬로베니아" },
       { "name": "Sova Restaurant", "note": "호수 전망 모던 슬로베니아 다이닝", "price": "€€€", "cuisine": "슬로베니아/파인" },
-      { "name": "Slaščičarna Šmon", "note": "원조 블레드 크림케이크 디저트 가게", "price": "€", "cuisine": "카페/디저트" }
+      { "name": "Slaščičarna Šmon", "note": "원조 블레드 크림케이크 디저트 가게", "price": "€", "cuisine": "카페/디저트" },
+      { "name": "Gostilna Murka", "note": "정원이 있는 정통 슬로베니아 향토 식당", "price": "€€", "cuisine": "슬로베니아" },
+      { "name": "Pizzeria Rustika", "note": "여행자 인기 화덕 피자·가성비", "price": "€", "cuisine": "이탈리아/피자" }
     ],
     "highlights": ["블레드 섬(플레트나 보트)", "블레드 성", "빈트가르 협곡", "보힌 호수"]
   },
@@ -222,7 +251,8 @@ const POI = {
       { "name": "Mazel Tov", "note": "유대인 지구의 분위기 좋은 마무리 만찬", "price": "€€", "cuisine": "중동/지중해" },
       { "name": "Central Market Hall", "note": "중앙시장에서 마지막 헝가리 먹거리·기념품", "price": "€", "cuisine": "시장/헝가리" },
       { "name": "Menza", "note": "복고풍 인테리어의 현대 헝가리 비스트로", "price": "€€", "cuisine": "헝가리" },
-      { "name": "Szimpla Kert", "note": "전설적인 폐허 펍(루인 바)에서 마지막 밤", "price": "€€", "cuisine": "바/펍" }
+      { "name": "Szimpla Kert", "note": "전설적인 폐허 펍(루인 바)에서 마지막 밤", "price": "€€", "cuisine": "바/펍" },
+      { "name": "Onyx Műhely", "note": "헝가리 유일급 파인다이닝(특별한 마무리)", "price": "€€€", "cuisine": "헝가리/파인다이닝" }
     ],
     "highlights": ["국회의사당 야경", "세체니 온천", "도나우 강 유람"]
   }
@@ -306,12 +336,12 @@ function selectStop(id){
   const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
   let html='';
   if(p.hotels && p.hotels.length){
-    html += sec('🏨 추천 숙소', p.hotels.length, p.hotels.map(h=>card(h.name,h.price,h.note,
-      [h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country))).join(''));
+    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country)));
+    html += sec('🏨 추천 숙소', p.hotels.length, expandable(cards, id+'-h'));
   }
   if(p.restaurants && p.restaurants.length){
-    html += sec('🍽 추천 식당', p.restaurants.length, p.restaurants.map(r=>card(r.name,r.price,r.note,
-      [r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country))).join(''));
+    const cards = p.restaurants.map(r=>card(r.name,r.price,r.note,[r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country)));
+    html += sec('🍽 추천 식당', p.restaurants.length, expandable(cards, id+'-r'));
   }
   if(p.highlights && p.highlights.length){
     html += `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5">📍 가볼 만한 곳</h3>
@@ -330,6 +360,24 @@ function selectStop(id){
 }
 function sec(t,cnt,inner){
   return `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5 flex items-center gap-2">${t}<span class="text-slate-400 font-normal text-[11.5px]">${cnt}곳</span></h3>${inner}</div>`;
+}
+const SHOWN = 2; // 기본 노출 개수, 나머지는 '더보기'로 펼침
+function expandable(cards, key){
+  if(cards.length <= SHOWN) return cards.join('');
+  const head = cards.slice(0, SHOWN).join('');
+  const rest = cards.slice(SHOWN).join('');
+  const n = cards.length - SHOWN;
+  return `${head}<div id="more-${key}" class="hidden">${rest}</div>
+    <button type="button" onclick="toggleMore('${key}',this)"
+      class="w-full mt-1 mb-1 text-[12.5px] font-semibold text-accent2 border border-slate-200 rounded-lg py-2 hover:bg-slate-50 transition">
+      더보기 <span class="text-slate-400">+${n}곳</span></button>`;
+}
+function toggleMore(key, btn){
+  const el = document.getElementById('more-'+key);
+  const hidden = el.classList.toggle('hidden');
+  btn.innerHTML = hidden
+    ? `더보기 <span class="text-slate-400">+${el.children.length}곳</span>`
+    : '접기 ▲';
 }
 function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
