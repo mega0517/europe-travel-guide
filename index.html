@@ -17,6 +17,11 @@
   .mk-num{background:#c0392b;color:#fff;border-radius:9999px;text-align:center;font-weight:700;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
   .mk-wp{background:#fff;border:2px solid #9aa7b1;border-radius:9999px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   #map{position:absolute;inset:0}
+  /* 선택된 지점의 말풍선 강조 (지도 이동 없이 색상만) */
+  .leaflet-popup.popup-active .leaflet-popup-content-wrapper{background:#c0392b;color:#fff;box-shadow:0 3px 14px rgba(192,57,43,.5)}
+  .leaflet-popup.popup-active .leaflet-popup-content-wrapper a{color:#ffe;}
+  .leaflet-popup.popup-active .leaflet-popup-tip{background:#c0392b}
+  .leaflet-popup.popup-active .leaflet-popup-close-button{color:#fff}
 </style>
 </head>
 <body class="h-screen overflow-hidden font-sans text-slate-800">
@@ -245,7 +250,7 @@ ROUTE.stops.forEach(s=>{
       style="width:${size}px;height:${size}px;line-height:${size-4}px;font-size:13px">${label}</div>`,
     iconSize:[size,size], iconAnchor:[size/2,size/2] });
   const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
-  m.bindPopup(`<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>`);
+  m.bindPopup(`<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>`,{autoPan:false});
   m.on('click',()=>selectStop(s.id));
   markers[s.id]=m;
 });
@@ -285,8 +290,13 @@ document.getElementById('tips').innerHTML =
 function selectStop(id){
   const s = ROUTE.stops.find(x=>x.id===id);
   const p = POI[id] || {};
-  map.flyTo([s.lat,s.lng], s.type==='stay'?12:11, {duration:.8});
+  // 지도는 전체 보기를 그대로 유지하고, 말풍선만 열어 색상으로 강조
   markers[id].openPopup();
+  const popEl = markers[id].getPopup().getElement();
+  if(popEl){
+    document.querySelectorAll('.leaflet-popup.popup-active').forEach(p=>p.classList.remove('popup-active'));
+    popEl.classList.add('popup-active');
+  }
 
   document.getElementById('p-chip').textContent =
     (s.type==='start'?'출발':s.type==='end'?'도착':s.type==='waypoint'?'경유·관광':`숙박 ${s.nights}박`) + ' · ' + fmtDay(s.day);
