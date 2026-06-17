@@ -75,16 +75,17 @@ const ROUTE = {
     { "id": "budapest_end", "name": "부다페스트 (도착)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-13", "type": "end", "nights": 0 }
   ],
   "legs": [
-    { "from": "budapest", "to": "hallstatt", "km": 330, "hours": 3.5 },
-    { "from": "hallstatt", "to": "salzburg", "km": 75, "hours": 1.2 },
-    { "from": "salzburg", "to": "feldkirch", "km": 310, "hours": 3.2 },
-    { "from": "feldkirch", "to": "lucerne", "km": 140, "hours": 1.8 },
-    { "from": "lucerne", "to": "interlaken", "km": 70, "hours": 1.2 },
-    { "from": "interlaken", "to": "zermatt", "km": 150, "hours": 2.5 },
-    { "from": "zermatt", "to": "milan", "km": 230, "hours": 3.2 },
-    { "from": "milan", "to": "bled", "km": 500, "hours": 5.0 },
-    { "from": "bled", "to": "budapest_end", "km": 460, "hours": 4.5 }
+    { "from": "budapest", "to": "hallstatt", "km": 330, "hours": 3.5, "toll": 12, "tollNote": "헝가리 e-마트리카 + 오스트리아 비네트" },
+    { "from": "hallstatt", "to": "salzburg", "km": 75, "hours": 1.2, "toll": 0, "tollNote": "오스트리아 비네트 적용 구간(추가 없음)" },
+    { "from": "salzburg", "to": "feldkirch", "km": 310, "hours": 3.2, "toll": 11, "tollNote": "아를베르크 터널 통행료" },
+    { "from": "feldkirch", "to": "lucerne", "km": 140, "hours": 1.8, "toll": 43, "tollNote": "스위스 연간 비네트 1회 구매(약 40 CHF)" },
+    { "from": "lucerne", "to": "interlaken", "km": 70, "hours": 1.2, "toll": 0, "tollNote": "스위스 비네트 적용 구간" },
+    { "from": "interlaken", "to": "zermatt", "km": 150, "hours": 2.5, "toll": 28, "tollNote": "뢰치베르크 카트레인(차량 적재 열차)" },
+    { "from": "zermatt", "to": "milan", "km": 230, "hours": 3.2, "toll": 48, "tollNote": "그랜드 생베르나르 터널 + 이탈리아 아우토스트라다" },
+    { "from": "milan", "to": "bled", "km": 500, "hours": 5.0, "toll": 46, "tollNote": "이탈리아 아우토스트라다 + 슬로베니아 비네트" },
+    { "from": "bled", "to": "budapest_end", "km": 460, "hours": 4.5, "toll": 20, "tollNote": "슬로베니아·오스트리아·헝가리 비네트/통행료" }
   ],
+  "fuel": { "consumption": 11, "priceEur": 1.85, "note": "아우디 Q8 가솔린 11L/100km, 유럽 휘발유 약 €1.85/L 추정" },
   "tips": [
     "오스트리아·스위스·슬로베니아는 고속도로 비네트(Vignette) 필수. 스위스는 연간권(40 CHF)만 판매되니 국경 전 구매. 슬로베니아·오스트리아는 전자 비네트(e-vignette) 단기권 구매 가능.",
     "이탈리아 밀라노 도심은 ZTL(Area C) 진입 제한 구역. 호텔 주차장 또는 외곽 주차 후 대중교통 권장. 위반 시 카메라 자동 과태료.",
@@ -265,8 +266,30 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 }).addTo(map);
 
 const latlngs = ROUTE.stops.map(s=>[s.lat,s.lng]);
-L.polyline(latlngs,{color:'#c0392b',weight:3,opacity:.75}).addTo(map);
 map.fitBounds(L.latLngBounds(latlngs).pad(0.12));
+
+/* 실제 도로 경로: OSRM 공개 라우팅으로 구간별 도로 형상을 받아 그린다.
+   실패 시 직선(점선)으로 폴백한다. */
+function stop(id){return ROUTE.stops.find(s=>s.id===id);}
+async function drawRoads(){
+  for(const lg of ROUTE.legs){
+    const a=stop(lg.from), b=stop(lg.to);
+    let drawn=false;
+    try{
+      const url=`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
+      const r=await fetch(url); const j=await r.json();
+      if(j.routes && j.routes[0]){
+        const coords=j.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+        L.polyline(coords,{color:'#c0392b',weight:4,opacity:.85}).addTo(map);
+        drawn=true;
+      }
+    }catch(e){}
+    if(!drawn){
+      L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'#c0392b',weight:3,opacity:.5,dashArray:'6,7'}).addTo(map);
+    }
+  }
+}
+drawRoads();
 
 const markers = {};
 let stayNo = 0;
@@ -335,6 +358,26 @@ function selectStop(id){
 
   const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
   let html='';
+
+  // 이전 도시 → 현재 도시 운전 정보 (해당 구간이 있는 도시에만 표시)
+  const leg = legTo(id);
+  if(leg){
+    const from = stop(leg.from);
+    const fuelL = leg.km * (ROUTE.fuel.consumption/100);
+    const fuelCost = fuelL * ROUTE.fuel.priceEur;
+    html += `<div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <div class="text-[12px] text-slate-500 mb-2">🚗 <b class="text-slate-700">${from.name.replace(/\s*\(.*\)/,'')}</b> → <b class="text-slate-700">${city}</b> 운전 구간</div>
+      <div class="grid grid-cols-2 gap-2 text-[13px]">
+        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">소요 시간</div><div class="font-bold">${fmtHours(leg.hours)}</div></div>
+        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">거리</div><div class="font-bold">${leg.km} km</div></div>
+        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 휘발유</div><div class="font-bold">${fuelL.toFixed(0)} L <span class="text-slate-400 font-normal">≈ €${fuelCost.toFixed(0)}</span></div></div>
+        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 톨비</div><div class="font-bold">€${leg.toll}</div></div>
+      </div>
+      ${leg.tollNote?`<div class="text-[11px] text-slate-400 mt-2">ℹ ${leg.tollNote}</div>`:''}
+      <div class="text-[10.5px] text-slate-400 mt-1">* ${ROUTE.fuel.note} · 톨/연료는 추정치</div>
+    </div>`;
+  }
+
   if(p.hotels && p.hotels.length){
     const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country)));
     html += sec('🏨 추천 숙소', p.hotels.length, expandable(cards, id+'-h'));
@@ -396,6 +439,7 @@ function card(nm,price,note,tags,mapUrl){
     (tags||[]).filter(Boolean).map(t=>`<span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded mr-1.5">${t}</span>`).join('')}</div></div>`;
 }
 function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
+function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
 function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
 function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
 
