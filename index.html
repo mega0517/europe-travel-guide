@@ -24,11 +24,11 @@
   .leaflet-popup.popup-active .leaflet-popup-close-button{color:#fff}
 </style>
 </head>
-<body class="h-screen overflow-hidden font-sans text-slate-800">
+<body class="min-h-screen md:h-screen md:overflow-hidden font-sans text-slate-800">
 <div id="app" class="flex flex-col md:flex-row h-auto md:h-screen md:overflow-hidden">
 
-  <!-- 좌: 지도 -->
-  <div class="relative min-w-0 h-[46vh] md:h-auto md:flex-1">
+  <!-- 좌: 지도 (모바일에서는 상단 고정) -->
+  <div class="sticky top-0 z-[20] md:relative md:z-auto min-w-0 h-[46vh] md:h-auto md:flex-1">
     <div id="map"></div>
     <div class="absolute z-[1000] top-3.5 left-1/2 -translate-x-1/2 w-[calc(100%-1.75rem)] max-w-[560px] bg-slate-900/80 backdrop-blur text-white px-3 py-2 md:px-4 md:py-3 rounded-xl pointer-events-none text-center">
       <h1 id="t-title" class="text-[14px] md:text-[18px] font-semibold tracking-tight"></h1>
@@ -316,7 +316,11 @@ ROUTE.stops.forEach(s=>{
       style="width:${size}px;height:${size}px;line-height:${size-4}px;font-size:13px">${label}</div>`,
     iconSize:[size,size], iconAnchor:[size/2,size/2] });
   const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
-  m.bindPopup(`<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>`,{autoPan:false});
+  const pleg = ROUTE.legs.find(l=>l.to===s.id);
+  const legLine = pleg
+    ? `<br><small>🚗 ${stop(pleg.from).name.replace(/\s*\(.*\)/,'')}→ 거리 ${pleg.km}km · ${fmtHours(pleg.hours)}</small>`
+    : '';
+  m.bindPopup(`<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>${legLine}`,{autoPan:false});
   m.on('click',()=>selectStop(s.id));
   markers[s.id]=m;
 });
@@ -342,8 +346,8 @@ ROUTE.stops.forEach(s=>{
     ? 'w-[25px] h-[25px] text-xs bg-accent'
     : 'w-[19px] h-[19px] text-[0px] bg-slate-400';
   el.innerHTML = `<div class="shrink-0 rounded-full text-white font-bold flex items-center justify-center ${numCls}">${num}</div>
-    <div class="min-w-0 text-[13px]"><b class="block text-[13.5px] truncate">${s.name}</b>
-    <small class="text-slate-500 text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?` · ${leg.km}km`:''}</small></div>`;
+    <div class="min-w-0 text-[11.5px] md:text-[13px]"><b class="block text-[12px] md:text-[13.5px] truncate">${s.name}</b>
+    <small class="text-slate-500 text-[10px] md:text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?` · ${leg.km}km`:''}</small></div>`;
   el.onclick=()=>selectStop(s.id);
   dl.appendChild(el);
 });
