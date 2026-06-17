@@ -10,3 +10,5 @@
 | 2026-06-17 | 초기 구성 (4 에이전트 + 4 스킬 + 오케스트레이터) | 전체 | - |
 | 2026-06-17 | GitHub Pages 게시 (mega0517/europe-travel-guide) | index.html | 무료 호스팅 요청 |
 | 2026-06-17 | 3열 레이아웃(지도/여정 선택/추천) 분리 + 숙소·식당 추천 확대 | index.html, 02_poi.json | UI 분리 및 추천 다양화 피드백 |
+| 2026-06-17 | 식당 카드에 구글 지도 링크 추가 | index.html | 위치 확인 편의 요청 |
+| 2026-06-18 | Tailwind CSS(Play CDN)로 스타일 전면 재작성 | index.html | Tailwind 적용 요청 |

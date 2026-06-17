@@ -6,111 +6,47 @@
 <title>중부유럽 자가용 일주 7박 8일 · 여행 가이드</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { accent: '#c0392b', accent2: '#2c6e8f' } } }
+  };
+</script>
 <style>
-  :root{
-    --bg:#0f1720; --panel:#fff; --ink:#1c2733; --muted:#6b7785;
-    --accent:#c0392b; --accent2:#2c6e8f; --line:#e6e9ec; --chip:#f2f5f7;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{font-family:'Helvetica Neue',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--ink);background:var(--bg)}
-  #app{display:flex;height:100vh;overflow:hidden}
-
-  /* 좌: 지도 */
-  #map-wrap{flex:1 1 48%;position:relative;min-width:0}
+  /* Leaflet 마커/팝업 등 Tailwind로 다루기 어려운 부분만 최소 보강 */
+  .mk-num{background:#c0392b;color:#fff;border-radius:9999px;text-align:center;font-weight:700;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+  .mk-wp{background:#fff;border:2px solid #9aa7b1;border-radius:9999px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   #map{position:absolute;inset:0}
-  .map-header{position:absolute;z-index:1000;top:14px;left:14px;right:14px;
-    background:rgba(15,23,32,.82);backdrop-filter:blur(6px);color:#fff;
-    padding:12px 16px;border-radius:12px;pointer-events:none}
-  .map-header h1{font-size:18px;letter-spacing:-.3px}
-  .map-header p{font-size:12.5px;opacity:.82;margin-top:3px}
-  .map-header .meta{font-size:11.5px;opacity:.7;margin-top:6px}
-
-  /* 중: 여정 선택 열 */
-  #daycol{flex:0 0 250px;background:#fafbfc;border-left:1px solid var(--line);
-    overflow-y:auto;display:flex;flex-direction:column}
-  .col-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
-    letter-spacing:.5px;padding:16px 16px 10px;position:sticky;top:0;background:#fafbfc;z-index:5;border-bottom:1px solid var(--line)}
-  .daylist{padding:8px 10px}
-  .dl-item{display:flex;align-items:center;gap:10px;padding:9px 9px;border-radius:9px;cursor:pointer;margin-bottom:2px}
-  .dl-item:hover{background:#eef2f5}
-  .dl-item.active{background:#fbe9e7;box-shadow:inset 3px 0 0 var(--accent)}
-  .dl-num{width:25px;height:25px;border-radius:50%;background:var(--accent);color:#fff;
-    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .dl-num.wp{background:#9aa7b1;width:19px;height:19px;font-size:0}
-  .dl-txt{font-size:13px;min-width:0}
-  .dl-txt b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .dl-txt small{color:var(--muted);font-size:11.5px}
-  .tips{margin:10px;background:#fff8e1;border:1px solid #ffe082;border-radius:11px;padding:13px 14px}
-  .tips h3{color:#b7791f;font-size:12.5px;margin-bottom:8px}
-  .tips li{font-size:11.8px;line-height:1.55;margin-left:15px;margin-bottom:6px;color:#5d4d22}
-
-  /* 우: 추천 숙소/식당 열 */
-  #panel{flex:0 0 34%;max-width:460px;background:var(--panel);overflow-y:auto;
-    box-shadow:-6px 0 24px rgba(0,0,0,.25);display:flex;flex-direction:column}
-  .p-head{padding:18px 20px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:5}
-  .p-head .day-chip{display:inline-block;background:var(--accent);color:#fff;font-size:11.5px;
-    font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px}
-  .p-head h2{font-size:21px;letter-spacing:-.4px}
-  .p-head .sub{color:var(--muted);font-size:13px;margin-top:4px}
-  .p-body{padding:6px 20px 30px}
-  .section{margin-top:20px}
-  .section h3{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent2);
-    margin-bottom:10px;display:flex;align-items:center;gap:7px}
-  .section h3 .cnt{color:var(--muted);font-weight:500;font-size:11.5px}
-  .card{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px;transition:.15s}
-  .card:hover{border-color:#c9d3da;box-shadow:0 3px 12px rgba(0,0,0,.05)}
-  .card .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  .card .nm{font-weight:700;font-size:14.5px}
-  .card .price{font-size:12px;color:#b8860b;font-weight:700;white-space:nowrap}
-  .card .nt{color:var(--muted);font-size:12.8px;margin-top:4px;line-height:1.5}
-  .card .tag{display:inline-block;background:var(--chip);color:#54616e;font-size:11px;
-    padding:2px 8px;border-radius:6px;margin-top:7px;margin-right:5px}
-  .card .maplink{display:inline-block;margin-top:9px;font-size:12px;font-weight:600;
-    color:var(--accent2);text-decoration:none;border:1px solid #cfe0e8;background:#f0f7fa;
-    padding:4px 10px;border-radius:7px;transition:.15s}
-  .card .maplink:hover{background:#e1eff5;border-color:#a9cbd8}
-  .hl{display:flex;flex-wrap:wrap;gap:7px}
-  .hl span{background:var(--chip);border-radius:8px;padding:6px 11px;font-size:12.5px}
-  .leaflet-marker-num{background:var(--accent);color:#fff;border-radius:50%;text-align:center;
-    font-weight:700;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
-  .leaflet-marker-wp{background:#fff;border:2px solid #9aa7b1;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-
-  @media(max-width:980px){
-    #app{flex-direction:column;height:auto}
-    #map-wrap{flex:none;height:46vh;position:relative}
-    #daycol{flex:none;max-height:none}
-    #panel{flex:none;max-width:none}
-  }
 </style>
 </head>
-<body>
-<div id="app">
+<body class="h-screen overflow-hidden font-sans text-slate-800">
+<div id="app" class="flex flex-col md:flex-row h-auto md:h-screen md:overflow-hidden">
+
   <!-- 좌: 지도 -->
-  <div id="map-wrap">
+  <div class="relative min-w-0 h-[46vh] md:h-auto md:flex-1">
     <div id="map"></div>
-    <div class="map-header">
-      <h1 id="t-title"></h1>
-      <p id="t-sub"></p>
-      <div class="meta" id="t-meta"></div>
+    <div class="absolute z-[1000] top-3.5 left-3.5 right-3.5 bg-slate-900/80 backdrop-blur text-white px-4 py-3 rounded-xl pointer-events-none">
+      <h1 id="t-title" class="text-[18px] font-semibold tracking-tight"></h1>
+      <p id="t-sub" class="text-[12.5px] opacity-80 mt-0.5"></p>
+      <div id="t-meta" class="text-[11.5px] opacity-70 mt-1.5"></div>
     </div>
   </div>
 
   <!-- 중: 여정 선택 열 -->
-  <div id="daycol">
-    <div class="col-title">🗺 여정 선택</div>
-    <div class="daylist" id="daylist"></div>
-    <div class="tips" id="tips"></div>
+  <div class="shrink-0 w-full md:w-[250px] bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 overflow-y-auto flex flex-col">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider px-4 pt-4 pb-2.5 sticky top-0 bg-slate-50 z-[5] border-b border-slate-200">🗺 여정 선택</div>
+    <div id="daylist" class="px-2.5 py-2"></div>
+    <div id="tips" class="m-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3"></div>
   </div>
 
   <!-- 우: 추천 숙소/식당 열 -->
-  <aside id="panel">
-    <div class="p-head">
-      <span class="day-chip" id="p-chip"></span>
-      <h2 id="p-name"></h2>
-      <div class="sub" id="p-sub"></div>
+  <aside class="shrink-0 w-full md:w-[34%] md:max-w-[460px] bg-white overflow-y-auto shadow-[-6px_0_24px_rgba(0,0,0,.25)] flex flex-col">
+    <div class="px-5 pt-[18px] pb-3.5 border-b border-slate-200 sticky top-0 bg-white z-[5]">
+      <span id="p-chip" class="inline-block bg-accent text-white text-[11.5px] font-bold px-2.5 py-1 rounded-full mb-2"></span>
+      <h2 id="p-name" class="text-[21px] font-bold tracking-tight"></h2>
+      <div id="p-sub" class="text-slate-500 text-[13px] mt-1"></div>
     </div>
-    <div class="p-body" id="p-body"></div>
+    <div id="p-body" class="px-5 pt-1.5 pb-8"></div>
   </aside>
 </div>
 
@@ -305,7 +241,7 @@ ROUTE.stops.forEach(s=>{
   const label = isStay? String(stayNo) : '';
   const size = isStay?28:14;
   const icon = L.divIcon({ className:'',
-    html:`<div class="${isStay?'leaflet-marker-num':'leaflet-marker-wp'}"
+    html:`<div class="${isStay?'mk-num':'mk-wp'}"
       style="width:${size}px;height:${size}px;line-height:${size-4}px;font-size:13px">${label}</div>`,
     iconSize:[size,size], iconAnchor:[size/2,size/2] });
   const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
@@ -327,17 +263,23 @@ ROUTE.stops.forEach(s=>{
   if(s.type==='stay') nStay++;
   const num = s.type==='stay'? nStay : '';
   const leg = legTo(s.id);
+  const isStay = s.type==='stay';
   const el = document.createElement('div');
-  el.className='dl-item'; el.dataset.id=s.id;
-  el.innerHTML = `<div class="dl-num ${s.type!=='stay'?'wp':''}">${num}</div>
-    <div class="dl-txt"><b>${s.name}</b>
-    <small>${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?` · ${leg.km}km`:''}</small></div>`;
+  el.className='dl-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer mb-0.5 hover:bg-slate-200/60 transition';
+  el.dataset.id=s.id;
+  const numCls = isStay
+    ? 'w-[25px] h-[25px] text-xs bg-accent'
+    : 'w-[19px] h-[19px] text-[0px] bg-slate-400';
+  el.innerHTML = `<div class="shrink-0 rounded-full text-white font-bold flex items-center justify-center ${numCls}">${num}</div>
+    <div class="min-w-0 text-[13px]"><b class="block text-[13.5px] truncate">${s.name}</b>
+    <small class="text-slate-500 text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?` · ${leg.km}km`:''}</small></div>`;
   el.onclick=()=>selectStop(s.id);
   dl.appendChild(el);
 });
 
 document.getElementById('tips').innerHTML =
-  `<h3>🚘 자가용 여행 팁</h3><ul>${ROUTE.tips.map(t=>`<li>${t}</li>`).join('')}</ul>`;
+  `<h3 class="text-amber-700 text-[12.5px] font-bold mb-2">🚘 자가용 여행 팁</h3>
+   <ul class="list-disc ml-4">${ROUTE.tips.map(t=>`<li class="text-[11.8px] leading-snug mb-1.5 text-amber-900/80">${t}</li>`).join('')}</ul>`;
 
 /* ===== 선택 동작 ===== */
 function selectStop(id){
@@ -362,24 +304,35 @@ function selectStop(id){
       [r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country))).join(''));
   }
   if(p.highlights && p.highlights.length){
-    html += `<div class="section"><h3>📍 가볼 만한 곳</h3><div class="hl">${
-      p.highlights.map(h=>`<span>${h}</span>`).join('')}</div></div>`;
+    html += `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5">📍 가볼 만한 곳</h3>
+      <div class="flex flex-wrap gap-1.5">${
+      p.highlights.map(h=>`<span class="bg-slate-100 rounded-lg px-2.5 py-1.5 text-[12.5px]">${h}</span>`).join('')}</div></div>`;
   }
   document.getElementById('p-body').innerHTML = html ||
-    '<div class="section" style="color:#6b7785;font-size:13px">이 지점은 이동 경유지입니다.</div>';
+    '<div class="mt-5 text-slate-500 text-[13px]">이 지점은 이동 경유지입니다.</div>';
 
-  document.querySelectorAll('.dl-item').forEach(e=>e.classList.toggle('active',e.dataset.id===id));
+  document.querySelectorAll('.dl-item').forEach(e=>{
+    const on = e.dataset.id===id;
+    e.classList.toggle('bg-red-50', on);
+    e.classList.toggle('shadow-[inset_3px_0_0_#c0392b]', on);
+  });
 }
-function sec(t,cnt,inner){return `<div class="section"><h3>${t}<span class="cnt">${cnt}곳</span></h3>${inner}</div>`}
+function sec(t,cnt,inner){
+  return `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5 flex items-center gap-2">${t}<span class="text-slate-400 font-normal text-[11.5px]">${cnt}곳</span></h3>${inner}</div>`;
+}
 function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
 }
 function card(nm,price,note,tags,mapUrl){
-  return `<div class="card"><div class="row"><span class="nm">${nm}</span>${
-    price?`<span class="price">${price}</span>`:''}</div>${
-    note?`<div class="nt">${note}</div>`:''}${
-    (tags||[]).filter(Boolean).map(t=>`<span class="tag">${t}</span>`).join('')}${
-    mapUrl?`<a class="maplink" href="${mapUrl}" target="_blank" rel="noopener">📍 구글 지도에서 보기</a>`:''}</div>`;
+  return `<div class="border border-slate-200 rounded-xl px-3.5 py-3 mb-2.5 hover:border-slate-300 hover:shadow-md transition">
+    <div class="flex justify-between items-baseline gap-2">
+      <span class="font-bold text-[14.5px]">${nm}</span>${
+      price?`<span class="text-xs font-bold text-amber-600 whitespace-nowrap">${price}</span>`:''}</div>${
+    note?`<div class="text-slate-500 text-[12.8px] mt-1 leading-relaxed">${note}</div>`:''}
+    <div class="mt-1.5">${
+    (tags||[]).filter(Boolean).map(t=>`<span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded mr-1.5">${t}</span>`).join('')}</div>${
+    mapUrl?`<a href="${mapUrl}" target="_blank" rel="noopener"
+      class="inline-block mt-2 text-xs font-semibold text-accent2 border border-sky-200 bg-sky-50 px-2.5 py-1 rounded-md hover:bg-sky-100 transition">📍 구글 지도에서 보기</a>`:''}</div>`;
 }
 function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
 function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
