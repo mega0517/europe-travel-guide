@@ -271,7 +271,15 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 }).addTo(map);
 
 const latlngs = ROUTE.stops.map(s=>[s.lat,s.lng]);
-map.fitBounds(L.latLngBounds(latlngs).pad(0.12));
+/* 전체 노선 맞춤: 모바일에서는 상단 제목이 노선을 가리지 않도록 위쪽 여백을 크게 준다 */
+function fitAll(){
+  const mobile = window.matchMedia('(max-width:767px)').matches;
+  map.fitBounds(L.latLngBounds(latlngs), {
+    paddingTopLeft: mobile ? [20, 120] : [40, 40],
+    paddingBottomRight: [20, 20]
+  });
+}
+fitAll();
 
 /* 실제 도로 경로: OSRM 공개 라우팅으로 구간별 도로 형상을 받아 그린다.
    실패 시 직선(점선)으로 폴백한다. */
@@ -451,7 +459,7 @@ function showFullRoute(){
     e.classList.remove('bg-red-50');
     e.classList.remove('shadow-[inset_3px_0_0_#c0392b]');
   });
-  map.fitBounds(L.latLngBounds(latlngs).pad(0.12));
+  fitAll();
 }
 function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
 function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
