@@ -39,7 +39,12 @@
 
   <!-- 중: 여정 선택 열 -->
   <div class="shrink-0 w-full md:w-[250px] bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 overflow-y-auto flex flex-col">
-    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider px-4 pt-4 pb-2.5 sticky top-0 bg-slate-50 z-[5] border-b border-slate-200">🗺 여정 선택</div>
+    <div class="sticky top-0 bg-slate-50 z-[5] border-b border-slate-200 px-3 pt-3 pb-2.5">
+      <button type="button" onclick="showFullRoute()"
+        class="w-full flex items-center justify-center gap-2 bg-accent text-white text-[13px] font-bold rounded-lg py-2.5 hover:bg-red-700 active:scale-[.99] transition">
+        🗺 여정 선택 <span class="font-normal opacity-80 text-[11.5px]">· 전체 노선 보기</span>
+      </button>
+    </div>
     <div id="daylist" class="px-2.5 py-2"></div>
     <div id="tips" class="m-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3"></div>
   </div>
@@ -437,6 +442,16 @@ function card(nm,price,note,tags,mapUrl){
     note?`<div class="text-slate-500 text-[12.8px] mt-1 leading-relaxed">${note}</div>`:''}
     <div class="mt-1.5">${
     (tags||[]).filter(Boolean).map(t=>`<span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded mr-1.5">${t}</span>`).join('')}</div></div>`;
+}
+/* '여정 선택' 버튼: 전체 노선이 보이도록 지도 맞춤 + 선택 강조 해제 */
+function showFullRoute(){
+  map.closePopup();
+  document.querySelectorAll('.leaflet-popup.popup-active').forEach(p=>p.classList.remove('popup-active'));
+  document.querySelectorAll('.dl-item').forEach(e=>{
+    e.classList.remove('bg-red-50');
+    e.classList.remove('shadow-[inset_3px_0_0_#c0392b]');
+  });
+  map.fitBounds(L.latLngBounds(latlngs).pad(0.12));
 }
 function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
 function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
