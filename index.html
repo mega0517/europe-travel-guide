@@ -46,7 +46,6 @@
       </button>
     </div>
     <div id="daylist" class="px-2.5 py-2"></div>
-    <div id="tips" class="m-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3"></div>
   </div>
 
   <!-- 우: 추천 숙소/식당 열 -->
@@ -366,15 +365,6 @@ const CITY_TIPS = {
   bled: ["슬로베니아 비네트(전자) 필요. 국경 전 온라인 구매 가능.", "블레드 섬은 플레트나 전통 보트로만 진입합니다."],
   budapest_end: ["반납·귀국 일정이면 도심 ZTL/주차 규정 다시 확인.", "마지막 날 중앙시장에서 기념품·먹거리 쇼핑 추천."]
 };
-function renderTips(id){
-  const s = ROUTE.stops.find(x=>x.id===id);
-  const city = s ? s.name.replace(/\s*\(.*\)/,'') : '';
-  const list = (CITY_TIPS[id] && CITY_TIPS[id].length) ? CITY_TIPS[id] : ROUTE.tips;
-  const title = (CITY_TIPS[id] && CITY_TIPS[id].length) ? `🚘 ${city} 여행 팁` : '🚘 자가용 여행 팁';
-  document.getElementById('tips').innerHTML =
-    `<h3 class="text-amber-700 text-[12.5px] font-bold mb-2">${title}</h3>
-     <ul class="list-disc ml-4">${list.map(t=>`<li class="text-[11.8px] leading-snug mb-1.5 text-amber-900/80">${t}</li>`).join('')}</ul>`;
-}
 
 /* ===== 선택 동작 ===== */
 function selectStop(id){
@@ -396,22 +386,38 @@ function selectStop(id){
   const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
   let html='';
 
-  // 이전 도시 → 현재 도시 운전 정보 (해당 구간이 있는 도시에만 표시)
+  // 운전 정보 + 자가용 여행 팁 (접이식 카드). 운전 구간이 없는 도시는 팁만 표시
   const leg = legTo(id);
-  if(leg){
-    const from = stop(leg.from);
-    const fuelL = leg.km * (ROUTE.fuel.consumption/100);
-    const fuelCost = fuelL * ROUTE.fuel.priceEur;
-    html += `<div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <div class="text-[12px] text-slate-500 mb-2">🚗 <b class="text-slate-700">${from.name.replace(/\s*\(.*\)/,'')}</b> → <b class="text-slate-700">${city}</b> 운전 구간</div>
-      <div class="grid grid-cols-2 gap-2 text-[13px]">
-        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">소요 시간</div><div class="font-bold">${fmtHours(leg.hours)}</div></div>
-        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">거리</div><div class="font-bold">${leg.km} km</div></div>
-        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 휘발유</div><div class="font-bold">${fuelL.toFixed(0)} L <span class="text-slate-400 font-normal">≈ €${fuelCost.toFixed(0)}</span></div></div>
-        <div class="bg-white rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 톨비</div><div class="font-bold">€${leg.toll}</div></div>
-      </div>
-      ${leg.tollNote?`<div class="text-[11px] text-slate-400 mt-2">ℹ ${leg.tollNote}</div>`:''}
-      <div class="text-[10.5px] text-slate-400 mt-1">* ${ROUTE.fuel.note} · 톨/연료는 추정치</div>
+  const tips = CITY_TIPS[id] || [];
+  if(leg || tips.length){
+    let body='';
+    if(leg){
+      const from = stop(leg.from);
+      const fuelL = leg.km * (ROUTE.fuel.consumption/100);
+      const fuelCost = fuelL * ROUTE.fuel.priceEur;
+      body += `<div class="grid grid-cols-2 gap-2 text-[13px]">
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">소요 시간</div><div class="font-bold">${fmtHours(leg.hours)}</div></div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">거리</div><div class="font-bold">${leg.km} km</div></div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 휘발유</div><div class="font-bold">${fuelL.toFixed(0)} L <span class="text-slate-400 font-normal">≈ €${fuelCost.toFixed(0)}</span></div></div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 톨비</div><div class="font-bold">€${leg.toll}</div></div>
+        </div>
+        ${leg.tollNote?`<div class="text-[11px] text-slate-400 mt-2">ℹ ${leg.tollNote}</div>`:''}
+        <div class="text-[10.5px] text-slate-400 mt-1">* ${ROUTE.fuel.note} · 톨/연료는 추정치</div>`;
+    }
+    if(tips.length){
+      body += `<div class="${leg?'mt-3 pt-3 border-t border-slate-200':''}">
+        <div class="text-[11.5px] font-bold text-amber-700 mb-1.5">🚘 ${city} 자가용 여행 팁</div>
+        <ul class="list-disc ml-4">${tips.map(t=>`<li class="text-[11.5px] leading-snug mb-1 text-amber-900/80">${t}</li>`).join('')}</ul></div>`;
+    }
+    const from = leg ? stop(leg.from).name.replace(/\s*\(.*\)/,'') : '';
+    const header = leg ? `🚗 ${from} → ${city} · 운전 정보 & 팁` : `🚘 ${city} 자가용 여행 팁`;
+    html += `<div class="mt-4 rounded-xl border border-slate-200 overflow-hidden">
+      <button type="button" onclick="toggleDrive(this)"
+        class="w-full flex items-center justify-between gap-2 bg-slate-50 hover:bg-slate-100 px-4 py-3 text-left transition">
+        <span class="text-[12.5px] font-semibold text-slate-700">${header}</span>
+        <span class="drive-chev text-slate-400 text-[11px]">▼ 펼치기</span>
+      </button>
+      <div class="drive-body hidden px-4 py-3 border-t border-slate-200">${body}</div>
     </div>`;
   }
 
@@ -431,8 +437,6 @@ function selectStop(id){
   }
   document.getElementById('p-body').innerHTML = html ||
     '<div class="mt-5 text-slate-500 text-[13px]">이 지점은 이동 경유지입니다.</div>';
-
-  renderTips(id);
 
   document.querySelectorAll('.dl-item').forEach(e=>{
     const on = e.dataset.id===id;
@@ -501,6 +505,11 @@ function showFullRoute(){
 }
 function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
 function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
+function toggleDrive(btn){
+  const body = btn.parentElement.querySelector('.drive-body');
+  const hidden = body.classList.toggle('hidden');
+  btn.querySelector('.drive-chev').textContent = hidden ? '▼ 펼치기' : '▲ 접기';
+}
 function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
 function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
 
