@@ -1116,7 +1116,11 @@ function showFullRoute(){
   });
   fitAll();
 }
-function fmtDay(d){const dd=d.split('-')[2];const mm=+d.split('-')[1];return `${mm}/${+dd}`}
+function fmtDay(d){
+  const p=d.split('-'); const mm=+p[1]; const dd=+p[2];
+  const wd=['일','월','화','수','목','금','토'][new Date(d+'T00:00:00').getDay()];
+  return `${mm}/${dd}(${wd})`;
+}
 function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
 function toggleDrive(btn){
   const body = btn.parentElement.querySelector('.drive-body');
