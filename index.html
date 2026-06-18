@@ -1194,7 +1194,14 @@ const CARD_THEME = {
   food:   'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50',
   airbnb: 'border-l-rose-400 bg-rose-50/40 hover:bg-rose-50'
 };
-function addDays(d,n){const dt=new Date(d+'T00:00:00');dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10);}
+function addDays(d,n){
+  const [y,m,dd]=d.split('-').map(Number);
+  const dt=new Date(y,m-1,dd);           // 로컬 자정(시간대 변환 없음)
+  dt.setDate(dt.getDate()+n);
+  const mm=String(dt.getMonth()+1).padStart(2,'0');
+  const da=String(dt.getDate()).padStart(2,'0');
+  return `${dt.getFullYear()}-${mm}-${da}`;
+}
 function airbnbUrl(city,country,checkin,checkout){
   let u='https://www.airbnb.com/s/'+encodeURIComponent(`${city} ${country}`)+'/homes?adults=4';
   if(checkin&&checkout) u+=`&checkin=${checkin}&checkout=${checkout}`;
