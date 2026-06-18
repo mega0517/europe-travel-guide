@@ -1143,8 +1143,9 @@ function selectStop(id){
   }
 
   if(p.hotels && p.hotels.length){
-    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country), 'hotel'));
-    html += sec('🏨 추천 숙소 (호텔)', p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
+    const hci = s.day, hco = addDays(s.day, s.nights||1);
+    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country), 'hotel', bookingBtn(h.name, city, s.country, hci, hco)));
+    html += sec(`🏨 추천 숙소 · 호텔 (${fmtDay(hci)}~${fmtDay(hco)})`, p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
   }
   if(p.airbnb && p.airbnb.length){
     const ci = s.day, co = addDays(s.day, s.nights||1);
@@ -1216,7 +1217,7 @@ function toggleMore(key, btn){
 function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
 }
-function card(nm,price,note,tags,mapUrl,type){
+function card(nm,price,note,tags,mapUrl,type,extra){
   const theme = CARD_THEME[type] || 'border-l-slate-300';
   const isAb = type==='airbnb';
   const ico = isAb?'🏠':'📍';
@@ -1231,7 +1232,17 @@ function card(nm,price,note,tags,mapUrl,type){
     <div class="flex justify-between items-baseline gap-2">
       ${nameHtml}${price?`<span class="text-[11.5px] font-extrabold ${priceColor(price)} whitespace-nowrap">${price}</span>`:''}</div>${
     note?`<div class="text-slate-500 text-[11.8px] mt-0.5 leading-snug">${note}</div>`:''}${
-    tagHtml?`<div class="mt-1">${tagHtml}</div>`:''}</div>`;
+    tagHtml?`<div class="mt-1">${tagHtml}</div>`:''}${extra||''}</div>`;
+}
+/* 호텔 예약 검색 링크(부킹닷컴, 정확한 숙박 날짜·4인 반영) */
+function bookingUrl(name,city,country,ci,co){
+  let u='https://www.booking.com/searchresults.html?ss='+encodeURIComponent(`${name} ${city} ${country}`)+'&group_adults=4&no_rooms=2&group_children=0';
+  if(ci&&co) u+=`&checkin=${ci}&checkout=${co}`;
+  return u;
+}
+function bookingBtn(name,city,country,ci,co){
+  return `<a href="${bookingUrl(name,city,country,ci,co)}" target="_blank" rel="noopener"
+    class="inline-block mt-1.5 text-[11px] font-semibold text-sky-700 border border-sky-200 bg-sky-50 px-2 py-0.5 rounded hover:bg-sky-100 transition">📅 ${fmtDay(ci)}~${fmtDay(co)} · 4인 예약검색</a>`;
 }
 /* '여정 선택' 버튼: 전체 노선이 보이도록 지도 맞춤 + 선택 강조 해제 */
 function showFullRoute(){
