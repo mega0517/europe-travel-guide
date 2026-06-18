@@ -347,14 +347,34 @@ ROUTE.stops.forEach(s=>{
     : 'w-[19px] h-[19px] text-[0px] bg-slate-400';
   el.innerHTML = `<div class="shrink-0 rounded-full text-white font-bold flex items-center justify-center ${numCls}">${num}</div>
     <div class="min-w-0 text-[11.5px] md:text-[13px]"><b class="block text-[12px] md:text-[13.5px] truncate">${s.name}</b>
-    <small class="text-slate-500 text-[10px] md:text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?` · ${leg.km}km`:''}</small></div>`;
+    <small class="text-slate-500 text-[10px] md:text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?`<br><span class="text-accent2">🚗 ${leg.km}km · ${fmtHours(leg.hours)}</span>`:''}</small></div>`;
   el.onclick=()=>selectStop(s.id);
   dl.appendChild(el);
 });
 
-document.getElementById('tips').innerHTML =
-  `<h3 class="text-amber-700 text-[12.5px] font-bold mb-2">🚘 자가용 여행 팁</h3>
-   <ul class="list-disc ml-4">${ROUTE.tips.map(t=>`<li class="text-[11.8px] leading-snug mb-1.5 text-amber-900/80">${t}</li>`).join('')}</ul>`;
+/* 도시별 자가용 여행 팁 (선택 시 표시). 없으면 전체 팁으로 폴백 */
+const CITY_TIPS = {
+  budapest: ["출발 전 헝가리 e-마트리카(전자 통행권)를 차량 번호로 등록하세요.", "도심 주차는 유료 구역(색상 라인)이 많아 호텔 주차장 예약을 권장."],
+  hallstatt: ["마을 진입 차량은 통제됩니다. 입구의 P1·P2 주차장에 세우고 도보로 이동.", "성수기 오전엔 주차가 빨리 차니 일찍 도착하는 게 좋아요."],
+  salzburg: ["구시가는 보행자 구역. 묀히스베르크(Mönchsberg) 차고나 P&R 이용.", "오스트리아 비네트(전자)가 차량에 등록됐는지 출발 전 확인."],
+  feldkirch: ["스위스 국경이 가까워요. 비네트 미구매 시 여기서 미리 준비.", "리히텐슈타인·스위스 당일치기 거점으로 좋습니다."],
+  lucerne: ["스위스 연간 비네트(약 40 CHF)를 국경 통과 전에 부착.", "구시가는 차량 진입 제한 — 역 인근 주차 후 도보."],
+  jungfraujoch: ["정상은 차량 진입 불가. 인터라켄/그린델발트에서 산악열차 이용.", "한여름에도 정상은 영하권 — 방한복과 선글라스 필수."],
+  interlaken: ["융프라우 철도 티켓은 성수기 온라인 사전 예약 권장.", "호텔 주차장 여부 확인 — 시내 주차가 제한적입니다."],
+  zermatt: ["체르마트는 휘발유차 진입 금지. 테쉬(Täsch) 주차장+셔틀열차 이용.", "마터호른 조망은 고르너그라트 등산열차가 가장 좋아요."],
+  milan: ["도심 ZTL(Area C) 진입 제한 — 카메라 자동 과태료 주의.", "ZTL 밖 호텔이나 외곽 주차+지하철 조합을 추천."],
+  bled: ["슬로베니아 비네트(전자) 필요. 국경 전 온라인 구매 가능.", "블레드 섬은 플레트나 전통 보트로만 진입합니다."],
+  budapest_end: ["반납·귀국 일정이면 도심 ZTL/주차 규정 다시 확인.", "마지막 날 중앙시장에서 기념품·먹거리 쇼핑 추천."]
+};
+function renderTips(id){
+  const s = ROUTE.stops.find(x=>x.id===id);
+  const city = s ? s.name.replace(/\s*\(.*\)/,'') : '';
+  const list = (CITY_TIPS[id] && CITY_TIPS[id].length) ? CITY_TIPS[id] : ROUTE.tips;
+  const title = (CITY_TIPS[id] && CITY_TIPS[id].length) ? `🚘 ${city} 여행 팁` : '🚘 자가용 여행 팁';
+  document.getElementById('tips').innerHTML =
+    `<h3 class="text-amber-700 text-[12.5px] font-bold mb-2">${title}</h3>
+     <ul class="list-disc ml-4">${list.map(t=>`<li class="text-[11.8px] leading-snug mb-1.5 text-amber-900/80">${t}</li>`).join('')}</ul>`;
+}
 
 /* ===== 선택 동작 ===== */
 function selectStop(id){
@@ -396,21 +416,23 @@ function selectStop(id){
   }
 
   if(p.hotels && p.hotels.length){
-    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country)));
-    html += sec('🏨 추천 숙소', p.hotels.length, expandable(cards, id+'-h'));
+    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country), 'hotel'));
+    html += sec('🏨 추천 숙소', p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
   }
   if(p.restaurants && p.restaurants.length){
-    const cards = p.restaurants.map(r=>card(r.name,r.price,r.note,[r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country)));
-    html += sec('🍽 추천 식당', p.restaurants.length, expandable(cards, id+'-r'));
+    const cards = p.restaurants.map(r=>card(r.name,r.price,r.note,[r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country), 'food'));
+    html += sec('🍽 추천 식당', p.restaurants.length, expandable(cards, id+'-r'), 'text-amber-700');
   }
   if(p.highlights && p.highlights.length){
-    html += `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5">📍 가볼 만한 곳</h3>
+    html += `<div class="mt-4"><h3 class="text-[12.5px] uppercase tracking-wide text-emerald-700 font-bold mb-2">📍 가볼 만한 곳 <span class="text-slate-400 font-normal text-[11px]">${p.highlights.length}곳</span></h3>
       <div class="flex flex-wrap gap-1.5">${
       p.highlights.map(h=>`<a href="${gmaps(h, city, s.country)}" target="_blank" rel="noopener"
-        class="bg-slate-100 hover:bg-sky-100 hover:text-accent2 rounded-lg px-2.5 py-1.5 text-[12.5px] transition">${h}</a>`).join('')}</div></div>`;
+        class="bg-emerald-50 text-emerald-800 border border-emerald-100 hover:bg-emerald-100 rounded-md px-2.5 py-1 text-[12px] transition">${h}</a>`).join('')}</div></div>`;
   }
   document.getElementById('p-body').innerHTML = html ||
     '<div class="mt-5 text-slate-500 text-[13px]">이 지점은 이동 경유지입니다.</div>';
+
+  renderTips(id);
 
   document.querySelectorAll('.dl-item').forEach(e=>{
     const on = e.dataset.id===id;
@@ -418,8 +440,19 @@ function selectStop(id){
     e.classList.toggle('shadow-[inset_3px_0_0_#c0392b]', on);
   });
 }
-function sec(t,cnt,inner){
-  return `<div class="mt-5"><h3 class="text-[13px] uppercase tracking-wider text-accent2 font-semibold mb-2.5 flex items-center gap-2">${t}<span class="text-slate-400 font-normal text-[11.5px]">${cnt}곳</span></h3>${inner}</div>`;
+function sec(t,cnt,inner,hc){
+  return `<div class="mt-4"><h3 class="text-[12.5px] uppercase tracking-wide ${hc||'text-accent2'} font-bold mb-2 flex items-center gap-2">${t}<span class="text-slate-400 font-normal text-[11px]">${cnt}곳</span></h3>${inner}</div>`;
+}
+/* 카드 유형별 색상(좌측 보더+호버) */
+const CARD_THEME = {
+  hotel: 'border-l-sky-400 bg-sky-50/40 hover:bg-sky-50',
+  food:  'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50'
+};
+function priceColor(p){
+  if(p==='€') return 'text-emerald-600';
+  if(p==='€€') return 'text-amber-600';
+  if(p==='€€€') return 'text-rose-600';
+  return 'text-slate-500';
 }
 const SHOWN = 2; // 기본 노출 개수, 나머지는 '더보기'로 펼침
 function expandable(cards, key){
@@ -442,18 +475,19 @@ function toggleMore(key, btn){
 function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
 }
-function card(nm,price,note,tags,mapUrl){
+function card(nm,price,note,tags,mapUrl,type){
+  const theme = CARD_THEME[type] || 'border-l-slate-300';
   const nameHtml = mapUrl
     ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="구글 지도에서 보기"
-        class="font-bold text-[14.5px] text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[11px] align-middle opacity-70">📍</span></a>`
-    : `<span class="font-bold text-[14.5px]">${nm}</span>`;
-  return `<div class="border border-slate-200 rounded-xl px-3.5 py-3 mb-2.5 hover:border-slate-300 hover:shadow-md transition">
+        class="font-bold text-[13.5px] text-slate-800 hover:text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[10px] align-middle opacity-60">📍</span></a>`
+    : `<span class="font-bold text-[13.5px]">${nm}</span>`;
+  const tagHtml = (tags||[]).filter(Boolean)
+    .map(t=>`<span class="inline-block bg-white/70 text-slate-500 text-[10.5px] px-1.5 py-0.5 rounded mr-1">${t}</span>`).join('');
+  return `<div class="border border-slate-200 border-l-[4px] ${theme} rounded-lg px-3 py-2 mb-1.5 transition">
     <div class="flex justify-between items-baseline gap-2">
-      ${nameHtml}${
-      price?`<span class="text-xs font-bold text-amber-600 whitespace-nowrap">${price}</span>`:''}</div>${
-    note?`<div class="text-slate-500 text-[12.8px] mt-1 leading-relaxed">${note}</div>`:''}
-    <div class="mt-1.5">${
-    (tags||[]).filter(Boolean).map(t=>`<span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded mr-1.5">${t}</span>`).join('')}</div></div>`;
+      ${nameHtml}${price?`<span class="text-[11.5px] font-extrabold ${priceColor(price)} whitespace-nowrap">${price}</span>`:''}</div>${
+    note?`<div class="text-slate-500 text-[11.8px] mt-0.5 leading-snug">${note}</div>`:''}${
+    tagHtml?`<div class="mt-1">${tagHtml}</div>`:''}</div>`;
 }
 /* '여정 선택' 버튼: 전체 노선이 보이도록 지도 맞춤 + 선택 강조 해제 */
 function showFullRoute(){
