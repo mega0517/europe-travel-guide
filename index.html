@@ -1024,17 +1024,29 @@ async function drawRoads(){
 }
 drawRoads();
 
+/* 숙박 번호를 '박 수' 기준으로 계산 — 2박 이상이면 범위(예: 5-6)로 표시 */
+const NIGHT_LABEL = {};
+(function(){ let cum=0;
+  ROUTE.stops.forEach(s=>{
+    if(s.type==='stay'){
+      const start=cum+1, end=cum+(s.nights||1);
+      NIGHT_LABEL[s.id] = (s.nights>1) ? `${start}-${end}` : `${start}`;
+      cum=end;
+    }
+  });
+})();
+
 const markers = {};
-let stayNo = 0;
 ROUTE.stops.forEach(s=>{
   const isStay = s.type==='stay';
-  if(isStay) stayNo++;
-  const label = isStay? String(stayNo) : '';
-  const size = isStay?28:14;
+  const label = isStay? NIGHT_LABEL[s.id] : '';
+  const multi = isStay && s.nights>1;
+  const w = isStay ? (multi?40:28) : 14;
+  const h = isStay?28:14;
   const icon = L.divIcon({ className:'',
     html:`<div class="${isStay?'mk-num':'mk-wp'}"
-      style="width:${size}px;height:${size}px;line-height:${size-4}px;font-size:13px">${label}</div>`,
-    iconSize:[size,size], iconAnchor:[size/2,size/2] });
+      style="width:${w}px;height:${h}px;line-height:${h-4}px;font-size:13px">${label}</div>`,
+    iconSize:[w,h], iconAnchor:[w/2,h/2] });
   const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
   const pleg = ROUTE.legs.find(l=>l.to===s.id);
   const legLine = pleg
@@ -1053,17 +1065,15 @@ document.getElementById('t-meta').textContent =
 
 /* 중간 열: 여정 리스트 */
 const dl = document.getElementById('daylist');
-let nStay=0;
 ROUTE.stops.forEach(s=>{
-  if(s.type==='stay') nStay++;
-  const num = s.type==='stay'? nStay : '';
-  const leg = legTo(s.id);
   const isStay = s.type==='stay';
+  const num = isStay? NIGHT_LABEL[s.id] : '';
+  const leg = legTo(s.id);
   const el = document.createElement('div');
   el.className='dl-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer mb-0.5 hover:bg-slate-200/60 transition';
   el.dataset.id=s.id;
   const numCls = isStay
-    ? 'w-[25px] h-[25px] text-xs bg-accent'
+    ? `${(s.nights>1)?'min-w-[34px] px-1':'w-[25px]'} h-[25px] text-[11px] bg-accent`
     : 'w-[19px] h-[19px] text-[0px] bg-slate-400';
   el.innerHTML = `<div class="shrink-0 rounded-full text-white font-bold flex items-center justify-center ${numCls}">${num}</div>
     <div class="min-w-0 text-[11.5px] md:text-[13px]"><b class="block text-[12px] md:text-[13.5px] truncate">${s.name}</b>
