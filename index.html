@@ -1111,10 +1111,12 @@ function selectStop(id){
 
   document.getElementById('p-chip').textContent =
     (s.type==='start'?'출발':s.type==='end'?'도착':s.type==='waypoint'?'경유·관광':`숙박 ${s.nights}박`) + ' · ' + fmtDay(s.day);
-  document.getElementById('p-name').textContent = s.name;
+  const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
+  document.getElementById('p-name').innerHTML =
+    `<a href="${wikiUrl(city)}" target="_blank" rel="noopener" title="${city} 소개 보기"
+       class="hover:text-accent2 hover:underline decoration-2 underline-offset-2 transition">${s.name} <span class="text-[14px] align-middle text-accent2">↗</span></a>`;
   document.getElementById('p-sub').textContent = s.country;
 
-  const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
   let html='';
 
   // 운전 정보 + 자가용 여행 팁 (접이식 카드). 운전 구간이 없는 도시는 팁만 표시
@@ -1233,6 +1235,10 @@ function toggleMore(key, btn){
 }
 function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
+}
+/* 도시 소개 페이지: 한국어 위키백과(정확 매칭 시 문서로, 아니면 검색 결과로 이동) */
+function wikiUrl(city){
+  return 'https://ko.wikipedia.org/w/index.php?title=Special:Search&go=Go&search='+encodeURIComponent(city);
 }
 function card(nm,price,note,tags,mapUrl,type,extra){
   const theme = CARD_THEME[type] || 'border-l-slate-300';
