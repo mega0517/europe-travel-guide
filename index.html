@@ -1147,10 +1147,12 @@ function selectStop(id){
     html += sec('🏨 추천 숙소 (호텔)', p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
   }
   if(p.airbnb && p.airbnb.length){
-    const cards = p.airbnb.map(a=>card(a.name,a.price,a.note,['👥 4인', a.area].filter(Boolean), airbnbUrl(city, s.country), 'airbnb'));
-    html += sec('🏠 에어비앤비 · 4인 숙박', p.airbnb.length,
+    const ci = s.day, co = addDays(s.day, s.nights||1);
+    const aurl = airbnbUrl(city, s.country, ci, co);
+    const cards = p.airbnb.map(a=>card(a.name,a.price,a.note,['👥 4인', a.area].filter(Boolean), aurl, 'airbnb'));
+    html += sec(`🏠 에어비앤비 · 4인 (${fmtDay(ci)}~${fmtDay(co)})`, p.airbnb.length,
       expandable(cards, id+'-a')
-      + `<a href="${airbnbUrl(city, s.country)}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
+      + `<a href="${aurl}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
       'text-rose-700');
   }
   if(p.restaurants && p.restaurants.length){
@@ -1181,8 +1183,11 @@ const CARD_THEME = {
   food:   'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50',
   airbnb: 'border-l-rose-400 bg-rose-50/40 hover:bg-rose-50'
 };
-function airbnbUrl(city,country){
-  return 'https://www.airbnb.com/s/'+encodeURIComponent(`${city} ${country}`)+'/homes?adults=4';
+function addDays(d,n){const dt=new Date(d+'T00:00:00');dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10);}
+function airbnbUrl(city,country,checkin,checkout){
+  let u='https://www.airbnb.com/s/'+encodeURIComponent(`${city} ${country}`)+'/homes?adults=4';
+  if(checkin&&checkout) u+=`&checkin=${checkin}&checkout=${checkout}`;
+  return u;
 }
 function priceColor(p){
   if(p==='€') return 'text-emerald-600';
