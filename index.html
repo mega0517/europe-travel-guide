@@ -17,10 +17,13 @@
   .mk-num{background:#c0392b;color:#fff;border-radius:9999px;text-align:center;font-weight:700;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
   .mk-wp{background:#fff;border:2px solid #9aa7b1;border-radius:9999px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   #map{position:absolute;inset:0}
-  /* 선택된 지점의 말풍선 강조 (지도 이동 없이 색상만) */
-  .leaflet-popup.popup-active .leaflet-popup-content-wrapper{background:#c0392b;color:#fff;box-shadow:0 3px 14px rgba(192,57,43,.5)}
+  /* 말풍선 반투명 */
+  .leaflet-popup-content-wrapper{background:rgba(255,255,255,.78);backdrop-filter:blur(3px)}
+  .leaflet-popup-tip{background:rgba(255,255,255,.78)}
+  /* 선택된 지점의 말풍선 강조 (지도 이동 없이 색상만, 반투명) */
+  .leaflet-popup.popup-active .leaflet-popup-content-wrapper{background:rgba(192,57,43,.8);color:#fff;box-shadow:0 3px 14px rgba(192,57,43,.45)}
   .leaflet-popup.popup-active .leaflet-popup-content-wrapper a{color:#ffe;}
-  .leaflet-popup.popup-active .leaflet-popup-tip{background:#c0392b}
+  .leaflet-popup.popup-active .leaflet-popup-tip{background:rgba(192,57,43,.8)}
   .leaflet-popup.popup-active .leaflet-popup-close-button{color:#fff}
 </style>
 </head>
@@ -50,10 +53,13 @@
 
   <!-- 우: 추천 숙소/식당 열 -->
   <aside class="shrink-0 w-full md:w-[34%] md:max-w-[460px] bg-white overflow-y-auto shadow-[-6px_0_24px_rgba(0,0,0,.25)] flex flex-col">
-    <div class="px-5 pt-[18px] pb-3.5 border-b border-slate-200 sticky top-0 bg-white z-[5]">
-      <span id="p-chip" class="inline-block bg-accent text-white text-[11.5px] font-bold px-2.5 py-1 rounded-full mb-2"></span>
-      <h2 id="p-name" class="text-[21px] font-bold tracking-tight"></h2>
-      <div id="p-sub" class="text-slate-500 text-[13px] mt-1"></div>
+    <div class="border-b border-slate-200 sticky top-0 bg-white z-[5]">
+      <div id="p-photo" class="hidden h-[120px] bg-slate-200 bg-cover bg-center"></div>
+      <div class="px-5 pt-[14px] pb-3.5">
+        <span id="p-chip" class="inline-block bg-accent text-white text-[11.5px] font-bold px-2.5 py-1 rounded-full mb-2"></span>
+        <h2 id="p-name" class="text-[21px] font-bold tracking-tight"></h2>
+        <div id="p-sub" class="text-slate-500 text-[13px] mt-1"></div>
+      </div>
     </div>
     <div id="p-body" class="px-5 pt-1.5 pb-8"></div>
   </aside>
@@ -1116,6 +1122,7 @@ function selectStop(id){
     `<a href="${wikiUrl(city)}" target="_blank" rel="noopener" title="${city} 소개 보기"
        class="hover:text-accent2 hover:underline decoration-2 underline-offset-2 transition">${s.name} <span class="text-[14px] align-middle text-accent2">↗</span></a>`;
   document.getElementById('p-sub').textContent = s.country;
+  loadPhoto(id);
 
   let html='';
 
@@ -1239,6 +1246,26 @@ function gmaps(name,city,country){
 /* 도시 소개 페이지: 한국어 위키백과(정확 매칭 시 문서로, 아니면 검색 결과로 이동) */
 function wikiUrl(city){
   return 'https://ko.wikipedia.org/w/index.php?title=Special:Search&go=Go&search='+encodeURIComponent(city);
+}
+/* 도시별 대표 사진: 위키백과 대표 이미지(영문 문서 lead image)를 런타임에 로드 */
+const PHOTO_TITLE = {
+  budapest:'Budapest', hallstatt:'Hallstatt', salzburg:'Salzburg', feldkirch:'Feldkirch,_Vorarlberg',
+  lucerne:'Lucerne', jungfraujoch:'Jungfraujoch', interlaken:'Interlaken', zermatt:'Zermatt',
+  milan:'Milan', bled:'Lake_Bled', budapest_end:'Budapest'
+};
+const photoCache = {};
+function loadPhoto(id){
+  const el=document.getElementById('p-photo');
+  const t=PHOTO_TITLE[id];
+  el.classList.add('hidden'); el.style.backgroundImage='';
+  if(!t) return;
+  const set=src=>{ if(src){ el.style.backgroundImage=`url("${src}")`; el.classList.remove('hidden'); } };
+  if(photoCache[id]!==undefined){ set(photoCache[id]); return; }
+  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t))
+    .then(r=>r.json())
+    .then(j=>{ const src=(j.thumbnail&&j.thumbnail.source)||(j.originalimage&&j.originalimage.source)||null;
+      photoCache[id]=src; set(src); })
+    .catch(()=>{ photoCache[id]=null; });
 }
 function card(nm,price,note,tags,mapUrl,type,extra){
   const theme = CARD_THEME[type] || 'border-l-slate-300';
