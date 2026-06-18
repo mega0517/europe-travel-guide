@@ -286,6 +286,26 @@ const POI = {
       "잘차흐 강변 산책",
       "운터스베르크 케이블카",
       "사운드 오브 뮤직 투어"
+    ],
+    "airbnb": [
+      {
+        "name": "구시가 2베드 아파트",
+        "note": "게트라이데 거리 도보권, 침실 2·주방·세탁기, 4인",
+        "price": "€€",
+        "area": "구시가"
+      },
+      {
+        "name": "잘자흐 강변 패밀리 플랫",
+        "note": "강 전망 2베드, 4인, 주차 가능",
+        "price": "€€€",
+        "area": "강변"
+      },
+      {
+        "name": "미라벨 인근 아파트",
+        "note": "역·정원 가까움, 4인, 엘리베이터",
+        "price": "€€",
+        "area": "노이슈타트"
+      }
     ]
   },
   "feldkirch": {
@@ -366,6 +386,20 @@ const POI = {
       "보덴 호수(근교)",
       "브레겐츠(근교)",
       "구시가 성문·탑"
+    ],
+    "airbnb": [
+      {
+        "name": "구시가 타운하우스",
+        "note": "중세 골목, 침실 2·4인, 전용 주차",
+        "price": "€€",
+        "area": "구시가"
+      },
+      {
+        "name": "몬타폰 알프스 샬레",
+        "note": "산 전망 4인, 주방 완비·주차",
+        "price": "€€",
+        "area": "근교 계곡"
+      }
     ]
   },
   "lucerne": {
@@ -458,6 +492,26 @@ const POI = {
       "예수교회",
       "부르바키 파노라마",
       "슈탄저호른(근교)"
+    ],
+    "airbnb": [
+      {
+        "name": "호수 전망 아파트",
+        "note": "구시가 도보, 2베드·4인, 발코니",
+        "price": "€€€",
+        "area": "호숫가"
+      },
+      {
+        "name": "루체른 패밀리 스튜디오",
+        "note": "역 인근, 4인, 주방·세탁기",
+        "price": "€€",
+        "area": "시내"
+      },
+      {
+        "name": "리기산 방향 샬레",
+        "note": "조용한 4인 2베드, 무료 주차",
+        "price": "€€",
+        "area": "근교"
+      }
     ]
   },
   "jungfraujoch": {
@@ -586,6 +640,26 @@ const POI = {
       "뮈렌 마을",
       "성 베아투스 동굴",
       "발렌베르크 야외박물관"
+    ],
+    "airbnb": [
+      {
+        "name": "융프라우 전망 샬레",
+        "note": "2베드 4인, 정원·주차",
+        "price": "€€€",
+        "area": "마텐"
+      },
+      {
+        "name": "인터라켄 시내 아파트",
+        "note": "두 역 중간, 4인, 주방",
+        "price": "€€",
+        "area": "시내"
+      },
+      {
+        "name": "라우터브룬넨 산속 집",
+        "note": "폭포 계곡 4인, 주차",
+        "price": "€€",
+        "area": "근교"
+      }
     ]
   },
   "zermatt": {
@@ -732,6 +806,26 @@ const POI = {
       "몬테나폴레오네 쇼핑가",
       "코모 호수(근교)",
       "베르가모(근교)"
+    ],
+    "airbnb": [
+      {
+        "name": "나빌리 디자인 아파트",
+        "note": "운하 인근, 2베드 4인, 지하철 도보",
+        "price": "€€",
+        "area": "나빌리"
+      },
+      {
+        "name": "두오모 근처 플랫",
+        "note": "도심 4인, ZTL 외곽 주차 안내",
+        "price": "€€€",
+        "area": "중심"
+      },
+      {
+        "name": "가족형 아파트(외곽)",
+        "note": "무료 주차·지하철 연결, 4인",
+        "price": "€",
+        "area": "외곽"
+      }
     ]
   },
   "bled": {
@@ -824,6 +918,20 @@ const POI = {
       "블레드 토보간 썰매",
       "사바강 래프팅",
       "류블랴나(근교)"
+    ],
+    "airbnb": [
+      {
+        "name": "블레드 호수뷰 아파트",
+        "note": "발코니 2베드 4인, 주차",
+        "price": "€€",
+        "area": "호숫가"
+      },
+      {
+        "name": "블레드 가족 샬레",
+        "note": "정원·전용 주차, 4인 2베드",
+        "price": "€€",
+        "area": "마을"
+      }
     ]
   },
   "budapest_end": {
@@ -1036,7 +1144,14 @@ function selectStop(id){
 
   if(p.hotels && p.hotels.length){
     const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country), 'hotel'));
-    html += sec('🏨 추천 숙소', p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
+    html += sec('🏨 추천 숙소 (호텔)', p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
+  }
+  if(p.airbnb && p.airbnb.length){
+    const cards = p.airbnb.map(a=>card(a.name,a.price,a.note,['👥 4인', a.area].filter(Boolean), airbnbUrl(city, s.country), 'airbnb'));
+    html += sec('🏠 에어비앤비 · 4인 숙박', p.airbnb.length,
+      expandable(cards, id+'-a')
+      + `<a href="${airbnbUrl(city, s.country)}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
+      'text-rose-700');
   }
   if(p.restaurants && p.restaurants.length){
     const cards = p.restaurants.map(r=>card(r.name,r.price,r.note,[r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country), 'food'));
@@ -1062,9 +1177,13 @@ function sec(t,cnt,inner,hc){
 }
 /* 카드 유형별 색상(좌측 보더+호버) */
 const CARD_THEME = {
-  hotel: 'border-l-sky-400 bg-sky-50/40 hover:bg-sky-50',
-  food:  'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50'
+  hotel:  'border-l-sky-400 bg-sky-50/40 hover:bg-sky-50',
+  food:   'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50',
+  airbnb: 'border-l-rose-400 bg-rose-50/40 hover:bg-rose-50'
 };
+function airbnbUrl(city,country){
+  return 'https://www.airbnb.com/s/'+encodeURIComponent(`${city} ${country}`)+'/homes?adults=4';
+}
 function priceColor(p){
   if(p==='€') return 'text-emerald-600';
   if(p==='€€') return 'text-amber-600';
@@ -1094,9 +1213,12 @@ function gmaps(name,city,country){
 }
 function card(nm,price,note,tags,mapUrl,type){
   const theme = CARD_THEME[type] || 'border-l-slate-300';
+  const isAb = type==='airbnb';
+  const ico = isAb?'🏠':'📍';
+  const ttl = isAb?'에어비앤비에서 보기':'구글 지도에서 보기';
   const nameHtml = mapUrl
-    ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="구글 지도에서 보기"
-        class="font-bold text-[13.5px] text-slate-800 hover:text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[10px] align-middle opacity-60">📍</span></a>`
+    ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="${ttl}"
+        class="font-bold text-[13.5px] text-slate-800 hover:text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[10px] align-middle opacity-60">${ico}</span></a>`
     : `<span class="font-bold text-[13.5px]">${nm}</span>`;
   const tagHtml = (tags||[]).filter(Boolean)
     .map(t=>`<span class="inline-block bg-white/70 text-slate-500 text-[10.5px] px-1.5 py-0.5 rounded mr-1">${t}</span>`).join('');
