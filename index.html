@@ -1051,7 +1051,8 @@ ROUTE.stops.forEach(s=>{
       style="width:${w}px;height:${h}px;line-height:${h-4}px;font-size:13px">${label}</div>`,
     iconSize:[w,h], iconAnchor:[w/2,h/2] });
   const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
-  m.bindPopup(buildPopup(s,null),{autoPan:false,minWidth:160});
+  // autoPan: 말풍선이 상단 제목에 가리지 않도록 지도를 살짝 이동해 제목 아래에 보이게 함
+  m.bindPopup(buildPopup(s,null),{autoPan:true,autoPanPaddingTopLeft:[30,118],autoPanPaddingBottomRight:[30,30],minWidth:160});
   m.on('click',()=>selectStop(s.id));
   markers[s.id]=m;
 });
