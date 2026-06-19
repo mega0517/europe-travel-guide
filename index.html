@@ -30,10 +30,15 @@
   <!-- 좌: 지도 (모바일에서는 상단 고정) -->
   <div class="sticky top-0 z-[20] md:relative md:z-auto min-w-0 h-[46vh] md:h-auto md:flex-1">
     <div id="map"></div>
-    <div class="absolute z-[1000] top-3.5 left-1/2 -translate-x-1/2 w-[calc(100%-1.75rem)] max-w-[560px] bg-slate-900/80 backdrop-blur text-white px-3 py-2 md:px-4 md:py-3 rounded-xl pointer-events-none text-center">
-      <h1 id="t-title" class="text-[14px] md:text-[18px] font-semibold tracking-tight"></h1>
-      <p id="t-sub" class="text-[10.5px] md:text-[12.5px] opacity-80 mt-0.5"></p>
-      <div id="t-meta" class="text-[10px] md:text-[11.5px] opacity-70 mt-1 md:mt-1.5"></div>
+    <div onclick="toggleTitle()" title="클릭하여 자세히 보기"
+      class="absolute z-[1000] top-3.5 left-1/2 -translate-x-1/2 w-[calc(100%-1.75rem)] max-w-[560px] bg-slate-900/80 backdrop-blur text-white px-3 py-2 md:px-4 md:py-3 rounded-xl text-center cursor-pointer select-none hover:bg-slate-900/90 transition">
+      <h1 class="text-[14px] md:text-[18px] font-semibold tracking-tight flex items-center justify-center gap-1.5">
+        <span id="t-title"></span><span id="t-caret" class="text-[10px] opacity-70 font-normal">▾</span>
+      </h1>
+      <div id="t-detail" class="hidden">
+        <p id="t-sub" class="text-[10.5px] md:text-[12.5px] opacity-80 mt-0.5"></p>
+        <div id="t-meta" class="text-[10px] md:text-[11.5px] opacity-70 mt-1 md:mt-1.5"></div>
+      </div>
     </div>
   </div>
 
@@ -1318,6 +1323,11 @@ function fmtDay(d){
   return `${mm}/${dd}(${wd})`;
 }
 function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
+function toggleTitle(){
+  const d=document.getElementById('t-detail');
+  const hidden=d.classList.toggle('hidden');
+  document.getElementById('t-caret').textContent = hidden ? '▾' : '▴';
+}
 function toggleDrive(btn){
   const body = btn.parentElement.querySelector('.drive-body');
   const hidden = body.classList.toggle('hidden');
