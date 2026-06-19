@@ -1051,14 +1051,22 @@ ROUTE.stops.forEach(s=>{
       style="width:${w}px;height:${h}px;line-height:${h-4}px;font-size:13px">${label}</div>`,
     iconSize:[w,h], iconAnchor:[w/2,h/2] });
   const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
+  m.bindPopup(buildPopup(s,null),{autoPan:false,minWidth:160});
+  m.on('click',()=>selectStop(s.id));
+  markers[s.id]=m;
+});
+
+/* 말풍선 HTML (사진 + 도시·날짜 + 직전 구간 요약) */
+function buildPopup(s, photoUrl){
   const pleg = ROUTE.legs.find(l=>l.to===s.id);
   const legLine = pleg
     ? `<br><small>🚗 ${stop(pleg.from).name.replace(/\s*\(.*\)/,'')}→ 거리 ${pleg.km}km · ${fmtHours(pleg.hours)}</small>`
     : '';
-  m.bindPopup(`<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>${legLine}`,{autoPan:false});
-  m.on('click',()=>selectStop(s.id));
-  markers[s.id]=m;
-});
+  const img = photoUrl
+    ? `<img src="${photoUrl}" alt="" style="width:100%;height:62px;object-fit:cover;border-radius:6px;margin-bottom:5px;display:block">`
+    : '';
+  return `${img}<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>${legLine}`;
+}
 
 /* 헤더 */
 document.getElementById('t-title').textContent = ROUTE.trip.title;
@@ -1251,18 +1259,20 @@ const PHOTO_TITLE = {
   milan:'Milan', bled:'Lake_Bled', budapest_end:'Budapest'
 };
 const photoCache = {};
-function loadPhoto(id){
-  const el=document.getElementById('p-photo');
+function fetchPhoto(id){
   const t=PHOTO_TITLE[id];
-  el.classList.add('hidden'); el.style.backgroundImage='';
-  if(!t) return;
-  const set=src=>{ if(src){ el.style.backgroundImage=`url("${src}")`; el.classList.remove('hidden'); } };
-  if(photoCache[id]!==undefined){ set(photoCache[id]); return; }
-  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t))
+  if(!t) return Promise.resolve(null);
+  if(photoCache[id]!==undefined) return Promise.resolve(photoCache[id]);
+  return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t))
     .then(r=>r.json())
     .then(j=>{ const src=(j.thumbnail&&j.thumbnail.source)||(j.originalimage&&j.originalimage.source)||null;
-      photoCache[id]=src; set(src); })
-    .catch(()=>{ photoCache[id]=null; });
+      photoCache[id]=src; return src; })
+    .catch(()=>{ photoCache[id]=null; return null; });
+}
+function loadPhoto(id){
+  const el=document.getElementById('p-photo');
+  el.classList.add('hidden'); el.style.backgroundImage='';
+  fetchPhoto(id).then(src=>{ if(src){ el.style.backgroundImage=`url("${src}")`; el.classList.remove('hidden'); } });
 }
 function card(nm,price,note,tags,mapUrl,type,extra){
   const theme = CARD_THEME[type] || 'border-l-slate-300';
@@ -1316,6 +1326,11 @@ function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
 function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
 
 selectStop(ROUTE.stops[0].id);
+
+/* 각 도시 말풍선에 대표 사진을 채워 넣는다(로드되는 대로 갱신) */
+ROUTE.stops.forEach(s=>{
+  fetchPhoto(s.id).then(url=>{ if(url && markers[s.id]) markers[s.id].setPopupContent(buildPopup(s,url)); });
+});
 </script>
 </body>
 </html>
