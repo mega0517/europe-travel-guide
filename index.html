@@ -1356,7 +1356,7 @@ function card(nm,price,note,tags,mapUrl,type,extra,detailObj){
     : `<span class="font-bold text-[13.5px]">${nm}</span>`;
   const tagHtml = (tags||[]).filter(Boolean)
     .map(t=>`<span class="inline-block bg-white/70 text-slate-500 text-[10.5px] px-1.5 py-0.5 rounded mr-1">${t}</span>`).join('');
-  return `<div class="border border-slate-200/80 border-l-[4px] ${theme} rounded-xl px-3.5 py-2.5 mb-2 hover:shadow-sm transition">
+  return `<div class="rec-card border border-slate-200/80 border-l-[4px] ${theme} rounded-xl px-3.5 py-2.5 mb-2 hover:shadow-sm transition">
     <div class="flex justify-between items-baseline gap-2">
       ${nameHtml}${price?`<span class="text-[11.5px] font-extrabold ${priceColor(price)} whitespace-nowrap">${price}</span>`:''}</div>${
     note?`<div class="text-stone text-[11.8px] mt-0.5 leading-snug">${note}</div>`:''}${
@@ -1408,9 +1408,8 @@ function resetDetail(){
   if(c){c.classList.add('hidden'); c.innerHTML='';}
   if(e) e.classList.remove('hidden');
 }
-function showDetail(d){
-  const c=document.getElementById('d-content'), e=document.getElementById('d-empty');
-  if(!c) return;
+/* 상세 내용 HTML 생성 (데스크톱 상세 열 / 모바일 인라인 공용) */
+function detailHTML(d){
   const embed='https://www.google.com/maps?q='+encodeURIComponent(d.query)+'&output=embed';
   const chips=(d.chips||[]).filter(Boolean)
     .map(x=>`<span class="inline-block bg-sand text-stone text-[11px] font-semibold px-2 py-0.5 rounded-full">${x}</span>`).join(' ');
@@ -1429,7 +1428,7 @@ function showDetail(d){
       ${mi?`<div class="text-[10px] text-stone/70 mt-1.5">※ 해당 요리 종류 기준 대표 메뉴·평균가 예시입니다(식당별 실제 메뉴와 다를 수 있음).</div>`:''}
     </div>` : '';
   const hasInfo = chips || d.note || infoRows || menuBlock;
-  c.innerHTML=`
+  return `
     <div class="px-5 pt-5 pb-3">
       <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone mb-1.5">${d.kind||''}</div>
       <h3 class="text-[20px] font-bold tracking-tight leading-tight">${d.name}</h3>
@@ -1452,17 +1451,39 @@ function showDetail(d){
       <a href="https://www.google.com/search?q=${encodeURIComponent(d.name+' '+(d.sub||''))}" target="_blank" rel="noopener"
         class="col-span-2 text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">웹에서 검색 🔎</a>
     </div>`;
+}
+/* 데스크톱: 우측 상세 열에 표시 */
+function showDetail(d){
+  const c=document.getElementById('d-content'), e=document.getElementById('d-empty');
+  if(!c) return;
+  c.innerHTML=detailHTML(d);
   e&&e.classList.add('hidden');
   c.classList.remove('hidden');
   c.parentElement.scrollTop=0;
 }
-/* 식당·명소 클릭: 넓은 화면이면 상세 열에 표시(새 탭 대신), 좁은 화면이면 기존대로 새 탭 */
+/* 모바일: 클릭한 카드 바로 아래에 상세 펼침 + 닫기 버튼 (다시 누르면 닫힘) */
+function toggleInlineDetail(cardEl, d){
+  const nxt = cardEl.nextElementSibling;
+  if(nxt && nxt.classList.contains('inline-detail')){ nxt.remove(); return; }  // 토글로 닫기
+  document.querySelectorAll('.inline-detail').forEach(el=>el.remove());        // 다른 패널은 닫기
+  const panel=document.createElement('div');
+  panel.className='inline-detail mt-1 mb-2 rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm';
+  panel.innerHTML=`<div class="flex justify-end px-3 py-1.5 bg-slate-50 border-b border-slate-200">
+      <button type="button" onclick="this.closest('.inline-detail').remove()"
+        class="text-[12px] font-semibold text-stone hover:text-accent px-2 py-0.5">✕ 닫기</button>
+    </div>${detailHTML(d)}`;
+  cardEl.after(panel);
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+/* 식당·명소 클릭: 넓은 화면이면 상세 열, 모바일이면 식당 카드 아래 인라인, 그 외(명소 등)는 새 탭 */
 document.addEventListener('click',function(ev){
   const a=ev.target.closest('[data-detail]');
   if(!a) return;
-  if(!isWide()) return;            // 모바일/태블릿은 기존 동작(새 탭) 유지
-  ev.preventDefault();
-  try{ showDetail(JSON.parse(decodeURIComponent(a.getAttribute('data-detail')))); }catch(e){}
+  let d; try{ d=JSON.parse(decodeURIComponent(a.getAttribute('data-detail'))); }catch(e){ return; }
+  if(isWide()){ ev.preventDefault(); showDetail(d); return; }
+  const cardEl=a.closest('.rec-card');                 // 모바일: 식당 카드면 인라인 표시
+  if(cardEl){ ev.preventDefault(); toggleInlineDetail(cardEl, d); }
+  // 명소 pill 등 카드가 아니면 기존 동작(새 탭) 유지
 });
 
 /* ===== 주변 실제 장소 실시간 검색 (OpenStreetMap Overpass, 무료·키 불필요) ===== */
