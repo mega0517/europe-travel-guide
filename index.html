@@ -9,29 +9,42 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
-    theme: { extend: { colors: { accent: '#c0392b', accent2: '#2c6e8f' } } }
+    theme: { extend: {
+      colors: { accent: '#c0392b', accent2: '#2c6e8f', ink: '#1b1714', paper: '#f7f3ec', sand: '#ece3d6', stone: '#6f6557' }
+    } }
   };
 </script>
 <style>
   /* Leaflet 마커/팝업 등 Tailwind로 다루기 어려운 부분만 최소 보강 */
-  .mk-num{background:#c0392b;color:#fff;border-radius:9999px;text-align:center;font-weight:700;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+  .mk-num{background:#c0392b;color:#fff;border-radius:9999px;text-align:center;font-weight:700;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)}
   .mk-wp{background:#fff;border:2px solid #9aa7b1;border-radius:9999px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   #map{position:absolute;inset:0}
+  /* 모던 팝업: 둥근 모서리·부드러운 그림자 (서체는 기본 유지) */
+  .leaflet-popup-content-wrapper{border-radius:15px;box-shadow:0 12px 36px rgba(27,23,20,.22);padding:2px}
+  .leaflet-popup-tip{box-shadow:0 12px 36px rgba(27,23,20,.16)}
   /* 선택된 지점의 말풍선 강조 (지도 이동 없이 색상만) */
-  .leaflet-popup.popup-active .leaflet-popup-content-wrapper{background:#c0392b;color:#fff;box-shadow:0 3px 14px rgba(192,57,43,.5)}
+  .leaflet-popup.popup-active .leaflet-popup-content-wrapper{background:#c0392b;color:#fff;box-shadow:0 10px 30px rgba(192,57,43,.5)}
   .leaflet-popup.popup-active .leaflet-popup-content-wrapper a{color:#ffe;}
   .leaflet-popup.popup-active .leaflet-popup-tip{background:#c0392b}
   .leaflet-popup.popup-active .leaflet-popup-close-button{color:#fff}
+  /* 얇고 모던한 스크롤바 */
+  .nice-scroll{scrollbar-width:thin;scrollbar-color:#d6cab8 transparent}
+  .nice-scroll::-webkit-scrollbar{width:9px;height:9px}
+  .nice-scroll::-webkit-scrollbar-thumb{background:#d6cab8;border-radius:9999px;border:2px solid transparent;background-clip:content-box}
+  .nice-scroll:hover::-webkit-scrollbar-thumb{background:#c3b49d;background-clip:content-box}
+  /* 증분형 더보기: 래퍼가 레이아웃에 영향 주지 않도록 contents 처리 */
+  .dc{display:contents}
+  .is-hidden{display:none!important}
 </style>
 </head>
-<body class="min-h-screen md:h-screen md:overflow-hidden font-sans text-slate-800">
+<body class="min-h-screen md:h-screen md:overflow-hidden font-sans text-ink bg-paper">
 <div id="app" class="flex flex-col md:flex-row h-auto md:h-screen md:overflow-hidden">
 
   <!-- 좌: 지도 (모바일에서는 상단 고정) -->
   <div class="sticky top-0 z-[20] md:relative md:z-auto min-w-0 h-[46vh] md:h-auto md:flex-1">
     <div id="map"></div>
     <div onclick="toggleTitle()" title="클릭하여 자세히 보기"
-      class="absolute z-[1000] top-3.5 left-1/2 -translate-x-1/2 w-[calc(100%-1.75rem)] max-w-[560px] bg-slate-900/80 backdrop-blur text-white px-3 py-2 md:px-4 md:py-3 rounded-xl text-center cursor-pointer select-none hover:bg-slate-900/90 transition">
+      class="absolute z-[1000] top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[580px] bg-ink/75 backdrop-blur-md text-white px-4 py-2.5 md:px-6 md:py-4 rounded-2xl text-center cursor-pointer select-none hover:bg-ink/85 transition shadow-xl ring-1 ring-white/10">
       <h1 class="text-[14px] md:text-[18px] font-semibold tracking-tight flex items-center justify-center gap-1.5">
         <span id="t-title"></span><span id="t-caret" class="text-[10px] opacity-70 font-normal">▾</span>
       </h1>
@@ -43,27 +56,40 @@
   </div>
 
   <!-- 중: 여정 선택 열 -->
-  <div class="shrink-0 w-full md:w-[250px] bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 overflow-y-auto flex flex-col">
-    <div class="sticky top-0 bg-slate-50 z-[5] border-b border-slate-200 px-3 pt-3 pb-2.5">
+  <div class="nice-scroll shrink-0 w-full md:w-[262px] bg-sand/40 border-t md:border-t-0 md:border-l border-sand overflow-y-auto flex flex-col">
+    <div class="sticky top-0 bg-sand/55 backdrop-blur z-[5] border-b border-sand px-3.5 pt-3.5 pb-3">
+      <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone mb-2 px-0.5">Itinerary</div>
       <button type="button" onclick="showFullRoute()"
-        class="w-full flex items-center justify-center gap-2 bg-accent text-white text-[13px] font-bold rounded-lg py-2.5 hover:bg-red-700 active:scale-[.99] transition">
+        class="w-full flex items-center justify-center gap-2 bg-accent text-white text-[13px] font-bold rounded-xl py-2.5 hover:bg-red-700 active:scale-[.99] transition shadow-sm">
         🗺 여정 선택 <span class="font-normal opacity-80 text-[11.5px]">· 전체 노선 보기</span>
       </button>
     </div>
-    <div id="daylist" class="px-2.5 py-2"></div>
+    <div id="daylist" class="px-2.5 py-2.5"></div>
   </div>
 
   <!-- 우: 추천 숙소/식당 열 -->
-  <aside class="shrink-0 w-full md:w-[34%] md:max-w-[460px] bg-white overflow-y-auto shadow-[-6px_0_24px_rgba(0,0,0,.25)] flex flex-col">
-    <div class="border-b border-slate-200 sticky top-0 bg-white z-[5]">
-      <div id="p-photo" class="hidden h-[120px] bg-slate-200 bg-cover bg-center"></div>
-      <div class="px-5 pt-[14px] pb-3.5">
-        <span id="p-chip" class="inline-block bg-accent text-white text-[11.5px] font-bold px-2.5 py-1 rounded-full mb-2"></span>
-        <h2 id="p-name" class="text-[21px] font-bold tracking-tight"></h2>
-        <div id="p-sub" class="text-slate-500 text-[13px] mt-1"></div>
+  <aside class="nice-scroll shrink-0 w-full md:w-[36%] md:max-w-[480px] bg-white overflow-y-auto shadow-[-10px_0_40px_rgba(27,23,20,.16)] flex flex-col">
+    <div class="sticky top-0 z-[5] bg-white">
+      <div class="relative h-[200px] md:h-[232px] bg-ink overflow-hidden">
+        <div id="p-photo" class="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-700"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-ink/5"></div>
+        <div class="absolute inset-x-0 bottom-0 px-5 pb-4">
+          <span id="p-chip" class="inline-block bg-accent text-white text-[11.5px] font-bold px-2.5 py-1 rounded-full mb-2 shadow"></span>
+          <h2 id="p-name" class="text-white text-[21px] font-bold tracking-tight drop-shadow-lg"></h2>
+          <div id="p-sub" class="text-white/80 text-[13px] mt-1 drop-shadow"></div>
+        </div>
       </div>
     </div>
-    <div id="p-body" class="px-5 pt-1.5 pb-8"></div>
+    <div id="p-body" class="px-5 pt-3 pb-10"></div>
+  </aside>
+
+  <!-- 우(데스크톱 전용): 클릭한 식당·명소 상세 (위치 임베드) -->
+  <aside id="detail-col" class="nice-scroll hidden xl:flex shrink-0 w-[28%] max-w-[380px] bg-paper border-l border-sand overflow-y-auto flex-col">
+    <div id="d-empty" class="m-auto px-7 py-10 text-center text-stone/80 text-[13px] leading-relaxed">
+      <div class="text-[34px] mb-3">🗺️</div>
+      추천 식당이나 <b>가볼 만한 곳</b>을 클릭하면<br>여기에서 위치와 정보를<br>한 화면에 볼 수 있어요.
+    </div>
+    <div id="d-content" class="hidden flex-col"></div>
   </aside>
 </div>
 
@@ -1087,7 +1113,7 @@ ROUTE.stops.forEach(s=>{
   const num = isStay? NIGHT_LABEL[s.id] : '';
   const leg = legTo(s.id);
   const el = document.createElement('div');
-  el.className='dl-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer mb-0.5 hover:bg-slate-200/60 transition';
+  el.className='dl-item flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl cursor-pointer mb-1 hover:bg-white hover:shadow-sm transition';
   el.dataset.id=s.id;
   const numCls = isStay
     ? `${(s.nights>1)?'min-w-[34px] px-1':'w-[25px]'} h-[25px] text-[11px] bg-accent`
@@ -1118,6 +1144,7 @@ const CITY_TIPS = {
 function selectStop(id){
   const s = ROUTE.stops.find(x=>x.id===id);
   const p = POI[id] || {};
+  currentStopId = id;
   // 지도는 전체 보기를 그대로 유지하고, 말풍선만 열어 색상으로 강조
   markers[id].openPopup();
   const popEl = markers[id].getPopup().getElement();
@@ -1186,18 +1213,26 @@ function selectStop(id){
       + `<a href="${aurl}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
       'text-rose-700');
   }
-  if(p.restaurants && p.restaurants.length){
-    const cards = p.restaurants.map(r=>card(r.name,r.price,r.note,[r.cuisine?r.cuisine:''], gmaps(r.name, city, s.country), 'food'));
-    html += sec('🍽 추천 식당', p.restaurants.length, expandable(cards, id+'-r'), 'text-amber-700');
+  {
+    const curated = (p.restaurants||[]).map(r=>card(r.name,r.price,r.note,[r.cuisine||''], gmaps(r.name, city, s.country), 'food', undefined,
+      { name:r.name, food:true, price:r.price||'', cuisineRaw:r.cuisine||'', chips:[r.cuisine, r.price].filter(Boolean), note:r.note||'', query:`${r.name} ${city} ${s.country}`, mapurl:gmaps(r.name, city, s.country), kind:'추천 식당' }));
+    html += sec('🍽 추천 식당', `<span id="cnt-r-${id}">${(p.restaurants||[]).length}</span>`,
+      `<div id="list-r-${id}">${expandableList(curated, id+'-r', 2, 4)}</div>`
+      + `<div id="load-r-${id}" class="text-[11.5px] text-stone/70 py-1.5 flex items-center gap-1.5"><span class="inline-block w-3 h-3 border-2 border-stone/40 border-t-transparent rounded-full animate-spin"></span> 주변 식당 100곳 실시간 검색 중…</div>`,
+      'text-amber-700');
   }
-  if(p.highlights && p.highlights.length){
-    html += `<div class="mt-4"><h3 class="text-[12.5px] uppercase tracking-wide text-emerald-700 font-bold mb-2">📍 가볼 만한 곳 <span class="text-slate-400 font-normal text-[11px]">${p.highlights.length}곳</span></h3>
-      <div class="flex flex-wrap gap-1.5">${
-      p.highlights.map(h=>`<a href="${gmaps(h, city, s.country)}" target="_blank" rel="noopener"
-        class="bg-emerald-50 text-emerald-800 border border-emerald-100 hover:bg-emerald-100 rounded-md px-2.5 py-1 text-[12px] transition">${h}</a>`).join('')}</div></div>`;
+  {
+    const pills = (p.highlights||[]).map(h=>pillHL(h, city, s.country));
+    html += `<div class="mt-5"><h3 class="text-[12.5px] uppercase tracking-wide text-emerald-700 font-bold mb-2.5">📍 가볼 만한 곳 <span class="text-stone/70 font-normal text-[11px]"><span id="cnt-hl-${id}">${(p.highlights||[]).length}</span>곳</span></h3>
+      <div id="list-hl-${id}" class="flex flex-wrap gap-1.5">${expandableList(pills, id+'-hl', 10, 10)}</div>
+      <div id="load-hl-${id}" class="text-[11.5px] text-stone/70 py-1.5 flex items-center gap-1.5"><span class="inline-block w-3 h-3 border-2 border-stone/40 border-t-transparent rounded-full animate-spin"></span> 주변 명소 100곳 실시간 검색 중…</div></div>`;
   }
   document.getElementById('p-body').innerHTML = html ||
     '<div class="mt-5 text-slate-500 text-[13px]">이 지점은 이동 경유지입니다.</div>';
+
+  resetDetail();  // 도시 변경 시 상세 열 초기화(다른 도시 정보 잔류 방지)
+  loadLive('restaurant', id, city, s.country);  // 주변 실제 식당 100곳 실시간 검색
+  loadLive('attraction', id, city, s.country);  // 주변 실제 명소 100곳 실시간 검색
 
   document.querySelectorAll('.dl-item').forEach(e=>{
     const on = e.dataset.id===id;
@@ -1206,7 +1241,7 @@ function selectStop(id){
   });
 }
 function sec(t,cnt,inner,hc){
-  return `<div class="mt-4"><h3 class="text-[12.5px] uppercase tracking-wide ${hc||'text-accent2'} font-bold mb-2 flex items-center gap-2">${t}<span class="text-slate-400 font-normal text-[11px]">${cnt}곳</span></h3>${inner}</div>`;
+  return `<div class="mt-5"><h3 class="text-[12.5px] uppercase tracking-wide ${hc||'text-accent2'} font-bold mb-2.5 flex items-center gap-2">${t}<span class="text-stone/70 font-normal text-[11px]">${cnt}곳</span></h3>${inner}</div>`;
 }
 /* 카드 유형별 색상(좌측 보더+호버) */
 const CARD_THEME = {
@@ -1251,6 +1286,35 @@ function toggleMore(key, btn){
     ? `더보기 <span class="text-slate-400">+${el.children.length}곳</span>`
     : '접기 ▲';
 }
+/* 증분형 더보기 + 언제든 접기: '더보기'는 step개씩 노출, '접기'는 처음 상태로 되돌림(부분 노출 상태에서도 가능) */
+function expandableList(items, key, initial, step){
+  if(items.length <= initial) return items.join('');
+  const head = items.slice(0, initial).join('');
+  const rest = items.slice(initial)
+    .map(h=>`<span class="more-${key} dc is-hidden">${h}</span>`).join('');
+  const remaining = items.length - initial;
+  return `${head}${rest}
+    <div data-ctrl="${key}" class="flex gap-2 w-full mt-1.5 mb-1">
+      <button type="button" data-act="more" data-key="${key}" data-step="${step}" onclick="expMore(this)"
+        class="flex-1 text-[12.5px] font-semibold text-accent2 border border-slate-200 rounded-lg py-2 hover:bg-slate-50 transition">
+        더보기 <span class="text-slate-400">+${Math.min(step,remaining)}곳</span></button>
+      <button type="button" data-act="less" data-key="${key}" onclick="expLess(this)"
+        class="hidden shrink-0 px-3.5 text-[12.5px] font-semibold text-stone border border-slate-200 rounded-lg py-2 hover:bg-slate-50 transition">접기 ▲</button>
+    </div>`;
+}
+function expUpdate(key){
+  const ctrl=document.querySelector('[data-ctrl="'+key+'"]'); if(!ctrl) return;
+  const total=document.querySelectorAll('.more-'+key).length;
+  const hidden=document.querySelectorAll('.more-'+key+'.is-hidden').length;
+  const more=ctrl.querySelector('[data-act="more"]'), less=ctrl.querySelector('[data-act="less"]');
+  if(hidden>0){ more.classList.remove('hidden'); more.querySelector('span').textContent='+'+Math.min(+more.dataset.step,hidden)+'곳'; }
+  else more.classList.add('hidden');
+  less.classList.toggle('hidden', (total-hidden)<=0);   // 하나라도 펼쳐져 있으면 접기 노출
+}
+function expMore(btn){ const key=btn.dataset.key, step=+btn.dataset.step;
+  Array.from(document.querySelectorAll('.more-'+key+'.is-hidden')).slice(0,step).forEach(el=>el.classList.remove('is-hidden')); expUpdate(key); }
+function expLess(btn){ const key=btn.dataset.key;
+  document.querySelectorAll('.more-'+key).forEach(el=>el.classList.add('is-hidden')); expUpdate(key); }
 function gmaps(name,city,country){
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
 }
@@ -1280,21 +1344,22 @@ function loadPhoto(id){
   el.classList.add('hidden'); el.style.backgroundImage='';
   fetchPhoto(id).then(src=>{ if(src){ el.style.backgroundImage=`url("${src}")`; el.classList.remove('hidden'); } });
 }
-function card(nm,price,note,tags,mapUrl,type,extra){
+function card(nm,price,note,tags,mapUrl,type,extra,detailObj){
   const theme = CARD_THEME[type] || 'border-l-slate-300';
   const isAb = type==='airbnb';
   const ico = isAb?'🏠':'📍';
   const ttl = isAb?'에어비앤비에서 보기':'구글 지도에서 보기';
+  const detailAttr = detailObj ? ` data-detail="${encodeURIComponent(JSON.stringify(detailObj))}"` : '';
   const nameHtml = mapUrl
-    ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="${ttl}"
+    ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="${ttl}"${detailAttr}
         class="font-bold text-[13.5px] text-slate-800 hover:text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[10px] align-middle opacity-60">${ico}</span></a>`
     : `<span class="font-bold text-[13.5px]">${nm}</span>`;
   const tagHtml = (tags||[]).filter(Boolean)
     .map(t=>`<span class="inline-block bg-white/70 text-slate-500 text-[10.5px] px-1.5 py-0.5 rounded mr-1">${t}</span>`).join('');
-  return `<div class="border border-slate-200 border-l-[4px] ${theme} rounded-lg px-3 py-2 mb-1.5 transition">
+  return `<div class="border border-slate-200/80 border-l-[4px] ${theme} rounded-xl px-3.5 py-2.5 mb-2 hover:shadow-sm transition">
     <div class="flex justify-between items-baseline gap-2">
       ${nameHtml}${price?`<span class="text-[11.5px] font-extrabold ${priceColor(price)} whitespace-nowrap">${price}</span>`:''}</div>${
-    note?`<div class="text-slate-500 text-[11.8px] mt-0.5 leading-snug">${note}</div>`:''}${
+    note?`<div class="text-stone text-[11.8px] mt-0.5 leading-snug">${note}</div>`:''}${
     tagHtml?`<div class="mt-1">${tagHtml}</div>`:''}${extra||''}</div>`;
 }
 /* 호텔 예약 검색 링크(부킹닷컴, 정확한 숙박 날짜·4인 반영) */
@@ -1335,6 +1400,222 @@ function toggleDrive(btn){
 }
 function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
 function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
+
+/* ===== 데스크톱 전용 상세 열 ===== */
+function isWide(){return window.matchMedia('(min-width:1280px)').matches;}
+function resetDetail(){
+  const c=document.getElementById('d-content'), e=document.getElementById('d-empty');
+  if(c){c.classList.add('hidden'); c.innerHTML='';}
+  if(e) e.classList.remove('hidden');
+}
+function showDetail(d){
+  const c=document.getElementById('d-content'), e=document.getElementById('d-empty');
+  if(!c) return;
+  const embed='https://www.google.com/maps?q='+encodeURIComponent(d.query)+'&output=embed';
+  const chips=(d.chips||[]).filter(Boolean)
+    .map(x=>`<span class="inline-block bg-sand text-stone text-[11px] font-semibold px-2 py-0.5 rounded-full">${x}</span>`).join(' ');
+  const rows=[];
+  if(d.address) rows.push(['📍','주소', d.address]);
+  if(d.hours)   rows.push(['🕒','영업시간', d.hours]);
+  if(d.phone)   rows.push(['📞','전화', `<a href="tel:${d.phone}" class="text-accent2 hover:underline">${d.phone}</a>`]);
+  if(d.website) rows.push(['🔗','웹사이트', `<a href="${d.website}" target="_blank" rel="noopener" class="text-accent2 hover:underline break-all">${d.website.replace(/^https?:\/\//,'').replace(/\/$/,'')}</a>`]);
+  const infoRows=rows.map(r=>`<div class="flex gap-2 text-[12.5px] py-1.5 border-b border-sand/70">
+      <span class="shrink-0">${r[0]}</span><span class="text-stone w-16 shrink-0">${r[1]}</span><span class="flex-1 text-slate-700 leading-snug">${r[2]}</span></div>`).join('');
+  const mk = d.food ? resolveMenuKey(d.cuisineRaw) : '';
+  const mi = mk ? MENU_INFO[mk] : null;
+  const menuBlock = (d.food && (mi || d.price)) ? `<div class="mx-5 mt-1 mb-1 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
+      ${mi?`<div class="text-[12.5px] leading-snug"><span class="font-bold text-amber-800">🍽 추천 메뉴</span> <span class="text-slate-700">${mi.dishes}</span></div>`:''}
+      <div class="text-[12.5px] leading-snug mt-1"><span class="font-bold text-amber-800">💶 대략 가격대</span> <span class="text-slate-700">${[mi?mi.price+' (1인)':'', d.price?priceKo(d.price):''].filter(Boolean).join(' · ')}</span></div>
+      ${mi?`<div class="text-[10px] text-stone/70 mt-1.5">※ 해당 요리 종류 기준 대표 메뉴·평균가 예시입니다(식당별 실제 메뉴와 다를 수 있음).</div>`:''}
+    </div>` : '';
+  const hasInfo = chips || d.note || infoRows || menuBlock;
+  c.innerHTML=`
+    <div class="px-5 pt-5 pb-3">
+      <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone mb-1.5">${d.kind||''}</div>
+      <h3 class="text-[20px] font-bold tracking-tight leading-tight">${d.name}</h3>
+      ${d.sub?`<div class="text-stone text-[12.5px] mt-1">${d.sub}</div>`:''}
+      ${chips?`<div class="flex flex-wrap gap-1.5 mt-2.5">${chips}</div>`:''}
+      ${d.note?`<div class="mt-3">${d.food?`<div class="text-[11px] font-bold text-amber-700 mb-1">✨ 특징</div>`:''}<div class="text-slate-600 text-[12.5px] leading-relaxed">${d.note}</div></div>`:''}
+      ${!hasInfo?`<div class="text-stone/70 text-[12px] mt-2">아래 지도와 링크에서 더 자세한 정보를 확인하세요.</div>`:''}
+    </div>
+    ${menuBlock}
+    <div class="relative w-full bg-sand" style="aspect-ratio:4/3">
+      <iframe title="${d.name} 지도" src="${embed}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        class="absolute inset-0 w-full h-full border-0"></iframe>
+    </div>
+    ${infoRows?`<div class="px-5 pt-3">${infoRows}</div>`:''}
+    <div class="px-5 py-4 grid grid-cols-2 gap-2">
+      <a href="${d.mapurl}" target="_blank" rel="noopener"
+        class="text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">지도에서 보기 ↗</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(d.query)}" target="_blank" rel="noopener"
+        class="text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">길찾기 →</a>
+      <a href="https://www.google.com/search?q=${encodeURIComponent(d.name+' '+(d.sub||''))}" target="_blank" rel="noopener"
+        class="col-span-2 text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">웹에서 검색 🔎</a>
+    </div>`;
+  e&&e.classList.add('hidden');
+  c.classList.remove('hidden');
+  c.parentElement.scrollTop=0;
+}
+/* 식당·명소 클릭: 넓은 화면이면 상세 열에 표시(새 탭 대신), 좁은 화면이면 기존대로 새 탭 */
+document.addEventListener('click',function(ev){
+  const a=ev.target.closest('[data-detail]');
+  if(!a) return;
+  if(!isWide()) return;            // 모바일/태블릿은 기존 동작(새 탭) 유지
+  ev.preventDefault();
+  try{ showDetail(JSON.parse(decodeURIComponent(a.getAttribute('data-detail')))); }catch(e){}
+});
+
+/* ===== 주변 실제 장소 실시간 검색 (OpenStreetMap Overpass, 무료·키 불필요) ===== */
+var currentStopId = null;
+function pillHL(h, city, country, info, queryName){
+  info = info || {};
+  const qn = queryName || h;   // 표시는 h(한국어), 지도 검색은 원문 qn 사용
+  const d = { name:h, sub:city, note:'', query:`${qn} ${city} ${country}`, mapurl:gmaps(qn, city, country), kind:'가볼 만한 곳',
+    chips:[info.cuisine].filter(Boolean), address:info.address||'', hours:info.hours||'', phone:info.phone||'', website:info.website||'' };
+  return `<a href="${gmaps(qn, city, country)}" target="_blank" rel="noopener"
+    data-detail="${encodeURIComponent(JSON.stringify(d))}"
+    class="bg-emerald-50 text-emerald-800 border border-emerald-100 hover:bg-emerald-100 hover:border-emerald-200 rounded-full px-3 py-1 text-[12px] transition">${h}</a>`;
+}
+const liveCache = {};
+const OSM_Q = {
+  restaurant: s=>`[out:json][timeout:25];(node["amenity"~"^(restaurant|cafe)$"](around:3500,${s.lat},${s.lng});way["amenity"~"^(restaurant|cafe)$"](around:3500,${s.lat},${s.lng}););out tags center 100;`,
+  attraction: s=>`[out:json][timeout:25];(node["tourism"~"^(attraction|viewpoint|museum|gallery|artwork|theme_park|zoo|aquarium)$"](around:6000,${s.lat},${s.lng});way["tourism"~"^(attraction|viewpoint|museum|gallery|artwork|theme_park|zoo|aquarium)$"](around:6000,${s.lat},${s.lng});node["historic"]["name"](around:6000,${s.lat},${s.lng}););out tags center 100;`
+};
+/* CORS 허용 미러를 우선 사용(overpass-api.de는 브라우저 CORS 헤더 미제공으로 차단됨). 실패 시 순차 폴백 */
+const OVERPASS_EPS = [
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter'
+];
+function overpassFetch(query, i){
+  i = i || 0;
+  if(i >= OVERPASS_EPS.length) return Promise.reject(new Error('all overpass endpoints failed'));
+  return fetch(OVERPASS_EPS[i], { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data='+encodeURIComponent(query) })
+    .then(r=>{ if(!r.ok) throw new Error('status '+r.status); return r.json(); })
+    .catch(()=>overpassFetch(query, i+1));
+}
+/* 현지어 장소명을 한국어로 번역 (무료 Google gtx, CORS 허용). 결과 캐시, 실패 시 원문 유지 */
+const trCache = {};
+function translateKo(names){
+  const todo = names.filter(n=>n && trCache[n]===undefined);
+  if(!todo.length) return Promise.resolve(trCache);
+  const chunks=[]; for(let i=0;i<todo.length;i+=40) chunks.push(todo.slice(i,i+40));
+  return Promise.all(chunks.map(chunk=>
+    fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q='+encodeURIComponent(chunk.join('\n')))
+      .then(r=>r.json())
+      .then(j=>{
+        const lines=((j[0]||[]).map(s=>s[0]).join('')).split('\n');
+        chunk.forEach((orig,idx)=>{ trCache[orig]=((lines[idx]||orig).trim())||orig; });
+      })
+      .catch(()=>{ chunk.forEach(orig=>{ trCache[orig]=orig; }); })
+  )).then(()=>trCache);
+}
+/* OSM cuisine 값을 한글로 변환(빈출값 사전, 없으면 원문 유지) */
+const CUISINE_KO = {
+  italian:'이탈리아 요리', pizza:'피자', pasta:'파스타', regional:'현지 요리', local:'현지 요리',
+  french:'프랑스 요리', chinese:'중식', japanese:'일식', sushi:'스시', korean:'한식',
+  indian:'인도 요리', thai:'타이 요리', vietnamese:'베트남 요리', mexican:'멕시코 요리',
+  american:'아메리칸', burger:'버거', steak_house:'스테이크', barbecue:'바비큐', grill:'그릴',
+  seafood:'해산물', fish:'생선 요리', kebab:'케밥', turkish:'터키 요리', greek:'그리스 요리',
+  spanish:'스페인 요리', mediterranean:'지중해 요리', vegetarian:'채식', vegan:'비건',
+  coffee_shop:'카페', cafe:'카페', ice_cream:'아이스크림', bakery:'베이커리', dessert:'디저트',
+  asian:'아시아 요리', international:'다국적 요리', austrian:'오스트리아 요리', german:'독일 요리',
+  swiss:'스위스 요리', hungarian:'헝가리 요리', slovenian:'슬로베니아 요리', sandwich:'샌드위치',
+  breakfast:'브런치', tapas:'타파스', wine:'와인 바', pub:'펍', bar:'바', fine_dining:'파인다이닝'
+};
+function cuisineKo(c){ if(!c) return ''; return CUISINE_KO[String(c).toLowerCase()] || c; }
+function priceKo(p){ return p==='€'?'저렴한 편 (€)':p==='€€'?'보통 (€€)':p==='€€€'?'고급 (€€€)':''; }
+/* 요리 종류별 대표 메뉴·평균 가격대(1인 기준, 예시). 특정 식당 실제 메뉴판이 아니라 요리 종류 기준 참고치 */
+const MENU_INFO = {
+  italian:{dishes:'파스타 · 리소토 · 피자 · 티라미수', price:'€12~25'},
+  pizza:{dishes:'마르게리타 · 콰트로 포르마지 · 칼조네', price:'€8~16'},
+  pasta:{dishes:'까르보나라 · 볼로네제 · 뇨끼', price:'€10~20'},
+  french:{dishes:'코코뱅 · 푸아그라 · 크렘 브륄레', price:'€20~40'},
+  austrian:{dishes:'비너슈니첼 · 굴라쉬 · 자허토르테', price:'€12~25'},
+  german:{dishes:'슈니첼 · 학센 · 소시지 플레이트', price:'€10~22'},
+  swiss:{dishes:'치즈 퐁뒤 · 라클렛 · 뢰스티', price:'€20~38'},
+  hungarian:{dishes:'굴라쉬 · 랑고스 · 도보스 토르타', price:'€8~18'},
+  slovenian:{dishes:'요타 · 크렘슈니타 · 송어 요리', price:'€10~20'},
+  mediterranean:{dishes:'그릴 생선 · 메제 · 올리브 플레이트', price:'€15~30'},
+  seafood:{dishes:'그릴 생선 · 해산물 모둠 · 새우 요리', price:'€18~35'},
+  fish:{dishes:'송어구이 · 농어 · 생선 수프', price:'€15~28'},
+  indian:{dishes:'커리 · 탄두리 · 난', price:'€10~20'},
+  thai:{dishes:'팟타이 · 똠얌꿍 · 그린커리', price:'€10~18'},
+  cafe:{dishes:'커피 · 케이크 · 브런치', price:'€5~12'},
+  bakery:{dishes:'페이스트리 · 샌드위치 · 빵', price:'€3~9'},
+  dessert:{dishes:'케이크 · 젤라또 · 타르트', price:'€4~10'},
+  burger:{dishes:'수제버거 · 감자튀김 · 밀크셰이크', price:'€9~16'},
+  steak_house:{dishes:'스테이크 · 그릴 미트 · 와인', price:'€25~50'},
+  barbecue:{dishes:'바비큐 플래터 · 립 · 그릴', price:'€15~30'},
+  pub:{dishes:'맥주 · 안주 플래터 · 소시지', price:'€8~18'},
+  bar:{dishes:'칵테일 · 와인 · 안주', price:'€8~20'},
+  fine_dining:{dishes:'셰프 코스 · 와인 페어링', price:'€60~120'},
+  vegetarian:{dishes:'채식 플레이트 · 샐러드 · 수프', price:'€10~18'},
+  kebab:{dishes:'케밥 · 팔라펠 · 랩', price:'€6~12'},
+  turkish:{dishes:'케밥 · 메제 · 바클라바', price:'€8~18'}
+};
+const CUISINE_KO_KEY = {'이탈리아':'italian','피자':'pizza','파스타':'pasta','프랑스':'french','오스트리아':'austrian','독일':'german','스위스':'swiss','헝가리':'hungarian','슬로베니아':'slovenian','지중해':'mediterranean','해산물':'seafood','생선':'fish','인도':'indian','타이':'thai','카페':'cafe','베이커리':'bakery','디저트':'dessert','버거':'burger','스테이크':'steak_house','바비큐':'barbecue','펍':'pub','맥주':'pub','바':'bar','파인다이닝':'fine_dining','채식':'vegetarian','케밥':'kebab','중동':'mediterranean'};
+function resolveMenuKey(raw){
+  if(!raw) return '';
+  const s=String(raw).toLowerCase().split('/')[0].trim();
+  if(MENU_INFO[s]) return s;
+  for(const k in CUISINE_KO_KEY){ if(String(raw).indexOf(k)>-1) return CUISINE_KO_KEY[k]; }
+  return '';
+}
+function liveRestoCard(n, city, country){
+  const ck = cuisineKo(n.cuisine);
+  return card(n.name,'','',[ck||'식당','주변'].filter(Boolean), gmaps(n.name,city,country), 'food', undefined,
+    { name:n.name, food:true, cuisineRaw:n.cuisine||'', sub:'주변 검색 결과', note:'', query:`${n.name} ${city} ${country}`, mapurl:gmaps(n.name,city,country), kind:'추천 식당 · 주변',
+      chips:[ck].filter(Boolean), address:n.address||'', hours:n.hours||'', phone:n.phone||'', website:n.website||'' });
+}
+function loadLive(kind, id, city, country){
+  const s = stop(id);
+  const ckey = id+'-'+kind;
+  const loaderId = (kind==='restaurant'?'load-r-':'load-hl-')+id;
+  function apply(items){
+    if(currentStopId!==id) return;                 // 도시가 바뀌었으면 무시
+    const loader=document.getElementById(loaderId); if(loader) loader.remove();
+    if(!items || !items.length) return;
+    if(kind==='restaurant'){
+      const seen=new Set((POI[id]&&POI[id].restaurants||[]).map(r=>r.name.toLowerCase()));
+      const fresh=items.filter(n=>!seen.has(n.name.toLowerCase()));
+      const curated=(POI[id]&&POI[id].restaurants||[]).map(r=>card(r.name,r.price,r.note,[r.cuisine||''], gmaps(r.name,city,country),'food',undefined,
+        { name:r.name, food:true, price:r.price||'', cuisineRaw:r.cuisine||'', chips:[r.cuisine,r.price].filter(Boolean), note:r.note||'', query:`${r.name} ${city} ${country}`, mapurl:gmaps(r.name,city,country), kind:'추천 식당' }));
+      const merged=curated.concat(fresh.map(n=>liveRestoCard(n,city,country)));
+      const list=document.getElementById('list-r-'+id); if(list) list.innerHTML=expandableList(merged, id+'-r', 2, 4);
+      const cnt=document.getElementById('cnt-r-'+id); if(cnt) cnt.textContent=merged.length;
+    }else{
+      const seen=new Set((POI[id]&&POI[id].highlights||[]).map(x=>x.toLowerCase()));
+      const fresh=items.filter(n=>!seen.has(n.name.toLowerCase()));
+      const curated=(POI[id]&&POI[id].highlights||[]).map(h=>pillHL(h,city,country));
+      function renderHL(tmap){
+        const livePills=fresh.map(n=>pillHL((tmap&&tmap[n.name])||n.name, city, country, n, n.name));  // 표시는 한국어, 검색은 원문
+        const merged=curated.concat(livePills);
+        const list=document.getElementById('list-hl-'+id); if(list) list.innerHTML=expandableList(merged, id+'-hl', 10, 10);
+        const cnt=document.getElementById('cnt-hl-'+id); if(cnt) cnt.textContent=merged.length;
+      }
+      renderHL(null);                                                                          // 우선 원문으로 즉시 표시
+      if(fresh.length) translateKo(fresh.map(n=>n.name)).then(tmap=>{ if(currentStopId===id) renderHL(tmap); });  // 번역되면 한국어로 교체
+    }
+  }
+  if(liveCache[ckey]){ apply(liveCache[ckey]); return; }
+  overpassFetch(OSM_Q[kind](s))
+    .then(j=>{
+      const seen=new Set(), out=[];
+      (j.elements||[]).forEach(e=>{
+        const t=e.tags||{}; const nm=t['name:ko']||t.name||t['name:en'];
+        if(!nm) return; const k=nm.toLowerCase(); if(seen.has(k)) return; seen.add(k);
+        const street=[t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' ');
+        const address=[street, t['addr:city']].filter(Boolean).join(', ');
+        out.push({ name:nm, cuisine:(t.cuisine||'').split(';')[0].replace(/_/g,' '),
+          address:address, hours:t.opening_hours||'', phone:t.phone||t['contact:phone']||'',
+          website:t.website||t['contact:website']||'' });
+      });
+      liveCache[ckey]=out; apply(out);
+    })
+    .catch(()=>{ if(currentStopId===id){ const l=document.getElementById(loaderId); if(l){ l.innerHTML='주변 실시간 검색을 불러오지 못했어요. <button onclick="retryLive(\''+kind+'\',\''+id+'\')" class="underline text-accent2">다시 시도</button>'; } } });
+}
+function retryLive(kind,id){ delete liveCache[id+'-'+kind]; const s=stop(id); const city=s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,''); const l=document.getElementById((kind==='restaurant'?'load-r-':'load-hl-')+id); if(l) l.textContent='다시 검색 중…'; loadLive(kind,id,city,s.country); }
 
 selectStop(ROUTE.stops[0].id);
 
