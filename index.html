@@ -1467,7 +1467,7 @@ function toggleInlineDetail(cardEl, d){
   if(nxt && nxt.classList.contains('inline-detail')){ nxt.remove(); return; }  // 토글로 닫기
   document.querySelectorAll('.inline-detail').forEach(el=>el.remove());        // 다른 패널은 닫기
   const panel=document.createElement('div');
-  panel.className='inline-detail mt-1 mb-2 rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm';
+  panel.className='inline-detail w-full basis-full mt-1 mb-2 rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm';
   panel.innerHTML=`<div class="flex justify-end px-3 py-1.5 bg-slate-50 border-b border-slate-200">
       <button type="button" onclick="this.closest('.inline-detail').remove()"
         class="text-[12px] font-semibold text-stone hover:text-accent px-2 py-0.5">✕ 닫기</button>
@@ -1481,9 +1481,9 @@ document.addEventListener('click',function(ev){
   if(!a) return;
   let d; try{ d=JSON.parse(decodeURIComponent(a.getAttribute('data-detail'))); }catch(e){ return; }
   if(isWide()){ ev.preventDefault(); showDetail(d); return; }
-  const cardEl=a.closest('.rec-card');                 // 모바일: 식당 카드면 인라인 표시
-  if(cardEl){ ev.preventDefault(); toggleInlineDetail(cardEl, d); }
-  // 명소 pill 등 카드가 아니면 기존 동작(새 탭) 유지
+  ev.preventDefault();                                 // 모바일: 식당 카드·명소 pill 모두 인라인 표시
+  const ref = a.closest('.rec-card') || a.closest('.dc') || a;   // 식당=카드, 명소=pill(또는 펼침 래퍼) 바로 아래
+  toggleInlineDetail(ref, d);
 });
 
 /* ===== 주변 실제 장소 실시간 검색 (OpenStreetMap Overpass, 무료·키 불필요) ===== */
