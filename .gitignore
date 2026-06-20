@@ -1,2 +1,33 @@
+# ── Workspace data (not committed) ───────────────────────────────────────────
 _workspace/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
 .DS_Store
+
+# ── Secrets / env files ───────────────────────────────────────────────────────
+.env
+backend/.env
+*.env
+!*.env.example
+
+# ── Databases ─────────────────────────────────────────────────────────────────
+*.db
+backend/europe.db
+
+# ── index.html backups (created by exporter Fix #8) ──────────────────────────
+index.*.bak
+index_backups/
+backend/.backups/
+.backups/
+
+# ── Python (backend) ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# ── Node (frontend) ───────────────────────────────────────────────────────────
+node_modules/
+dist/
+

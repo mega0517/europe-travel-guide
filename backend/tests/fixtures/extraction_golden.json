@@ -1,0 +1,77 @@
+{
+  "restaurants": [
+    {
+      "name": "Figlmüller Bäckerstraße",
+      "city": "Vienna",
+      "note": "Famous for its enormous Wiener Schnitzel",
+      "price": "€€€",
+      "cuisine": "Austrian"
+    },
+    {
+      "name": "Zum Wohl",
+      "city": "Vienna",
+      "note": "Excellent Austrian wine bar with cold cuts and cheese",
+      "price": "€€",
+      "cuisine": "Austrian/Wine"
+    },
+    {
+      "name": "Trattoria Milanese",
+      "city": "Milan",
+      "note": "Classic Milanese cuisine since 1933, try the risotto alla Milanese",
+      "price": "€€€",
+      "cuisine": "Italian/Milanese"
+    },
+    {
+      "name": "Luini",
+      "city": "Milan",
+      "note": "Famous street-food spot for panzerotti (fried dough pockets)",
+      "price": "€",
+      "cuisine": "Street food"
+    }
+  ],
+  "hotels": [
+    {
+      "name": "Hotel Sacher Wien",
+      "city": "Vienna",
+      "note": "Iconic luxury hotel, home of the original Sachertorte",
+      "price": "€€€€",
+      "parking": "available"
+    }
+  ],
+  "airbnb": [
+    {
+      "name": "Airbnb Navigli District",
+      "city": "Milan",
+      "note": "Stylish apartment in the trendy canal district",
+      "price": "€€",
+      "area": "Navigli"
+    }
+  ],
+  "highlights": [
+    {
+      "name": "Schönbrunn Palace",
+      "city": "Vienna",
+      "note": "UNESCO World Heritage baroque palace with formal gardens"
+    },
+    {
+      "name": "Belvedere Museum",
+      "city": "Vienna",
+      "note": "Home to Klimt's \"The Kiss\""
+    },
+    {
+      "name": "St. Stephen's Cathedral",
+      "city": "Vienna",
+      "note": "Stephansdom"
+    },
+    {
+      "name": "The Last Supper",
+      "city": "Milan",
+      "note": "Leonardo da Vinci's masterpiece, book well in advance"
+    },
+    {
+      "name": "Duomo di Milano",
+      "city": "Milan",
+      "note": "Gothic cathedral with rooftop terrace views"
+    }
+  ]
+}
