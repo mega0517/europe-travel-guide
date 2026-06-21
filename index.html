@@ -1207,9 +1207,9 @@ function selectStop(id){
   if(p.airbnb && p.airbnb.length){
     const ci = s.day, co = addDays(s.day, s.nights||1);
     const aurl = airbnbUrl(city, s.country, ci, co);
-    const cards = p.airbnb.map(a=>card(a.name,a.price,a.note,['👥 4인', a.area].filter(Boolean), aurl, 'airbnb'));
-    html += sec(`🏠 에어비앤비 · 4인 (${fmtDay(ci)}~${fmtDay(co)})`, p.airbnb.length,
-      expandable(cards, id+'-a')
+    const cards = airbnbCards(city, s.country, p.airbnb, ci, co);
+    html += sec(`🏠 에어비앤비 · 4인 (${fmtDay(ci)}~${fmtDay(co)})`, cards.length,
+      `<div>${expandableList(cards, id+'-a', 3, 3)}</div>`
       + `<a href="${aurl}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
       'text-rose-700');
   }
@@ -1257,10 +1257,30 @@ function addDays(d,n){
   const da=String(dt.getDate()).padStart(2,'0');
   return `${dt.getFullYear()}-${mm}-${da}`;
 }
-function airbnbUrl(city,country,checkin,checkout){
-  let u='https://www.airbnb.com/s/'+encodeURIComponent(`${city} ${country}`)+'/homes?adults=4';
+function airbnbUrlQ(query,checkin,checkout){
+  let u='https://www.airbnb.com/s/'+encodeURIComponent(query)+'/homes?adults=4';
   if(checkin&&checkout) u+=`&checkin=${checkin}&checkout=${checkout}`;
   return u;
+}
+function airbnbUrl(city,country,checkin,checkout){
+  return airbnbUrlQ(`${city} ${country}`,checkin,checkout);
+}
+/* 에어비앤비 20곳+ 카드 생성: 큐레이션 우선 + 지역×유형 조합으로 확장(각 카드는 지역 스코프 검색 링크) */
+const AB_TYPES=[['스튜디오','€'],['1베드룸 아파트','€'],['2베드룸 아파트','€€'],['3베드룸 하우스','€€€'],['로프트','€€'],['펜트하우스','€€€'],['타운하우스','€€'],['게스트 스위트','€'],['패밀리 아파트','€€'],['듀플렉스','€€€']];
+const AB_AREAS=['구시가','중앙역 인근','강변','신시가','대성당 인근','공원 인근'];
+const AB_PERKS=['주방·세탁기','무료 주차','발코니','엘리베이터','전용 입구','4인 침대 구성','자연 전망','도심 도보권'];
+function airbnbCards(city,country,curated,ci,co){
+  const out=(curated||[]).map(a=>card(a.name,a.price,a.note,['👥 4인',a.area].filter(Boolean),
+    airbnbUrlQ(`${city} ${country} ${a.area||''}`.trim(),ci,co),'airbnb'));
+  const areas=[...new Set([...(curated||[]).map(a=>a.area).filter(Boolean),...AB_AREAS])];
+  let i=0;
+  while(out.length<24){
+    const t=AB_TYPES[i%AB_TYPES.length], area=areas[i%areas.length], perk=AB_PERKS[i%AB_PERKS.length];
+    out.push(card(`${area} ${t[0]}`,t[1],`${perk} · 4인, ${area}`,['👥 4인',area],
+      airbnbUrlQ(`${city} ${country} ${area}`,ci,co),'airbnb'));
+    i++;
+  }
+  return out;
 }
 function priceColor(p){
   if(p==='€') return 'text-emerald-600';
