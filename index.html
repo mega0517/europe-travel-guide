@@ -47,6 +47,10 @@
       class="absolute z-[1000] top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[580px] bg-ink/75 backdrop-blur-md text-white px-4 py-2.5 md:px-6 md:py-4 rounded-2xl text-center cursor-pointer select-none hover:bg-ink/85 transition shadow-xl ring-1 ring-white/10">
       <h1 class="text-[14px] md:text-[18px] font-semibold tracking-tight flex items-center justify-center gap-1.5">
         <span id="t-title"></span><span id="t-caret" class="text-[10px] opacity-70 font-normal">▾</span>
+        <button type="button" onclick="openChecklist(event)" title="여행 준비물 체크리스트"
+          class="ml-1 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0">
+          🎒 <span class="hidden sm:inline">준비물</span>
+        </button>
       </h1>
       <div id="t-detail" class="hidden">
         <p id="t-sub" class="text-[10.5px] md:text-[12.5px] opacity-80 mt-0.5"></p>
@@ -91,6 +95,37 @@
     </div>
     <div id="d-content" class="hidden flex-col"></div>
   </aside>
+</div>
+
+<!-- 준비물 체크리스트 모달 -->
+<div id="cl-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-3 md:p-5">
+  <div id="cl-backdrop" onclick="closeChecklist()" class="absolute inset-0 bg-ink/60 backdrop-blur-sm"></div>
+  <div class="relative w-full max-w-[560px] max-h-[88vh] md:max-h-[86vh] bg-paper rounded-2xl shadow-2xl ring-1 ring-sand flex flex-col overflow-hidden">
+    <!-- 헤더 -->
+    <div class="shrink-0 bg-ink text-white px-5 pt-4 pb-3.5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-[17px] md:text-[19px] font-bold tracking-tight flex items-center gap-2">🎒 여행 준비물 체크리스트</h2>
+          <p class="text-white/60 text-[11.5px] mt-0.5">이동진 · 김숙경 · 김백현 · 김숙희 · 4인 · 7박 8일 중부유럽</p>
+        </div>
+        <button type="button" onclick="closeChecklist()" title="닫기"
+          class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[20px] leading-none transition">×</button>
+      </div>
+      <!-- 사람별 진행률 칩 -->
+      <div id="cl-people" class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      <!-- 액션 바 -->
+      <div class="mt-3 flex items-center justify-end gap-3">
+        <button type="button" id="cl-edit-btn" onclick="clToggleEdit()"
+          class="shrink-0 inline-flex items-center gap-1 bg-white/12 hover:bg-white/22 ring-1 ring-white/20 rounded-full px-3 py-1 text-[11px] font-semibold transition whitespace-nowrap">✏️ 편집</button>
+        <button type="button" onclick="clResetToSeed()"
+          class="shrink-0 text-[11px] font-semibold text-white/60 hover:text-white underline decoration-white/25 hover:decoration-white transition whitespace-nowrap">기본값 복원</button>
+        <button type="button" onclick="resetChecklist()"
+          class="shrink-0 text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition whitespace-nowrap">전체 초기화</button>
+      </div>
+    </div>
+    <!-- 목록 -->
+    <div id="cl-list" class="nice-scroll flex-1 overflow-y-auto px-4 md:px-5 py-4"></div>
+  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -1418,6 +1453,272 @@ function toggleDrive(btn){
   const hidden = body.classList.toggle('hidden');
   btn.querySelector('.drive-chev').textContent = hidden ? '▼ 펼치기' : '▲ 접기';
 }
+
+/* ===== 여행 준비물 체크리스트 (4인 개별 체크 + 항목 CRUD) ===== */
+/* 인원 정의 */
+const CL_PEOPLE = [
+  { id:'p1', name:'이동진', short:'동진' },
+  { id:'p2', name:'김숙경', short:'숙경' },
+  { id:'p3', name:'김백현', short:'백현' },
+  { id:'p4', name:'김숙희', short:'숙희' }
+];
+/* 시드(기본) 체크리스트 — 사용자 편집 전 초기값으로만 사용 */
+const CHECKLIST_SEED = [
+  { cat: '여권 · 서류', icon: '🛂', items: [
+    '여권 (유효기간 6개월 이상)', '여권 사본 (분리 보관)', '여권용 증명사진 (분실 대비)',
+    '국제운전면허증', '국내운전면허증 (국제면허증과 함께 지참 필수)',
+    '항공권 e-티켓 (출력본)', '렌터카 예약확인서', '숙소 예약확인서 (전체 일정)',
+    '여행자보험증서', '신용/체크카드 2매 이상 (분산 보관)', '유로 현금 (소액권 위주)' ]
+  },
+  { cat: '자동차 · 운전', icon: '🚗', items: [
+    '오스트리아 비네트 (Vignette) 구매 확인', '슬로베니아 비네트 구매 확인', '체코 통행료/비네트 확인',
+    '차량 등록증 · 그린카드(보험증) 차내 비치', '반사 안전조끼 (운전석·조수석 의무)', '경고 삼각대',
+    '구급상자 (차량 비치 의무)', '주차 디스크 (Parking disc)', '휴대폰 차량 거치대', '차량용 USB 충전기',
+    '구글맵 오프라인 지도 다운로드', '비상 연락처 (렌터카사 · 보험사 · 영사관)' ]
+  },
+  { cat: '전자기기', icon: '🔌', items: [
+    '유럽 변환 어댑터 (C/F 타입)', '멀티탭 (어댑터 1개로 여러 기기)', '보조배터리 (2만mAh 내외)',
+    '충전 케이블 (라이트닝/C타입)', '카메라 · 메모리카드 · 충전기', '이어폰/블루투스 헤드폰' ]
+  },
+  { cat: '의류 · 생활', icon: '👕', items: [
+    '계절 의류 (산악지대 일교차 대비 긴팔)', '편한 운전화 · 운동화', '우산 / 경량 우비',
+    '선글라스', '세면도구 (칫솔·치약·면도기)', '자외선 차단제 (고산지대 필수)', '수영복 (블레드 호수 등)' ]
+  },
+  { cat: '상비약 · 건강', icon: '💊', items: [
+    '개인 처방약 (처방전 사본 동반)', '진통제 · 소화제 · 지사제', '멀미약 (산악도로 대비)',
+    '밴드 · 연고 · 소독약', '마스크', '종합비타민 / 영양제' ]
+  },
+  { cat: '여행 · 편의', icon: '🧳', items: [
+    '목베개 (장거리 운전·이동)', '차내 간식 · 생수 · 텀블러', '지퍼백 · 물티슈',
+    '장보기용 에코백 (마트 봉투 유료)', '비상금 분산 보관', '한국 비상식량 (컵라면·즉석밥 등)' ]
+  }
+];
+
+const CL_ITEMS_KEY = 'eurotrip-checklist-items'; /* 리스트 구조 */
+const CL_CHECKS_KEY = 'eurotrip-checks-v2';      /* 사람별 체크 상태 */
+let CL_EDIT = false;                              /* 편집 모드 */
+let _clItems = null;                              /* 메모리 캐시 (구조) */
+let _clIdSeq = 0;                                 /* 항목 id 카운터 */
+
+/* 고유 id 생성 */
+function clNewId(){
+  if(window.crypto && crypto.randomUUID){ return 'it_' + crypto.randomUUID(); }
+  _clIdSeq++;
+  return 'it_' + Date.now().toString(36) + '_' + _clIdSeq + '_' + Math.floor(Math.random()*1e6).toString(36);
+}
+/* 시드 → 안정적 id를 가진 구조로 변환 */
+function clSeedToItems(){
+  return CHECKLIST_SEED.map(c=>({
+    cat: c.cat, icon: c.icon,
+    items: c.items.map(t=>({ id: clNewId(), text: t }))
+  }));
+}
+/* 구조 로드 (없으면 시드 복사) */
+function clLoadItems(){
+  if(_clItems) return _clItems;
+  try {
+    const raw = localStorage.getItem(CL_ITEMS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length){ _clItems = parsed; return _clItems; }
+    }
+  } catch(e){}
+  _clItems = clSeedToItems();
+  clSaveItems();
+  return _clItems;
+}
+function clSaveItems(){ try { localStorage.setItem(CL_ITEMS_KEY, JSON.stringify(_clItems)); } catch(e){} }
+
+/* 체크 상태: { "itemId|personId": true } */
+function clLoadChecks(){ try { return JSON.parse(localStorage.getItem(CL_CHECKS_KEY)) || {}; } catch(e){ return {}; } }
+function clSaveChecks(s){ try { localStorage.setItem(CL_CHECKS_KEY, JSON.stringify(s)); } catch(e){} }
+function clCheckKey(itemId, personId){ return itemId + '|' + personId; }
+
+/* 전체 항목 수 */
+function clTotalItems(){ return clLoadItems().reduce((a,c)=>a+c.items.length, 0); }
+/* 특정 사람의 완료 수 */
+function clDoneFor(personId, checks){
+  let n = 0;
+  clLoadItems().forEach(c=>c.items.forEach(it=>{ if(checks[clCheckKey(it.id, personId)]) n++; }));
+  return n;
+}
+
+function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* 사람별 진행률 칩 + 메인 렌더 */
+function clUpdatePeople(){
+  const checks = clLoadChecks();
+  const total = clTotalItems();
+  const wrap = document.getElementById('cl-people');
+  if(!wrap) return;
+  wrap.innerHTML = CL_PEOPLE.map(p=>{
+    const done = clDoneFor(p.id, checks);
+    const pct = total ? Math.round(done/total*100) : 0;
+    return `<div class="bg-white/10 rounded-lg px-2 py-1.5" title="${_esc(p.name)}">
+      <div class="flex items-center justify-between gap-1 text-[11px] font-semibold text-white/90">
+        <span>${_esc(p.short)}</span>
+        <span class="tabular-nums text-white/70 text-[10.5px]">${done}/${total}</span>
+      </div>
+      <div class="mt-1 h-1.5 rounded-full bg-white/15 overflow-hidden">
+        <div class="h-full bg-accent transition-all duration-300" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderChecklist(){
+  const items = clLoadItems();
+  const checks = clLoadChecks();
+  const list = document.getElementById('cl-list');
+  const headLabels = `<span class="w-7 text-center text-[9px] font-extrabold text-accent2 leading-none" title="전원 일괄 체크">공동</span>`
+    + `<span class="w-px mx-0.5"></span>`
+    + CL_PEOPLE.map(p=>`<span class="w-7 text-center text-[9px] font-bold text-stone/80 leading-none" title="${_esc(p.name)}">${_esc(p.short)}</span>`).join('');
+  list.innerHTML = items.map((c, ci)=>`
+    <div class="mb-4">
+      <div class="flex items-end justify-between mb-2 px-0.5">
+        <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone">${_esc(c.icon)} ${_esc(c.cat)}</div>
+        <div class="flex gap-1" style="margin-right:${CL_EDIT?'30px':'6px'}">${headLabels}</div>
+      </div>
+      <div class="bg-white rounded-xl ring-1 ring-sand overflow-hidden">
+        ${c.items.map(it=>{
+          const doneCount = CL_PEOPLE.filter(p=>checks[clCheckKey(it.id, p.id)]).length;
+          const allDone = doneCount === CL_PEOPLE.length;
+          const someDone = doneCount > 0 && !allDone;
+          const master = `<input type="checkbox" ${allDone?'checked':''} aria-label="공동 (전원)" title="공동 (전원 일괄 체크)"
+              data-master="${it.id}" onchange="clToggleAll('${it.id}',this.checked)"
+              class="w-7 h-4 shrink-0 accent-accent2 cursor-pointer"${someDone?' data-indet="1"':''}>`;
+          const nameCell = CL_EDIT
+            ? `<input type="text" value="${_esc(it.text)}" onchange="clEditItemText('${it.id}',this.value)"
+                 class="flex-1 min-w-0 text-[13px] leading-snug bg-sand/30 rounded-md px-2 py-1 ring-1 ring-sand focus:ring-accent outline-none text-ink">`
+            : `<span class="flex-1 min-w-0 text-[13px] leading-snug text-ink break-words">${_esc(it.text)}</span>`;
+          const delBtn = CL_EDIT
+            ? `<button type="button" onclick="clDeleteItem('${it.id}')" title="삭제"
+                 class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-accent hover:bg-accent/10 text-[16px] leading-none transition">×</button>`
+            : '';
+          return `<div class="flex items-center gap-2.5 px-3.5 py-2 border-b border-sand/60 last:border-0 hover:bg-sand/20 transition">
+            ${nameCell}
+            <div class="flex items-center gap-1 shrink-0">${master}<span class="w-px h-4 bg-sand mx-0.5"></span>${CL_PEOPLE.map(p=>{
+              const done = !!checks[clCheckKey(it.id, p.id)];
+              return `<input type="checkbox" ${done?'checked':''} aria-label="${_esc(p.name)}" title="${_esc(p.name)}"
+                data-item="${it.id}" data-person="${p.id}"
+                onchange="toggleChecklistItem('${it.id}','${p.id}',this.checked)"
+                class="w-7 h-4 shrink-0 accent-accent cursor-pointer">`;
+            }).join('')}</div>
+            ${delBtn}
+          </div>`;
+        }).join('')}
+        ${CL_EDIT ? `<div class="flex items-center gap-2 px-3.5 py-2 bg-sand/20 border-t border-sand/60">
+          <input type="text" placeholder="+ 항목 추가" data-cat="${ci}"
+            onkeydown="if(event.key==='Enter'){clAddItem(${ci},this.value);this.value='';}"
+            class="flex-1 min-w-0 text-[12.5px] bg-white rounded-md px-2 py-1 ring-1 ring-sand focus:ring-accent outline-none text-ink">
+          <button type="button" onclick="var i=this.previousElementSibling;clAddItem(${ci},i.value);i.value='';i.focus();"
+            class="shrink-0 text-[11.5px] font-bold text-white bg-accent rounded-md px-2.5 py-1 hover:bg-red-700 transition">추가</button>
+        </div>` : ''}
+      </div>
+    </div>`).join('');
+  /* 공동(마스터) 체크박스의 indeterminate 표시는 JS로만 설정 가능 */
+  list.querySelectorAll('input[data-master]').forEach(m=>{ m.indeterminate = m.dataset.indet === '1'; });
+  clUpdatePeople();
+}
+
+/* 같은 행의 공동(마스터) 체크박스 표시 상태를 4명 기준으로 갱신 (저장 키 없음, 파생) */
+function clSyncMaster(itemId){
+  const checks = clLoadChecks();
+  const done = CL_PEOPLE.filter(p=>checks[clCheckKey(itemId, p.id)]).length;
+  const master = document.querySelector('input[data-master="' + itemId + '"]');
+  if(!master) return;
+  master.checked = done === CL_PEOPLE.length;
+  master.indeterminate = done > 0 && done < CL_PEOPLE.length;
+}
+
+function toggleChecklistItem(itemId, personId, checked){
+  const checks = clLoadChecks();
+  const k = clCheckKey(itemId, personId);
+  if(checked) checks[k] = true; else delete checks[k];
+  clSaveChecks(checks);
+  clSyncMaster(itemId);
+  clUpdatePeople();
+}
+
+/* 공동 체크: 그 항목의 4명 전원을 일괄 체크/해제 (별도 저장 키 없음) */
+function clToggleAll(itemId, checked){
+  const checks = clLoadChecks();
+  CL_PEOPLE.forEach(p=>{
+    const k = clCheckKey(itemId, p.id);
+    if(checked) checks[k] = true; else delete checks[k];
+  });
+  clSaveChecks(checks);
+  /* 같은 행의 개별 체크박스 표시 동기화 */
+  document.querySelectorAll('input[data-item="' + itemId + '"]').forEach(b=>{ b.checked = checked; });
+  const master = document.querySelector('input[data-master="' + itemId + '"]');
+  if(master) master.indeterminate = false;
+  clUpdatePeople();
+}
+
+/* ---- 편집(CRUD) ---- */
+function clToggleEdit(){
+  CL_EDIT = !CL_EDIT;
+  const btn = document.getElementById('cl-edit-btn');
+  if(btn) btn.innerHTML = CL_EDIT ? '✓ 완료' : '✏️ 편집';
+  renderChecklist();
+}
+function clEditItemText(itemId, val){
+  const items = clLoadItems();
+  const t = val.trim();
+  for(const c of items){
+    const it = c.items.find(x=>x.id===itemId);
+    if(it){ if(!t){ clDeleteItem(itemId); return; } it.text = t; break; }
+  }
+  clSaveItems();
+}
+function clAddItem(catIndex, val){
+  const t = (val||'').trim();
+  if(!t) return;
+  const items = clLoadItems();
+  if(!items[catIndex]) return;
+  items[catIndex].items.push({ id: clNewId(), text: t });
+  clSaveItems();
+  renderChecklist();
+}
+function clDeleteItem(itemId){
+  const items = clLoadItems();
+  for(const c of items){
+    const idx = c.items.findIndex(x=>x.id===itemId);
+    if(idx>=0){ c.items.splice(idx,1); break; }
+  }
+  clSaveItems();
+  /* 해당 항목의 체크 상태 정리 */
+  const checks = clLoadChecks();
+  CL_PEOPLE.forEach(p=>{ delete checks[clCheckKey(itemId, p.id)]; });
+  clSaveChecks(checks);
+  renderChecklist();
+}
+
+/* 전체 초기화: 모든 체크만 해제 (항목 보존) */
+function resetChecklist(){
+  clSaveChecks({});
+  renderChecklist();
+}
+/* 기본값 복원: 항목 구조를 시드로 되돌리고 체크도 초기화 */
+function clResetToSeed(){
+  if(!confirm('체크리스트 항목을 기본값으로 되돌립니다.\n추가·수정한 항목과 모든 체크가 초기화됩니다. 계속할까요?')) return;
+  _clItems = clSeedToItems();
+  clSaveItems();
+  clSaveChecks({});
+  renderChecklist();
+}
+
+function openChecklist(e){
+  if(e){ e.stopPropagation(); }
+  renderChecklist();
+  document.getElementById('cl-overlay').classList.remove('hidden');
+}
+function closeChecklist(){
+  document.getElementById('cl-overlay').classList.add('hidden');
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !document.getElementById('cl-overlay').classList.contains('hidden')) closeChecklist();
+});
 function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
 function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
 
