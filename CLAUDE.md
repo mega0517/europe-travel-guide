@@ -34,3 +34,4 @@
 | 2026-06-21 | 여행 준비물 체크리스트 모달(6카테고리 48항목, localStorage 저장·진행률·ESC 닫기) + 제목에 '🎒 준비물' 활성화 버튼(stopPropagation으로 제목 토글과 분리) | index.html | 부부 자동차 여행 준비물 확인 체크리스트 요청 |
 | 2026-06-21 | 체크리스트 4인 개별 체크(이동진·김숙경·김백현·김숙희, 항목별 4체크박스·사람별 진행률) + 항목 CRUD(편집모드: 추가·삭제·이름수정, 안정적 id, 기본값 복원). 구조/체크 localStorage 키 분리(items, checks-v2) | index.html | 4인 개별 선택 + 리스트 추가·삭제 수정 요청 |
 | 2026-06-21 | 체크리스트 항목별 '공동' 체크박스 추가(체크 시 4명 전원 일괄 체크/해제, 파생표시: 전원=checked·일부=indeterminate, 별도 저장키 없음) | index.html | 공동 체크 시 4명 전원 확인 처리 요청 |
+| 2026-06-21 | 체크리스트 Supabase 실시간 동기화 연동(shared_state 단일행 jsonb, postgres_changes 구독, 여러 기기 공유). config(URL/anon key) 비면 localStorage 폴백 100% 유지, 채우면 자동 활성. 에코가드·편집중 input 보존·동기화 배지 | index.html | 변경사항 여러 기기 공유 저장(Supabase) 요청 |

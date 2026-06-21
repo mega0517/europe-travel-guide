@@ -107,6 +107,7 @@
         <div>
           <h2 class="text-[17px] md:text-[19px] font-bold tracking-tight flex items-center gap-2">🎒 여행 준비물 체크리스트</h2>
           <p class="text-white/60 text-[11.5px] mt-0.5">이동진 · 김숙경 · 김백현 · 김숙희 · 4인 · 7박 8일 중부유럽</p>
+          <span id="cl-sync-badge" class="inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5">이 기기에 저장</span>
         </div>
         <button type="button" onclick="closeChecklist()" title="닫기"
           class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[20px] leading-none transition">×</button>
@@ -130,6 +131,8 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Supabase (실시간 체크리스트 동기화 — config 비면 미사용, 로컬 폴백) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ===== 임베드 데이터 (Phase1·2 산출물) ===== */
 const ROUTE = {
@@ -1500,6 +1503,142 @@ let CL_EDIT = false;                              /* 편집 모드 */
 let _clItems = null;                              /* 메모리 캐시 (구조) */
 let _clIdSeq = 0;                                 /* 항목 id 카운터 */
 
+/* ===== Supabase 실시간 동기화 (선택) ===== */
+/* Supabase 실시간 동기화 — 콘솔에서 발급한 값으로 채우면 자동 활성. 비우면 이 기기 localStorage만 사용 */
+const CL_SUPABASE_URL = "https://ehwhvritnhffujvyfcod.supabase.co";        // 예: https://xxxx.supabase.co
+const CL_SUPABASE_ANON_KEY = "sb_publishable_Jx-Hll2OSd4iii5fO5Ca5g_OR4OJH0D";   // anon public key
+const CL_SYNC_ID = 'eurotrip2026'; // shared_state row id
+
+const clCloud = {
+  on: false,          /* 클라우드 활성(초기화 성공) 여부 */
+  connected: false,   /* 실시간 채널 구독 성공 여부 */
+  sb: null,           /* Supabase 클라이언트 인스턴스 */
+  channel: null,      /* realtime 채널 */
+  writing: false      /* 에코 루프 방지: 자기 쓰기 중 플래그 */
+};
+
+/* config 유효성: URL 과 ANON_KEY 둘 다 채워져 있어야 활성 */
+function clCloudEnabled(){
+  return !!(CL_SUPABASE_URL && CL_SUPABASE_ANON_KEY);
+}
+
+/* 초기화 — 실패/미설정 시 조용히 로컬 폴백 */
+function clCloudInit(){
+  if(clCloud.on) return true;
+  if(!clCloudEnabled()) return false;
+  if(typeof window === 'undefined' || !window.supabase || !window.supabase.createClient) return false;
+  try {
+    clCloud.sb = window.supabase.createClient(CL_SUPABASE_URL, CL_SUPABASE_ANON_KEY);
+    clCloud.on = true;
+    return true;
+  } catch(e){
+    clCloud.on = false;
+    return false;
+  }
+}
+
+/* 클라우드로 쓰기 (활성일 때만). which: 'items' | 'checks' — 바뀐 컬럼만 upsert */
+function clCloudPush(which, value){
+  if(!clCloud.on || !clCloud.sb) return;
+  try {
+    clCloud.writing = true;
+    const row = { id: CL_SYNC_ID, updated_at: new Date().toISOString() };
+    row[which] = value;
+    clCloud.sb.from('shared_state').upsert(row)
+      .then(()=>{ clCloud.writing = false; }, ()=>{ clCloud.writing = false; });
+  } catch(e){ clCloud.writing = false; }
+}
+
+/* 활성 input(편집 중 항목명/추가칸)에 포커스가 있으면 리렌더 보류 */
+function clIsEditingFocused(){
+  const a = document.activeElement;
+  return !!(a && a.tagName === 'INPUT' && a.type === 'text' && a.closest && a.closest('#cl-list'));
+}
+
+/* 원격에서 받은 items 적용 (로컬 캐시·스토리지 갱신 + 조건부 리렌더) */
+function clApplyRemoteItems(val){
+  if(!Array.isArray(val) || !val.length) return;
+  const next = JSON.stringify(val);
+  if(next === JSON.stringify(_clItems)) return; /* 동일 값이면 스킵 */
+  _clItems = val;
+  try { localStorage.setItem(CL_ITEMS_KEY, next); } catch(e){}
+  if(clModalOpen() && !clIsEditingFocused()) renderChecklist();
+}
+/* 원격에서 받은 checks 적용 */
+function clApplyRemoteChecks(val){
+  const obj = val || {};
+  const next = JSON.stringify(obj);
+  let cur = '{}';
+  try { cur = localStorage.getItem(CL_CHECKS_KEY) || '{}'; } catch(e){}
+  if(next === cur) return;               /* 동일 값이면 스킵 */
+  try { localStorage.setItem(CL_CHECKS_KEY, next); } catch(e){}
+  if(clModalOpen() && !clIsEditingFocused()) renderChecklist();
+}
+
+/* 실시간 구독 시작 (모달 열릴 때): 초기 1회 select + postgres_changes 구독 */
+function clSubscribe(){
+  if(!clCloud.on || !clCloud.sb) return;
+  if(clCloud.channel) return; /* 중복 구독 방지 */
+
+  /* 초기 1회 현재 상태 로드 */
+  try {
+    clCloud.sb.from('shared_state').select('items,checks').eq('id', CL_SYNC_ID).maybeSingle()
+      .then(res=>{
+        const data = res && res.data;
+        if(!data) return; /* 원격이 비어 있으면 로컬 유지 */
+        if(clCloud.writing) return;
+        if(data.items) clApplyRemoteItems(data.items);
+        if(data.checks) clApplyRemoteChecks(data.checks);
+      }, ()=>{});
+  } catch(e){}
+
+  /* 실시간 변경 구독 */
+  try {
+    clCloud.channel = clCloud.sb.channel('cl-' + CL_SYNC_ID)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'shared_state', filter: 'id=eq.' + CL_SYNC_ID },
+        payload=>{
+          if(clCloud.writing) return;        /* 자기 쓰기 에코 스킵 */
+          const row = payload && payload.new;
+          if(!row) return;
+          if(row.items) clApplyRemoteItems(row.items);
+          if(row.checks) clApplyRemoteChecks(row.checks);
+        })
+      .subscribe(status=>{
+        clCloud.connected = (status === 'SUBSCRIBED');
+        clSyncBadge();
+      });
+  } catch(e){}
+}
+
+/* 구독 해제 (모달 닫을 때) */
+function clUnsubscribe(){
+  if(!clCloud.on || !clCloud.sb) return;
+  try {
+    if(clCloud.channel){
+      clCloud.sb.removeChannel(clCloud.channel);
+      clCloud.channel = null;
+    }
+  } catch(e){}
+  clCloud.connected = false;
+}
+
+/* 동기화 상태 배지 갱신 */
+function clSyncBadge(){
+  const el = document.getElementById('cl-sync-badge');
+  if(!el) return;
+  if(!clCloud.on){
+    el.textContent = '이 기기에 저장';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  } else if(clCloud.connected){
+    el.textContent = '☁︎ 실시간 동기화';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-accent2/25 ring-1 ring-accent2/40 text-white text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  } else {
+    el.textContent = '오프라인(이 기기 저장)';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-amber-300/30 text-amber-200/90 text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  }
+}
+
 /* 고유 id 생성 */
 function clNewId(){
   if(window.crypto && crypto.randomUUID){ return 'it_' + crypto.randomUUID(); }
@@ -1527,11 +1666,11 @@ function clLoadItems(){
   clSaveItems();
   return _clItems;
 }
-function clSaveItems(){ try { localStorage.setItem(CL_ITEMS_KEY, JSON.stringify(_clItems)); } catch(e){} }
+function clSaveItems(){ try { localStorage.setItem(CL_ITEMS_KEY, JSON.stringify(_clItems)); } catch(e){} clCloudPush('items', _clItems); }
 
 /* 체크 상태: { "itemId|personId": true } */
 function clLoadChecks(){ try { return JSON.parse(localStorage.getItem(CL_CHECKS_KEY)) || {}; } catch(e){ return {}; } }
-function clSaveChecks(s){ try { localStorage.setItem(CL_CHECKS_KEY, JSON.stringify(s)); } catch(e){} }
+function clSaveChecks(s){ try { localStorage.setItem(CL_CHECKS_KEY, JSON.stringify(s)); } catch(e){} clCloudPush('checks', s); }
 function clCheckKey(itemId, personId){ return itemId + '|' + personId; }
 
 /* 전체 항목 수 */
@@ -1708,13 +1847,21 @@ function clResetToSeed(){
   renderChecklist();
 }
 
+function clModalOpen(){
+  const o = document.getElementById('cl-overlay');
+  return !!o && !o.classList.contains('hidden');
+}
 function openChecklist(e){
   if(e){ e.stopPropagation(); }
+  clCloudInit();        /* 활성 가능하면 초기화 (실패 시 조용히 로컬 폴백) */
+  clSubscribe();        /* 클라우드 활성일 때만 실제 구독 */
+  clSyncBadge();
   renderChecklist();
   document.getElementById('cl-overlay').classList.remove('hidden');
 }
 function closeChecklist(){
   document.getElementById('cl-overlay').classList.add('hidden');
+  clUnsubscribe();      /* 구독 해제 (비활성이면 no-op) */
 }
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape' && !document.getElementById('cl-overlay').classList.contains('hidden')) closeChecklist();
