@@ -35,3 +35,4 @@
 | 2026-06-21 | 체크리스트 4인 개별 체크(이동진·김숙경·김백현·김숙희, 항목별 4체크박스·사람별 진행률) + 항목 CRUD(편집모드: 추가·삭제·이름수정, 안정적 id, 기본값 복원). 구조/체크 localStorage 키 분리(items, checks-v2) | index.html | 4인 개별 선택 + 리스트 추가·삭제 수정 요청 |
 | 2026-06-21 | 체크리스트 항목별 '공동' 체크박스 추가(체크 시 4명 전원 일괄 체크/해제, 파생표시: 전원=checked·일부=indeterminate, 별도 저장키 없음) | index.html | 공동 체크 시 4명 전원 확인 처리 요청 |
 | 2026-06-21 | 체크리스트 Supabase 실시간 동기화 연동(shared_state 단일행 jsonb, postgres_changes 구독, 여러 기기 공유). config(URL/anon key) 비면 localStorage 폴백 100% 유지, 채우면 자동 활성. 에코가드·편집중 input 보존·동기화 배지 | index.html | 변경사항 여러 기기 공유 저장(Supabase) 요청 |
+| 2026-06-21 | 실시간 자동동기화→수동 저장 방식 전환: 자동 push·postgres_changes 구독 제거, 편집버튼 옆 '저장' 버튼(items+checks upsert)·dirty 추적·미저장 보호(모달 재오픈 시 dirty면 불러오기 스킵)·저장버튼 상태전이 | index.html | 실시간 말고 저장 버튼으로 저장 요청 |
