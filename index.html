@@ -1249,7 +1249,8 @@ function selectStop(id){
     const aurl = airbnbUrl(city, s.country, ci, co);
     const cards = airbnbCards(city, s.country, p.airbnb, ci, co);
     html += sec(`🏠 에어비앤비 · 4인 (${fmtDay(ci)}~${fmtDay(co)})`, cards.length,
-      `<div>${expandableList(cards, id+'-a', 3, 3)}</div>`
+      wishlistGuide(city, id)
+      + `<div>${expandableList(cards, id+'-a', 3, 3)}</div>`
       + `<a href="${aurl}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
       'text-rose-700');
   }
@@ -1304,6 +1305,67 @@ function airbnbUrlQ(query,checkin,checkout){
 }
 function airbnbUrl(city,country,checkin,checkout){
   return airbnbUrlQ(`${city} ${country}`,checkin,checkout);
+}
+/* 도시별 에어비앤비 위시리스트 ID(숙박지 stop id → Airbnb wishlist id).
+   각 리스트에 해당 도시·숙박일 기준 4인 숙소 10곳을 미리 저장해 둠. */
+const AB_WISHLIST = {
+  salzburg:   '2096235451',
+  feldkirch:  '2096236961',
+  lucerne:    '2096237346',
+  interlaken: '2096237730',
+  milan:      '2096238086',
+  bled:       '2096238451'
+};
+/* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
+   해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
+const AB_WISHLIST_SHARE = {
+  salzburg:   'https://www.airbnb.co.kr/wishlists/invite/f3024878-7a15-4724-8ff0-7394bd752ff7?s=67&unique_share_id=82cae9ee-bb96-4190-ad94-2eff9fca3b26',
+  feldkirch:  'https://www.airbnb.co.kr/wishlists/invite/f732eb10-6fe1-45dd-889f-afa8a368b5ba?s=67&unique_share_id=df0ffb50-d53b-447a-8c24-f672f46d87e0',
+  lucerne:    'https://www.airbnb.co.kr/wishlists/invite/489b8185-7b65-4121-bbac-fc5f93e61751?s=67&unique_share_id=5f0ceb7b-6919-4d87-b197-9b77ff58fd06',
+  interlaken: 'https://www.airbnb.co.kr/wishlists/invite/94768887-5db7-4940-b3e3-314bc96d85e8?s=67&unique_share_id=bd4aca03-8ed4-4302-8f4e-85c848598f75',
+  milan:      'https://www.airbnb.co.kr/wishlists/invite/1ac76185-0d6e-475a-8b3a-74483ac6a451?s=67&unique_share_id=da6a3a51-a9e9-40f0-be59-b6a333515681',
+  bled:       'https://www.airbnb.co.kr/wishlists/invite/45ecd7a9-62b3-428a-9f26-47ebe0d8fa57?s=67&unique_share_id=8d6c0741-7509-4d57-8524-f5d8f61eddfb'
+};
+/* 도시별 위시리스트 안내/링크:
+   1) 공동 편집 초대 링크가 있으면 → '함께 편집하기'(누구나 참여해 숙소 추가 가능)
+   2) 없으면 미리 만들어둔 위시리스트 직링크(본인 열람용)
+   3) 둘 다 없으면 직접 만들도록 안내(폴백) */
+function wishlistGuide(city, id){
+  const share = AB_WISHLIST_SHARE[id];
+  const wid = AB_WISHLIST[id];
+  if(share){
+    return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[11.5px] font-bold text-rose-700">🤝 ${city} 공동 위시리스트 · 10곳</span>
+        <a href="${share}" target="_blank" rel="noopener"
+           class="text-[11px] font-semibold text-white bg-rose-500 px-2.5 py-1 rounded hover:bg-rose-600 transition">함께 편집하기 →</a>
+      </div>
+      <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
+        ${city} 숙박일 기준 4인 숙소 10곳을 미리 담아둔 <b>공동 편집</b> 위시리스트입니다. 위 버튼을 누르면 각자 에어비앤비에 로그인해 참여하고, 함께 숙소를 추가·삭제할 수 있어요.</div>
+    </div>`;
+  }
+  if(wid){
+    const wl=`https://www.airbnb.com/wishlists/${wid}`;
+    return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[11.5px] font-bold text-rose-700">🤍 ${city} 위시리스트 · 10곳</span>
+        <a href="${wl}" target="_blank" rel="noopener"
+           class="text-[11px] font-semibold text-white bg-rose-500 px-2.5 py-1 rounded hover:bg-rose-600 transition">위시리스트 열기 →</a>
+      </div>
+      <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
+        ${city} 숙박일 기준 4인 숙소 10곳을 미리 담아둔 위시리스트입니다. 위 버튼으로 에어비앤비에서 바로 확인·예약하세요.</div>
+    </div>`;
+  }
+  const wl='https://www.airbnb.com/wishlists';
+  return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11.5px] font-bold text-rose-700">🤍 ${city} 위시리스트</span>
+      <a href="${wl}" target="_blank" rel="noopener"
+         class="text-[11px] font-semibold text-rose-600 border border-rose-300 bg-white px-2 py-0.5 rounded hover:bg-rose-100 transition">위시리스트 열기 →</a>
+    </div>
+    <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
+      아래 숙소 이름(🏠)을 눌러 에어비앤비에서 연 뒤 ♡를 누르고 <b>새 위시리스트 "${city}"</b>를 만들어 저장하세요. 이후 같은 도시 숙소는 그 리스트에 모입니다.</div>
+  </div>`;
 }
 /* 에어비앤비 20곳+ 카드 생성: 큐레이션 우선 + 지역×유형 조합으로 확장(각 카드는 지역 스코프 검색 링크) */
 const AB_TYPES=[['스튜디오','€'],['1베드룸 아파트','€'],['2베드룸 아파트','€€'],['3베드룸 하우스','€€€'],['로프트','€€'],['펜트하우스','€€€'],['타운하우스','€€'],['게스트 스위트','€'],['패밀리 아파트','€€'],['듀플렉스','€€€']];

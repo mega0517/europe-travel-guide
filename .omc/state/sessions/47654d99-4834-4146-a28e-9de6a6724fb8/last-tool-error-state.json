@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && node /tmp/ab_share.mjs 2>&1\",\"timeout\":180000,\"description\":\"Retry share link generation\"}",
+  "error": "Exit code 1\nnode:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\n[TypeError: fetch failed] {\n  [cause]: AggregateError [ECONNREFUSED]: \n      at internalConnectMultiple (node:net:1193:18)\n      at afterConnectMultiple (node:net:1783:7) {\n    code: 'ECONNREFUSED',\n    [errors]: [\n      Error: connect ECONNREFUSED ::1:53856\n          at createConnectionError (node:net:1746:14)\n          at afterConnectMultiple (node:net:1776:16) {\n        errno: -61,\n        code: 'ECONNREFUSED'...",
+  "timestamp": "2026-06-21T09:56:10.948Z",
+  "retry_count": 1
+}

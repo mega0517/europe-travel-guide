@@ -36,3 +36,4 @@
 | 2026-06-21 | 체크리스트 항목별 '공동' 체크박스 추가(체크 시 4명 전원 일괄 체크/해제, 파생표시: 전원=checked·일부=indeterminate, 별도 저장키 없음) | index.html | 공동 체크 시 4명 전원 확인 처리 요청 |
 | 2026-06-21 | 체크리스트 Supabase 실시간 동기화 연동(shared_state 단일행 jsonb, postgres_changes 구독, 여러 기기 공유). config(URL/anon key) 비면 localStorage 폴백 100% 유지, 채우면 자동 활성. 에코가드·편집중 input 보존·동기화 배지 | index.html | 변경사항 여러 기기 공유 저장(Supabase) 요청 |
 | 2026-06-21 | 실시간 자동동기화→수동 저장 방식 전환: 자동 push·postgres_changes 구독 제거, 편집버튼 옆 '저장' 버튼(items+checks upsert)·dirty 추적·미저장 보호(모달 재오픈 시 dirty면 불러오기 스킵)·저장버튼 상태전이 | index.html | 실시간 말고 저장 버튼으로 저장 요청 |
+| 2026-06-21 | 에어비앤비 도시별 위시리스트 자동 생성·저장(cheliped 브라우저 자동화, 로그인 세션): 6개 숙박지(잘츠부르크·펠트키르히·루체른·인터라켄·밀라노·블레드) 위시리스트 생성 후 숙박일 기준 4인 숙소 10곳씩 ♡ 저장, 리스트명에 숙박 날짜 표기. 각 도시 에어비앤비 섹션에 위시리스트 직링크 추가(AB_WISHLIST id 맵, wishlistGuide(city,id)) | index.html, (Airbnb 계정) | 도시별 위시리스트 자동 저장 + 가이드 직링크 요청 |
