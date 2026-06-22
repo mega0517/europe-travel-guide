@@ -141,36 +141,27 @@ const ROUTE = {
   "trip": { "title": "문경자매부부 유럽중부 여행", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 Q8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
   "stops": [
     { "id": "budapest", "name": "부다페스트 (출발)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-06", "type": "start", "nights": 0 },
-    { "id": "hallstatt", "name": "할슈타트", "country": "오스트리아", "lat": 47.5622, "lng": 13.6493, "day": "2026-07-06", "type": "waypoint", "nights": 0 },
     { "id": "salzburg", "name": "잘츠부르크", "country": "오스트리아", "lat": 47.8095, "lng": 13.0550, "day": "2026-07-06", "type": "stay", "nights": 1 },
-    { "id": "feldkirch", "name": "펠트키르히", "country": "오스트리아", "lat": 47.2382, "lng": 9.5985, "day": "2026-07-07", "type": "stay", "nights": 1 },
-    { "id": "lucerne", "name": "루체른", "country": "스위스", "lat": 47.0502, "lng": 8.3093, "day": "2026-07-08", "type": "stay", "nights": 1 },
-    { "id": "jungfraujoch", "name": "융프라우요흐", "country": "스위스", "lat": 46.5474, "lng": 7.9853, "day": "2026-07-09", "type": "waypoint", "nights": 0 },
-    { "id": "interlaken", "name": "인터라켄", "country": "스위스", "lat": 46.6863, "lng": 7.8632, "day": "2026-07-09", "type": "stay", "nights": 1 },
-    { "id": "zermatt", "name": "체르마트 (마터호른)", "country": "스위스", "lat": 46.0207, "lng": 7.7491, "day": "2026-07-10", "type": "waypoint", "nights": 0 },
+    { "id": "interlaken", "name": "인터라켄", "country": "스위스", "lat": 46.6863, "lng": 7.8632, "day": "2026-07-07", "type": "stay", "nights": 3 },
     { "id": "milan", "name": "밀라노", "country": "이탈리아", "lat": 45.4642, "lng": 9.1900, "day": "2026-07-10", "type": "stay", "nights": 2 },
-    { "id": "bled", "name": "블레드 호수", "country": "슬로베니아", "lat": 46.3683, "lng": 14.0931, "day": "2026-07-12", "type": "stay", "nights": 1 },
+    { "id": "piran", "name": "피란", "country": "슬로베니아", "lat": 45.5285, "lng": 13.5683, "day": "2026-07-12", "type": "stay", "nights": 1 },
     { "id": "budapest_end", "name": "부다페스트 (도착)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-13", "type": "end", "nights": 0 }
   ],
   "legs": [
-    { "from": "budapest", "to": "hallstatt", "km": 330, "hours": 3.5, "toll": 12, "tollNote": "헝가리 e-마트리카 + 오스트리아 비네트" },
-    { "from": "hallstatt", "to": "salzburg", "km": 75, "hours": 1.2, "toll": 0, "tollNote": "오스트리아 비네트 적용 구간(추가 없음)" },
-    { "from": "salzburg", "to": "feldkirch", "km": 310, "hours": 3.2, "toll": 11, "tollNote": "아를베르크 터널 통행료" },
-    { "from": "feldkirch", "to": "lucerne", "km": 140, "hours": 1.8, "toll": 43, "tollNote": "스위스 연간 비네트 1회 구매(약 40 CHF)" },
-    { "from": "lucerne", "to": "interlaken", "km": 70, "hours": 1.2, "toll": 0, "tollNote": "스위스 비네트 적용 구간" },
-    { "from": "interlaken", "to": "zermatt", "km": 150, "hours": 2.5, "toll": 28, "tollNote": "뢰치베르크 카트레인(차량 적재 열차)" },
-    { "from": "zermatt", "to": "milan", "km": 230, "hours": 3.2, "toll": 48, "tollNote": "그랜드 생베르나르 터널 + 이탈리아 아우토스트라다" },
-    { "from": "milan", "to": "bled", "km": 500, "hours": 5.0, "toll": 46, "tollNote": "이탈리아 아우토스트라다 + 슬로베니아 비네트" },
-    { "from": "bled", "to": "budapest_end", "km": 460, "hours": 4.5, "toll": 20, "tollNote": "슬로베니아·오스트리아·헝가리 비네트/통행료" }
+    { "from": "budapest", "to": "salzburg", "km": 400, "hours": 4.0, "toll": 14, "tollNote": "헝가리 e-마트리카 + 오스트리아 비네트" },
+    { "from": "salzburg", "to": "interlaken", "km": 565, "hours": 5.5, "toll": 50, "tollNote": "아를베르크 터널 통행료 + 스위스 연간 비네트(약 40 CHF)" },
+    { "from": "interlaken", "to": "milan", "km": 320, "hours": 3.7, "toll": 30, "tollNote": "심플론/고타르 터널 + 이탈리아 아우토스트라다" },
+    { "from": "milan", "to": "piran", "km": 500, "hours": 5.0, "toll": 46, "tollNote": "이탈리아 아우토스트라다 + 슬로베니아 비네트" },
+    { "from": "piran", "to": "budapest_end", "km": 545, "hours": 5.5, "toll": 25, "tollNote": "슬로베니아·오스트리아·헝가리 비네트/통행료" }
   ],
   "fuel": { "consumption": 11, "priceEur": 1.85, "note": "아우디 Q8 가솔린 11L/100km, 유럽 휘발유 약 €1.85/L 추정" },
   "tips": [
     "오스트리아·스위스·슬로베니아는 고속도로 비네트(Vignette) 필수. 스위스는 연간권(40 CHF)만 판매되니 국경 전 구매. 슬로베니아·오스트리아는 전자 비네트(e-vignette) 단기권 구매 가능.",
     "이탈리아 밀라노 도심은 ZTL(Area C) 진입 제한 구역. 호텔 주차장 또는 외곽 주차 후 대중교통 권장. 위반 시 카메라 자동 과태료.",
-    "체르마트는 휘발유 차량 진입 금지. 인근 테쉬(Täsch) 주차장에 차를 두고 셔틀열차로 이동.",
-    "융프라우요흐는 인터라켄/그린델발트에서 산악열차로 오른다. 정상 주차장 없음 — 차는 산기슭에 주차.",
-    "스위스·이탈리아 알프스 구간은 일부 산악 패스/카트레인(Lötschberg 등) 이용 시 시간 단축. 한여름에도 고지대는 방한 준비.",
-    "주차: 잘츠부르크·루체른 구시가는 보행자 구역이라 외곽 P&R 주차 후 도보 권장."
+    "인터라켄 3박은 융프라우요흐·그린델발트·라우터브룬넨·쉴트호른 당일 여행 거점으로 활용. 정상은 산악열차/케이블카로 오르고 차는 산기슭(라우터브룬넨·그린델발트 터미널)에 주차.",
+    "피란 구시가는 차량 진입 제한 구역. 마을 입구 포르나체(Fornače) 또는 아르제(Arze) 대형 주차장에 주차하고 무료 셔틀버스로 구시가 이동.",
+    "스위스·이탈리아 알프스 구간은 한여름에도 고지대가 서늘하니 방한 준비. 슬로베니아 해안(피란)은 여름에 덥고 습하므로 에어컨 숙소 권장.",
+    "주차: 잘츠부르크 구시가는 보행자 구역이라 외곽 P&R 주차 후 도보 권장. 인터라켄·피란도 도심 외곽 주차장 활용."
   ]
 };
 const POI = {
@@ -1008,6 +999,42 @@ const POI = {
       }
     ]
   },
+  "piran": {
+    "hotels": [
+      { "name": "Hotel Piran", "note": "타르티니 광장 옆 해변가 4성, 바다 전망", "price": "€€€", "parking": "인근 공영주차(Arze)" },
+      { "name": "Art Hotel Tartini", "note": "타르티니 광장 정면 부티크 호텔", "price": "€€", "parking": "인근 공영주차" },
+      { "name": "Hotel Barbara Piran Beach", "note": "피에사 해변 가족형 리조트, 수영장", "price": "€€", "parking": "자체 주차장" },
+      { "name": "Max Piran", "note": "구시가의 로맨틱한 소형 호텔(6실)", "price": "€€", "parking": "인근 공영주차" },
+      { "name": "Memento Piran", "note": "항구 인근 모던 부티크", "price": "€€", "parking": "인근 공영주차" },
+      { "name": "PachaMama Pleasant Stay", "note": "구시가 게스트하우스, 가성비", "price": "€", "parking": "인근 공영주차" }
+    ],
+    "restaurants": [
+      { "name": "Pri Mari", "note": "현지인이 사랑하는 지중해·해산물", "price": "€€", "cuisine": "슬로베니아/해산물" },
+      { "name": "Fritolin pri Cantini", "note": "캐주얼 튀김 해산물, 셀프 주문", "price": "€", "cuisine": "해산물" },
+      { "name": "Cantina Klet", "note": "항구 광장 소박한 생선 요리", "price": "€", "cuisine": "해산물" },
+      { "name": "Restaurant Pavel 2", "note": "해변가 생선·조개 모둠", "price": "€€", "cuisine": "해산물" },
+      { "name": "Gostilna Park", "note": "가성비 좋은 현지 가정식", "price": "€", "cuisine": "슬로베니아" },
+      { "name": "Restaurant Neptun", "note": "전통 해산물 노포", "price": "€€", "cuisine": "해산물" }
+    ],
+    "highlights": [
+      "타르티니 광장",
+      "성 게오르기우스 대성당(전망 종탑)",
+      "피란 성벽(파노라마 전망)",
+      "푼타 등대·곶",
+      "세르게이 마셰라 해양박물관",
+      "피에사 해변",
+      "세초블레 염전 자연공원",
+      "포르토로주 리조트(인근)",
+      "타르티니 생가",
+      "미노리트 수도원",
+      "베네치아 하우스(붉은 집)",
+      "피란 항구·마리나"
+    ],
+    "airbnb": [
+      { "name": "타르티니 광장 바다뷰 아파트", "note": "바다 전망 2베드 4인, 인근 주차", "price": "€€", "area": "구시가" },
+      { "name": "피란 구시가 가족 아파트", "note": "4인 2베드, 에어컨·인근 주차", "price": "€€", "area": "구시가" }
+    ]
+  },
   "budapest_end": {
     "restaurants": [
       {
@@ -1307,14 +1334,15 @@ function airbnbUrl(city,country,checkin,checkout){
   return airbnbUrlQ(`${city} ${country}`,checkin,checkout);
 }
 /* 도시별 에어비앤비 위시리스트 ID(숙박지 stop id → Airbnb wishlist id).
-   각 리스트에 해당 도시·숙박일 기준 4인 숙소 10곳을 미리 저장해 둠. */
+   각 리스트에 해당 도시·숙박일 기준 4인 숙소 20곳을 미리 저장해 둠. */
 const AB_WISHLIST = {
   salzburg:   '2096235451',
   feldkirch:  '2096236961',
   lucerne:    '2096237346',
   interlaken: '2096237730',
   milan:      '2096238086',
-  bled:       '2096238451'
+  bled:       '2096238451',
+  piran:      '2097543475'
 };
 /* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
    해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
@@ -1324,7 +1352,8 @@ const AB_WISHLIST_SHARE = {
   lucerne:    'https://www.airbnb.co.kr/wishlists/invite/489b8185-7b65-4121-bbac-fc5f93e61751?s=67&unique_share_id=5f0ceb7b-6919-4d87-b197-9b77ff58fd06',
   interlaken: 'https://www.airbnb.co.kr/wishlists/invite/94768887-5db7-4940-b3e3-314bc96d85e8?s=67&unique_share_id=bd4aca03-8ed4-4302-8f4e-85c848598f75',
   milan:      'https://www.airbnb.co.kr/wishlists/invite/1ac76185-0d6e-475a-8b3a-74483ac6a451?s=67&unique_share_id=da6a3a51-a9e9-40f0-be59-b6a333515681',
-  bled:       'https://www.airbnb.co.kr/wishlists/invite/45ecd7a9-62b3-428a-9f26-47ebe0d8fa57?s=67&unique_share_id=8d6c0741-7509-4d57-8524-f5d8f61eddfb'
+  bled:       'https://www.airbnb.co.kr/wishlists/invite/45ecd7a9-62b3-428a-9f26-47ebe0d8fa57?s=67&unique_share_id=8d6c0741-7509-4d57-8524-f5d8f61eddfb',
+  piran:      'https://www.airbnb.co.kr/wishlists/invite/1136838c-efc5-413e-bf23-2fe954ea2bd5?s=67&unique_share_id=3c2fa6e8-b6b2-4f6c-8bf1-5c841105a1d6'
 };
 /* 도시별 위시리스트 안내/링크:
    1) 공동 편집 초대 링크가 있으면 → '함께 편집하기'(누구나 참여해 숙소 추가 가능)
@@ -1336,24 +1365,24 @@ function wishlistGuide(city, id){
   if(share){
     return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
       <div class="flex items-center justify-between gap-2">
-        <span class="text-[11.5px] font-bold text-rose-700">🤝 ${city} 공동 위시리스트 · 10곳</span>
+        <span class="text-[11.5px] font-bold text-rose-700">🤝 ${city} 공동 위시리스트 · 20곳</span>
         <a href="${share}" target="_blank" rel="noopener"
            class="text-[11px] font-semibold text-white bg-rose-500 px-2.5 py-1 rounded hover:bg-rose-600 transition">함께 편집하기 →</a>
       </div>
       <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
-        ${city} 숙박일 기준 4인 숙소 10곳을 미리 담아둔 <b>공동 편집</b> 위시리스트입니다. 위 버튼을 누르면 각자 에어비앤비에 로그인해 참여하고, 함께 숙소를 추가·삭제할 수 있어요.</div>
+        ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 <b>공동 편집</b> 위시리스트입니다. 위 버튼을 누르면 각자 에어비앤비에 로그인해 참여하고, 함께 숙소를 추가·삭제할 수 있어요.</div>
     </div>`;
   }
   if(wid){
     const wl=`https://www.airbnb.com/wishlists/${wid}`;
     return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
       <div class="flex items-center justify-between gap-2">
-        <span class="text-[11.5px] font-bold text-rose-700">🤍 ${city} 위시리스트 · 10곳</span>
+        <span class="text-[11.5px] font-bold text-rose-700">🤍 ${city} 위시리스트 · 20곳</span>
         <a href="${wl}" target="_blank" rel="noopener"
            class="text-[11px] font-semibold text-white bg-rose-500 px-2.5 py-1 rounded hover:bg-rose-600 transition">위시리스트 열기 →</a>
       </div>
       <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
-        ${city} 숙박일 기준 4인 숙소 10곳을 미리 담아둔 위시리스트입니다. 위 버튼으로 에어비앤비에서 바로 확인·예약하세요.</div>
+        ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 위시리스트입니다. 위 버튼으로 에어비앤비에서 바로 확인·예약하세요.</div>
     </div>`;
   }
   const wl='https://www.airbnb.com/wishlists';
