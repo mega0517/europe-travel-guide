@@ -264,6 +264,13 @@ const POI = {
   "salzburg": {
     "hotels": [
       {
+        "name": "Leonardo Hotel Salzburg City Center",
+        "note": "예약 확정 숙소 — 구시가·중앙역 인근 4성, 자가용 접근 편리",
+        "price": "€€",
+        "parking": "자체 주차장(유료)",
+        "confirmed": true
+      },
+      {
         "name": "Hotel Sacher Salzburg",
         "note": "잘자흐 강변 5성 클래식 호텔",
         "price": "€€€",
@@ -1268,7 +1275,7 @@ function selectStop(id){
 
   if(p.hotels && p.hotels.length){
     const hci = s.day, hco = addDays(s.day, s.nights||1);
-    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.parking?`🅿 ${h.parking}`:''], gmaps(h.name, city, s.country), 'hotel', bookingBtn(h.name, city, s.country, hci, hco)));
+    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.confirmed?'✅ 예약 확정':'', h.parking?`🅿 ${h.parking}`:''].filter(Boolean), gmaps(h.name, city, s.country), h.confirmed?'hotel-confirmed':'hotel', bookingBtn(h.name, city, s.country, hci, hco)));
     html += sec(`🏨 추천 숙소 · 호텔 (${fmtDay(hci)}~${fmtDay(hco)})`, p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
   }
   if(p.airbnb && p.airbnb.length){
@@ -1314,6 +1321,7 @@ function sec(t,cnt,inner,hc){
 /* 카드 유형별 색상(좌측 보더+호버) */
 const CARD_THEME = {
   hotel:  'border-l-sky-400 bg-sky-50/40 hover:bg-sky-50',
+  'hotel-confirmed': 'border-l-emerald-500 bg-emerald-50/60 hover:bg-emerald-50 ring-1 ring-emerald-200',
   food:   'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50',
   airbnb: 'border-l-rose-400 bg-rose-50/40 hover:bg-rose-50'
 };
