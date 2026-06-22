@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1782000672353,
-  "projectRoot": "/Users/skywalker/MyClaude/europe-travel",
+  "lastScanned": 1782094961452,
+  "projectRoot": "/Users/bhkim/MyClaude/europe-travel-guide",
   "techStack": {
     "languages": [],
     "frameworks": [],
@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && npm install >/dev/null 2>&1 && npm run build >/dev/null 2>&1 && echo \"build done\"",
+    "buildCommand": null,
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -32,34 +32,21 @@
   },
   "customNotes": [],
   "directoryMap": {
-    "_workspace": {
-      "path": "_workspace",
-      "purpose": null,
-      "fileCount": 4,
-      "lastAccessed": 1782000672338,
-      "keyFiles": [
-        "01_route.json",
-        "02_poi.json",
-        "03_qa_report.md",
-        "04_city_tips.json"
-      ]
-    },
     "backend": {
       "path": "backend",
       "purpose": null,
-      "fileCount": 6,
-      "lastAccessed": 1782000672338,
+      "fileCount": 3,
+      "lastAccessed": 1782094961394,
       "keyFiles": [
         "README.md",
-        "europe.db",
         "requirements.txt"
       ]
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
-      "fileCount": 11,
-      "lastAccessed": 1782000672339,
+      "fileCount": 10,
+      "lastAccessed": 1782094961413,
       "keyFiles": [
         "README.md",
         "eslint.config.js",
@@ -71,40 +58,44 @@
     "backend/app": {
       "path": "backend/app",
       "purpose": "Application code",
-      "fileCount": 8,
-      "lastAccessed": 1782000672340,
+      "fileCount": 6,
+      "lastAccessed": 1782094961426,
       "keyFiles": [
         "__init__.py",
-        "__init__.pyc",
-        "config.py"
+        "config.py",
+        "logging_conf.py"
       ]
     },
-    "frontend/dist": {
-      "path": "frontend/dist",
-      "purpose": "Distribution/build output",
+    "backend/tests": {
+      "path": "backend/tests",
+      "purpose": "Test files",
       "fileCount": 3,
-      "lastAccessed": 1782000672340,
+      "lastAccessed": 1782094961427,
       "keyFiles": [
-        "favicon.svg",
-        "icons.svg",
-        "index.html"
+        "conftest.py",
+        "test_e2e.py",
+        "test_resolver.py"
       ]
-    },
-    "frontend/node_modules": {
-      "path": "frontend/node_modules",
-      "purpose": "Dependencies",
-      "fileCount": 2,
-      "lastAccessed": 1782000672345,
-      "keyFiles": []
     },
     "frontend/public": {
       "path": "frontend/public",
       "purpose": "Public files",
       "fileCount": 2,
-      "lastAccessed": 1782000672346,
+      "lastAccessed": 1782094961427,
       "keyFiles": [
         "favicon.svg",
         "icons.svg"
+      ]
+    },
+    "frontend/src": {
+      "path": "frontend/src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1782094961429,
+      "keyFiles": [
+        "App.tsx",
+        "index.css",
+        "main.tsx"
       ]
     }
   },
