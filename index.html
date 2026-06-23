@@ -1370,6 +1370,11 @@ const AB_WISHLIST = {
   bled:       '2096238451',
   piran:      '2097543475'
 };
+/* 도시별 숙소 비교·리뷰 분석 보고서(개별 숙소 가격·평점·리뷰·정렬). 값이 있으면 보고서 버튼 노출 */
+const AB_REPORT = {
+  interlaken: 'interlaken-report.html',
+  milan:      'milan-report.html'
+};
 /* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
    해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
 const AB_WISHLIST_SHARE = {
@@ -1385,6 +1390,12 @@ const AB_WISHLIST_SHARE = {
    1) 공동 편집 초대 링크가 있으면 → '함께 편집하기'(누구나 참여해 숙소 추가 가능)
    2) 없으면 미리 만들어둔 위시리스트 직링크(본인 열람용)
    3) 둘 다 없으면 직접 만들도록 안내(폴백) */
+function reportBtn(city, id){
+  const rep = AB_REPORT[id];
+  if(!rep) return '';
+  return `<a href="${rep}" target="_blank" rel="noopener"
+     class="block text-center text-[11.5px] font-semibold text-teal-700 border border-teal-200 bg-teal-50 rounded-lg py-1.5 mt-1.5 hover:bg-teal-100 transition">📊 ${city} 숙소 비교·리뷰 분석 보고서 (가격·평점·정렬) →</a>`;
+}
 function wishlistGuide(city, id){
   const share = AB_WISHLIST_SHARE[id];
   const wid = AB_WISHLIST[id];
@@ -1397,6 +1408,7 @@ function wishlistGuide(city, id){
       </div>
       <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
         ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 <b>공동 편집</b> 위시리스트입니다. 위 버튼을 누르면 각자 에어비앤비에 로그인해 참여하고, 함께 숙소를 추가·삭제할 수 있어요.</div>
+      ${reportBtn(city, id)}
     </div>`;
   }
   if(wid){
