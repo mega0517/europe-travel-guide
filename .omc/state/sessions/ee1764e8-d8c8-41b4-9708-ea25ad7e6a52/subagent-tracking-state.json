@@ -8,10 +8,19 @@
       "status": "completed",
       "completed_at": "2026-06-24T14:15:41.000Z",
       "duration_ms": 596353
+    },
+    {
+      "agent_id": "a098ac5b7d96ef67a",
+      "agent_type": "airbnb-reviewer",
+      "started_at": "2026-06-24T14:56:49.881Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-24T15:08:13.987Z",
+      "duration_ms": 684106
     }
   ],
-  "total_spawned": 1,
-  "total_completed": 1,
+  "total_spawned": 2,
+  "total_completed": 2,
   "total_failed": 0,
-  "last_updated": "2026-06-24T14:15:41.101Z"
+  "last_updated": "2026-06-24T15:08:14.090Z"
 }

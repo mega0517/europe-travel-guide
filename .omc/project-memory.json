@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && npm install >/dev/null 2>&1 && npm run build >/dev/null 2>&1 && echo done",
+    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && ls dist 2>/dev/null && echo BUILT || (npm install && npm run build)",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -112,8 +112,8 @@
   "hotPaths": [
     {
       "path": "index.html",
-      "accessCount": 57,
-      "lastAccessed": 1782284569883,
+      "accessCount": 60,
+      "lastAccessed": 1782312598144,
       "type": "file"
     },
     {
@@ -124,8 +124,8 @@
     },
     {
       "path": "_workspace/03_airbnb-reviewer_data.json",
-      "accessCount": 10,
-      "lastAccessed": 1782309948607,
+      "accessCount": 11,
+      "lastAccessed": 1782313015750,
       "type": "file"
     },
     {
@@ -142,8 +142,8 @@
     },
     {
       "path": "밀라노_숙소_단점_리뷰.md",
-      "accessCount": 3,
-      "lastAccessed": 1782311411061,
+      "accessCount": 4,
+      "lastAccessed": 1782313020330,
       "type": "file"
     },
     {
@@ -204,6 +204,12 @@
       "path": "travel-guide-report.html",
       "accessCount": 1,
       "lastAccessed": 1782230250355,
+      "type": "file"
+    },
+    {
+      "path": "밀라노_숙소_단점_리뷰.html",
+      "accessCount": 1,
+      "lastAccessed": 1782313021130,
       "type": "file"
     }
   ],

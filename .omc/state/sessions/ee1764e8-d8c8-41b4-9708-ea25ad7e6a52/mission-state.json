@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-24T14:15:41.000Z",
+  "updatedAt": "2026-06-24T15:08:13.987Z",
   "missions": [
     {
       "id": "session:ee1764e8-d8c8-41b4-9708-ea25ad7e6a52:none",
@@ -7,15 +7,15 @@
       "name": "none",
       "objective": "Session mission",
       "createdAt": "2026-06-24T14:05:44.647Z",
-      "updatedAt": "2026-06-24T14:15:41.000Z",
+      "updatedAt": "2026-06-24T15:08:13.987Z",
       "status": "done",
-      "workerCount": 1,
+      "workerCount": 2,
       "taskCounts": {
-        "total": 1,
+        "total": 2,
         "pending": 0,
         "blocked": 0,
         "inProgress": 0,
-        "completed": 1,
+        "completed": 2,
         "failed": 0
       },
       "agents": [
@@ -28,6 +28,16 @@
           "latestUpdate": "completed",
           "completedSummary": null,
           "updatedAt": "2026-06-24T14:15:41.000Z"
+        },
+        {
+          "name": "airbnb-reviewer:a098ac5",
+          "role": "airbnb-reviewer",
+          "ownership": "a098ac5b7d96ef67a",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-06-24T15:08:13.987Z"
         }
       ],
       "timeline": [
@@ -46,6 +56,22 @@
           "agent": "airbnb-reviewer:a7f0b4e",
           "detail": "completed",
           "sourceKey": "session-stop:a7f0b4e461fd2669d"
+        },
+        {
+          "id": "session-start:a098ac5b7d96ef67a:2026-06-24T14:56:49.881Z",
+          "at": "2026-06-24T14:56:49.881Z",
+          "kind": "update",
+          "agent": "airbnb-reviewer:a098ac5",
+          "detail": "started airbnb-reviewer:a098ac5",
+          "sourceKey": "session-start:a098ac5b7d96ef67a"
+        },
+        {
+          "id": "session-stop:a098ac5b7d96ef67a:2026-06-24T15:08:13.987Z",
+          "at": "2026-06-24T15:08:13.987Z",
+          "kind": "completion",
+          "agent": "airbnb-reviewer:a098ac5",
+          "detail": "completed",
+          "sourceKey": "session-stop:a098ac5b7d96ef67a"
         }
       ]
     }
