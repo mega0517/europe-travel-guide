@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git log --oneline -3; echo \\\"=== tracked? ===\\\"; git ls-files | grep -i 밀라노; echo \\\"=== check ignore ===\\\"; git check-ignore \\\"밀라노_숙소_단점_리뷰.html\\\" milan-report.html\",\"description\":\"Check l...",
+  "error": "Exit code 1\n724e83a Add detailed review summary for recommended Airbnb listings in Milan\n315a552 빌드 명령어 추가 및 파일 접근 기록 업데이트\n252ea56 밀라노 ZTL(Area C) 재점검: 위시리스트 20곳 ZTL 안/밖 분류 + 가이드 안내 반영\n=== tracked? ===\n=== check ignore ===",
+  "timestamp": "2026-06-24T14:42:23.544Z",
+  "retry_count": 1
+}
