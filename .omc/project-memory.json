@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && (npm run build 2>&1 | tail -3) ; node cheliped-cli.mjs '[{\"cmd\":\"goto\",\"args\":[\"https://www.airbnb.com/wishlists/2096238086?locale=en\"]},{\"cmd\":\"run-js\",\"args\":[\"document.title\"]}]' 2>&1 | head -40",
+    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && npm install >/dev/null 2>&1 && npm run build >/dev/null 2>&1 && echo done",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -123,15 +123,15 @@
       "type": "file"
     },
     {
-      "path": "숙소_검토_보고서.md",
-      "accessCount": 9,
-      "lastAccessed": 1782284465271,
+      "path": "_workspace/03_airbnb-reviewer_data.json",
+      "accessCount": 10,
+      "lastAccessed": 1782309948607,
       "type": "file"
     },
     {
-      "path": "_workspace/03_airbnb-reviewer_data.json",
-      "accessCount": 8,
-      "lastAccessed": 1782284372116,
+      "path": "숙소_검토_보고서.md",
+      "accessCount": 9,
+      "lastAccessed": 1782284465271,
       "type": "file"
     },
     {
@@ -141,9 +141,21 @@
       "type": "file"
     },
     {
+      "path": "밀라노_숙소_단점_리뷰.md",
+      "accessCount": 3,
+      "lastAccessed": 1782311411061,
+      "type": "file"
+    },
+    {
       "path": "_workspace/01_airbnb-reviewer_data.json",
       "accessCount": 2,
       "lastAccessed": 1782282101444,
+      "type": "file"
+    },
+    {
+      "path": "milan-report.html",
+      "accessCount": 2,
+      "lastAccessed": 1782311885558,
       "type": "file"
     },
     {

@@ -1,0 +1,17 @@
+{
+  "agents": [
+    {
+      "agent_id": "a7f0b4e461fd2669d",
+      "agent_type": "airbnb-reviewer",
+      "started_at": "2026-06-24T14:05:44.647Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-24T14:15:41.000Z",
+      "duration_ms": 596353
+    }
+  ],
+  "total_spawned": 1,
+  "total_completed": 1,
+  "total_failed": 0,
+  "last_updated": "2026-06-24T14:15:41.101Z"
+}

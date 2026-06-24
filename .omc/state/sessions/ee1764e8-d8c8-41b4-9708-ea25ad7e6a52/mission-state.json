@@ -1,0 +1,53 @@
+{
+  "updatedAt": "2026-06-24T14:15:41.000Z",
+  "missions": [
+    {
+      "id": "session:ee1764e8-d8c8-41b4-9708-ea25ad7e6a52:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-06-24T14:05:44.647Z",
+      "updatedAt": "2026-06-24T14:15:41.000Z",
+      "status": "done",
+      "workerCount": 1,
+      "taskCounts": {
+        "total": 1,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 0,
+        "completed": 1,
+        "failed": 0
+      },
+      "agents": [
+        {
+          "name": "airbnb-reviewer:a7f0b4e",
+          "role": "airbnb-reviewer",
+          "ownership": "a7f0b4e461fd2669d",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-06-24T14:15:41.000Z"
+        }
+      ],
+      "timeline": [
+        {
+          "id": "session-start:a7f0b4e461fd2669d:2026-06-24T14:05:44.647Z",
+          "at": "2026-06-24T14:05:44.647Z",
+          "kind": "update",
+          "agent": "airbnb-reviewer:a7f0b4e",
+          "detail": "started airbnb-reviewer:a7f0b4e",
+          "sourceKey": "session-start:a7f0b4e461fd2669d"
+        },
+        {
+          "id": "session-stop:a7f0b4e461fd2669d:2026-06-24T14:15:41.000Z",
+          "at": "2026-06-24T14:15:41.000Z",
+          "kind": "completion",
+          "agent": "airbnb-reviewer:a7f0b4e",
+          "detail": "completed",
+          "sourceKey": "session-stop:a7f0b4e461fd2669d"
+        }
+      ]
+    }
+  ]
+}
