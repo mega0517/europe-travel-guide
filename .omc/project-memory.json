@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1782094961452,
+  "lastScanned": 1782230795113,
   "projectRoot": "/Users/bhkim/MyClaude/europe-travel-guide",
   "techStack": {
     "languages": [],
@@ -32,11 +32,21 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "_workspace": {
+      "path": "_workspace",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1782230795066,
+      "keyFiles": [
+        "01_airbnb-reviewer_data.json",
+        "02_travel-guide-reporter_outline.md"
+      ]
+    },
     "backend": {
       "path": "backend",
       "purpose": null,
-      "fileCount": 3,
-      "lastAccessed": 1782094961394,
+      "fileCount": 4,
+      "lastAccessed": 1782230795066,
       "keyFiles": [
         "README.md",
         "requirements.txt"
@@ -45,8 +55,8 @@
     "frontend": {
       "path": "frontend",
       "purpose": null,
-      "fileCount": 10,
-      "lastAccessed": 1782094961413,
+      "fileCount": 11,
+      "lastAccessed": 1782230795066,
       "keyFiles": [
         "README.md",
         "eslint.config.js",
@@ -59,7 +69,7 @@
       "path": "backend/app",
       "purpose": "Application code",
       "fileCount": 6,
-      "lastAccessed": 1782094961426,
+      "lastAccessed": 1782230795067,
       "keyFiles": [
         "__init__.py",
         "config.py",
@@ -70,7 +80,7 @@
       "path": "backend/tests",
       "purpose": "Test files",
       "fileCount": 3,
-      "lastAccessed": 1782094961427,
+      "lastAccessed": 1782230795067,
       "keyFiles": [
         "conftest.py",
         "test_e2e.py",
@@ -81,7 +91,7 @@
       "path": "frontend/public",
       "purpose": "Public files",
       "fileCount": 2,
-      "lastAccessed": 1782094961427,
+      "lastAccessed": 1782230795067,
       "keyFiles": [
         "favicon.svg",
         "icons.svg"
@@ -91,7 +101,7 @@
       "path": "frontend/src",
       "purpose": "Source code",
       "fileCount": 3,
-      "lastAccessed": 1782094961429,
+      "lastAccessed": 1782230795067,
       "keyFiles": [
         "App.tsx",
         "index.css",
@@ -102,14 +112,80 @@
   "hotPaths": [
     {
       "path": "index.html",
-      "accessCount": 33,
-      "lastAccessed": 1782128247191,
+      "accessCount": 48,
+      "lastAccessed": 1782230330129,
       "type": "file"
     },
     {
       "path": "CLAUDE.md",
-      "accessCount": 8,
-      "lastAccessed": 1782130927836,
+      "accessCount": 14,
+      "lastAccessed": 1782222130911,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/europe-trip-orchestrator/SKILL.md",
+      "accessCount": 7,
+      "lastAccessed": 1782222074491,
+      "type": "file"
+    },
+    {
+      "path": ".claude/agents/airbnb-reviewer.md",
+      "accessCount": 1,
+      "lastAccessed": 1782139670916,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/airbnb-review-report/SKILL.md",
+      "accessCount": 1,
+      "lastAccessed": 1782139724192,
+      "type": "file"
+    },
+    {
+      "path": "_workspace/01_airbnb-reviewer_data.json",
+      "accessCount": 1,
+      "lastAccessed": 1782139926410,
+      "type": "file"
+    },
+    {
+      "path": "숙소_검토_보고서.md",
+      "accessCount": 1,
+      "lastAccessed": 1782139998174,
+      "type": "file"
+    },
+    {
+      "path": ".claude/agents/travel-guide-reporter.md",
+      "accessCount": 1,
+      "lastAccessed": 1782221980991,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/travel-guide-report/SKILL.md",
+      "accessCount": 1,
+      "lastAccessed": 1782222022035,
+      "type": "file"
+    },
+    {
+      "path": "_workspace/02_travel-guide-reporter_outline.md",
+      "accessCount": 1,
+      "lastAccessed": 1782222215201,
+      "type": "file"
+    },
+    {
+      "path": "여행_가이드_보고서.md",
+      "accessCount": 1,
+      "lastAccessed": 1782222317280,
+      "type": "file"
+    },
+    {
+      "path": "숙소_비교_검토_보고서.html",
+      "accessCount": 1,
+      "lastAccessed": 1782222603781,
+      "type": "file"
+    },
+    {
+      "path": "travel-guide-report.html",
+      "accessCount": 1,
+      "lastAccessed": 1782230250355,
       "type": "file"
     }
   ],

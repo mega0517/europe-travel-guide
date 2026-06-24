@@ -2,7 +2,7 @@
 
 **목표:** 부다페스트 출발 7박8일 중부유럽 자동차 여행을, 좌측 지도+루트 / 우측 클릭형 숙소·식당 추천 패널을 갖춘 단일 HTML 가이드로 구축·갱신한다.
 
-**트리거:** 여행 여정·지도·루트·숙소/식당 추천·가이드 사이트 관련 작업(신규 구축 또는 재실행·수정·일정 변경·도시 추가·추천 교체·디자인 변경) 요청 시 `europe-trip-orchestrator` 스킬을 사용하라. 단순 질문은 직접 응답 가능.
+**트리거:** 여행 여정·지도·루트·숙소/식당 추천·가이드 사이트 관련 작업(신규 구축 또는 재실행·수정·일정 변경·도시 추가·추천 교체·디자인 변경), 추천 숙소(에어비앤비) 검토·평가·검토 보고서 작성, 그리고 해외여행 가이드 보고서·종합 문서 작성 요청 시 `europe-trip-orchestrator` 스킬을 사용하라. 단순 질문은 직접 응답 가능.
 
 **변경 이력:**
 | 날짜 | 변경 내용 | 대상 | 사유 |
@@ -41,3 +41,6 @@
 | 2026-06-22 | 일정 전면 변경: 부다페스트→잘츠부르크(1박)→인터라켄(3박)→밀라노(2박)→피란(1박)→부다페스트. ROUTE.stops/legs/tips 갱신, 피란(슬로베니아) POI 신규 추가, 펠트키르히·루체른·블레드·할슈타트·융프라우·체르마트 경유 제외 | index.html | 방문 도시·일정 수정 요청 |
 | 2026-06-22 | 피란 위시리스트 신규 생성(id 2097543475) + 예약가능 2쌍적합 20개 저장(침실2+에어컨+주방+무료주차, 7/12~7/13). index.html AB_WISHLIST.piran/AB_WISHLIST_SHARE.piran(공동편집 링크) 추가, 위시 표기 10→20곳 | index.html, (Airbnb 계정) | 피란 위시리스트 생성 요청 |
 | 2026-06-22 | 인터라켄 새 날짜(7/7~7/10 3박) 재큐레이션: 예약불가 12곳 제거→예약가능 12곳 백필(검색 144곳), 리스트명 7/9~7/10→7/7~7/10. locale=en 강제로 한국어 계정에서도 영어 aria-label 동작, CDP 새 탭 생성으로 windowless 인스턴스 복구 | (Airbnb 계정) | 인터라켄 재큐레이션 요청 |
+| 2026-06-22 | 잘츠부르크 예약 확정 숙소(Leonardo Hotel Salzburg City Center) 반영: POI 첫 호텔(confirmed)·녹색 확정 배지 카드(hotel-confirmed 테마), 지도에 실제 좌표 녹색 🏨 마커+팝업 | index.html | 확정 숙소 카드·지도 반영 요청 |
+| 2026-06-22 | 하네스 확장: airbnb-reviewer 에이전트 + airbnb-review-report 스킬 추가(추천 숙소를 루브릭으로 검토→검토 보고서). 오케스트레이터에 검토 모드(서브 에이전트) 연동 | .claude/agents/airbnb-reviewer.md, .claude/skills/airbnb-review-report, europe-trip-orchestrator | 추천 에어비앤비 숙소 검토 보고서 요청 |
+| 2026-06-23 | 하네스 확장: travel-guide-reporter 에이전트 + travel-guide-report 스킬 추가(여정·도시·숙소·운전·예산·팁을 묶은 읽기용 가이드 보고서). 오케스트레이터에 가이드 보고서 모드(서브 에이전트) 연동 | .claude/agents/travel-guide-reporter.md, .claude/skills/travel-guide-report, europe-trip-orchestrator | 해외여행 가이드 보고서 작성 요청 |
