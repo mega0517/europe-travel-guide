@@ -1390,6 +1390,22 @@ const AB_WISHLIST_SHARE = {
   bled:       'https://www.airbnb.co.kr/wishlists/invite/45ecd7a9-62b3-428a-9f26-47ebe0d8fa57?s=67&unique_share_id=8d6c0741-7509-4d57-8524-f5d8f61eddfb',
   piran:      'https://www.airbnb.co.kr/wishlists/invite/1136838c-efc5-413e-bf23-2fe954ea2bd5?s=67&unique_share_id=3c2fa6e8-b6b2-4f6c-8bf1-5c841105a1d6'
 };
+
+/* 도시별 숙소 선택 주의 메모(있으면 위시리스트 안내에 노란 박스로 노출).
+   밀라노: 자가용 여행 핵심 — ZTL(Area C) 진입 시 카메라 자동 과태료. ZTL 밖+주차 숙소 우선. */
+const AB_NOTE = {
+  milan: {
+    title: '🚗 ZTL(Area C) 주의 — 자가용은 ZTL 밖 숙소 우선',
+    body: '밀라노 도심 ZTL(Area C)은 카메라 자동 단속(위반 시 ~€80+). 차고가 있어도 진입로가 ZTL 안이면 단속 대상입니다. 위시리스트 20곳을 ZTL 위치로 재점검한 결과 <b>ZTL 밖 15곳·안/경계 4곳</b>. <b>ZTL 밖 + 전용주차/차고 숙소</b>를 권장합니다.',
+    picks: [
+      'Maggiolina · [2min Metro] 차고(폭215cm)·AC·4 beds — 종합 1순위',
+      'Vimodrone · Terrace Apt with garage — 가성비 1순위',
+      'Assago · Park Avenue 3-room(4 beds, 평점 4.99)',
+      'Lotto/Fiera · Private parking, terrace(4 beds)'
+    ],
+    avoid: 'Brera·Porta Venezia(Casa Melzo)·Central pied-à-terre·Obeliscus는 ZTL 안/경계 — 호스트 임시통행권(permesso) 등록 확인 전 비추천.'
+  }
+};
 /* 도시별 위시리스트 안내/링크:
    1) 공동 편집 초대 링크가 있으면 → '함께 편집하기'(누구나 참여해 숙소 추가 가능)
    2) 없으면 미리 만들어둔 위시리스트 직링크(본인 열람용)
@@ -1399,6 +1415,17 @@ function reportBtn(city, id){
   if(!rep) return '';
   return `<a href="${rep}" target="_blank" rel="noopener"
      class="block text-center text-[11.5px] font-semibold text-teal-700 border border-teal-200 bg-teal-50 rounded-lg py-1.5 mt-1.5 hover:bg-teal-100 transition">📊 ${city} 숙소 비교·리뷰 분석 보고서 (가격·평점·정렬) →</a>`;
+}
+function noteBox(id){
+  const n = AB_NOTE[id];
+  if(!n) return '';
+  const picks = (n.picks||[]).map(p=>`<li>${p}</li>`).join('');
+  return `<div class="mb-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2">
+    <div class="text-[11.5px] font-bold text-amber-800">${n.title}</div>
+    <div class="text-[10.8px] text-amber-800/90 mt-1 leading-snug">${n.body}</div>
+    ${picks ? `<ul class="text-[10.6px] text-amber-900/90 mt-1.5 ml-3 list-disc leading-snug">${picks}</ul>` : ''}
+    ${n.avoid ? `<div class="text-[10.6px] text-rose-700 mt-1.5 leading-snug">⚠ ${n.avoid}</div>` : ''}
+  </div>`;
 }
 function wishlistGuide(city, id){
   const share = AB_WISHLIST_SHARE[id];
@@ -1412,6 +1439,7 @@ function wishlistGuide(city, id){
       </div>
       <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
         ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 <b>공동 편집</b> 위시리스트입니다. 위 버튼을 누르면 각자 에어비앤비에 로그인해 참여하고, 함께 숙소를 추가·삭제할 수 있어요.</div>
+      ${noteBox(id)}
       ${reportBtn(city, id)}
     </div>`;
   }
@@ -1425,6 +1453,7 @@ function wishlistGuide(city, id){
       </div>
       <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
         ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 위시리스트입니다. 위 버튼으로 에어비앤비에서 바로 확인·예약하세요.</div>
+      ${noteBox(id)}
     </div>`;
   }
   const wl='https://www.airbnb.com/wishlists';
