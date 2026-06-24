@@ -1379,6 +1379,10 @@ const AB_REPORT = {
   interlaken: 'interlaken-report.html',
   milan:      'milan-report.html'
 };
+/* 도시별 숙소 '단점 리뷰' 보고서(숙소별 단점 10줄·썸네일). 값이 있으면 비교 보고서 옆에 버튼 노출 */
+const AB_DEFECT_REPORT = {
+  milan: '밀라노_숙소_단점_리뷰.html'
+};
 /* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
    해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
 const AB_WISHLIST_SHARE = {
@@ -1412,9 +1416,13 @@ const AB_NOTE = {
    3) 둘 다 없으면 직접 만들도록 안내(폴백) */
 function reportBtn(city, id){
   const rep = AB_REPORT[id];
-  if(!rep) return '';
-  return `<a href="${rep}" target="_blank" rel="noopener"
-     class="block text-center text-[11.5px] font-semibold text-teal-700 border border-teal-200 bg-teal-50 rounded-lg py-1.5 mt-1.5 hover:bg-teal-100 transition">📊 ${city} 숙소 비교·리뷰 분석 보고서 (가격·평점·정렬) →</a>`;
+  const def = AB_DEFECT_REPORT[id];
+  if(!rep && !def) return '';
+  const repBtn = rep ? `<a href="${rep}" target="_blank" rel="noopener"
+     class="block text-center text-[11.5px] font-semibold text-teal-700 border border-teal-200 bg-teal-50 rounded-lg py-1.5 mt-1.5 hover:bg-teal-100 transition">📊 ${city} 숙소 비교·리뷰 분석 보고서 (가격·평점·정렬) →</a>` : '';
+  const defBtn = def ? `<a href="${encodeURI(def)}" target="_blank" rel="noopener"
+     class="block text-center text-[11.5px] font-semibold text-rose-700 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1.5 hover:bg-rose-100 transition">⚠️ ${city} 숙소별 단점 리뷰 보고서 (단점 10줄·썸네일) →</a>` : '';
+  return repBtn + defBtn;
 }
 function noteBox(id){
   const n = AB_NOTE[id];
