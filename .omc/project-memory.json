@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": null,
+    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && (npm run build 2>&1 | tail -3) ; node cheliped-cli.mjs '[{\"cmd\":\"goto\",\"args\":[\"https://www.airbnb.com/wishlists/2096238086?locale=en\"]},{\"cmd\":\"run-js\",\"args\":[\"document.title\"]}]' 2>&1 | head -40",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -112,8 +112,8 @@
   "hotPaths": [
     {
       "path": "index.html",
-      "accessCount": 48,
-      "lastAccessed": 1782230330129,
+      "accessCount": 57,
+      "lastAccessed": 1782284569883,
       "type": "file"
     },
     {
@@ -123,9 +123,27 @@
       "type": "file"
     },
     {
+      "path": "숙소_검토_보고서.md",
+      "accessCount": 9,
+      "lastAccessed": 1782284465271,
+      "type": "file"
+    },
+    {
+      "path": "_workspace/03_airbnb-reviewer_data.json",
+      "accessCount": 8,
+      "lastAccessed": 1782284372116,
+      "type": "file"
+    },
+    {
       "path": ".claude/skills/europe-trip-orchestrator/SKILL.md",
       "accessCount": 7,
       "lastAccessed": 1782222074491,
+      "type": "file"
+    },
+    {
+      "path": "_workspace/01_airbnb-reviewer_data.json",
+      "accessCount": 2,
+      "lastAccessed": 1782282101444,
       "type": "file"
     },
     {
@@ -138,18 +156,6 @@
       "path": ".claude/skills/airbnb-review-report/SKILL.md",
       "accessCount": 1,
       "lastAccessed": 1782139724192,
-      "type": "file"
-    },
-    {
-      "path": "_workspace/01_airbnb-reviewer_data.json",
-      "accessCount": 1,
-      "lastAccessed": 1782139926410,
-      "type": "file"
-    },
-    {
-      "path": "숙소_검토_보고서.md",
-      "accessCount": 1,
-      "lastAccessed": 1782139998174,
       "type": "file"
     },
     {
