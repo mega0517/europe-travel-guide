@@ -1,18 +1,18 @@
-// VIP 패스 가이드 인터렉티브 기능
+// VIP 패스 가이드 — 인터렉티브 맵 + 명소 카드
 
 const courseData = {
   1: {
     title: "융프라우요흐 (Top of Europe)",
     subtitle: "유럽 최고 기차역 · 3,454m",
-    price: "CHF 239.20",
-    priceNote: "풀 왕복권 (그린델발트/벵엔 출발)",
-    duration: "약 45분",
-    highlight: "아이거 익스프레스(곤돌라) 추천",
+    elev: "3,454m",
+    icon: "🏔️",
+    accent: "#2e6fb0",
+    tag: "유럽의 지붕 · 스핑크스 전망대·얼음궁전·신라면",
     content: `
       <h4>요금</h4>
       <p>풀 왕복권: <b>CHF 239.20</b> (인터라켄 동역 출발 CHF 261.20)</p>
       <p>융프라우 트래블 패스 연계권: <b>CHF 63부터</b> (가장 큰 절약)</p>
-      
+
       <div class="vip-price-tag">
         <div class="label">굿모닝 티켓</div>
         <div class="value">15~20% 할인</div>
@@ -36,10 +36,10 @@ const courseData = {
   2: {
     title: "아이거글렛쳐 (Eigergletscher)",
     subtitle: "산악열차 환승역 · 2,320m",
-    price: "포함됨",
-    priceNote: "융프라우요흐 티켓에 포함",
-    duration: "약 30분 (→ 정상)",
-    highlight: "아이거 북벽 조망 · 곤돌라↔열차 환승",
+    elev: "2,320m",
+    icon: "🚠",
+    accent: "#5bb0d6",
+    tag: "아이거 북벽 코앞 · 곤돌라↔열차 환승점",
     content: `
       <h4>개요</h4>
       <p>아이거 익스프레스 곤돌라에서 융프라우요흐행 산악열차로 갈아타는 환승역. <b>해발 2,320m</b>.</p>
@@ -57,10 +57,10 @@ const courseData = {
   8: {
     title: "클라이네 샤이덱 (Kleine Scheidegg)",
     subtitle: "산악열차 허브 · 2,061m",
-    price: "레스토랑 할인",
-    priceNote: "VIP 패스로 레스토랑 할인 (6.13–10.25)",
-    duration: "약 1시간",
-    highlight: "아이거·묀히·융프라우 3봉 정면",
+    elev: "2,061m",
+    icon: "🚂",
+    accent: "#1f5288",
+    tag: "아이거·묀히·융프라우 3봉 정면 · 환승 허브",
     content: `
       <h4>개요</h4>
       <p>융프라우 지역 산악열차의 주요 환승 허브. <b>해발 2,061m</b>. 융프라우요흐·멘리헨으로 갈라지는 길목.</p>
@@ -75,13 +75,57 @@ const courseData = {
       </div>
     `
   },
+  7: {
+    title: "멘리헨 (Männlichen)",
+    subtitle: "로열 워크 파노라마 · 2,230m",
+    elev: "2,230m",
+    icon: "🥾",
+    accent: "#2f7d5a",
+    tag: "평탄한 로열 워크 · 3봉 파노라마 능선",
+    content: `
+      <h4>개요</h4>
+      <p><b>해발 2,230m</b>. 그린델발트/벵엔에서 케이블카로 오르는 능선 전망대.</p>
+
+      <h4>로열 워크</h4>
+      <p>✓ 멘리헨 → 클라이네 샤이덱 <b>"로열 워크"</b> (약 1시간, 평탄)<br>
+      ✓ 아이거·묀히·융프라우 3봉 파노라마<br>
+      ✓ 부부·가족 동반 무난</p>
+
+      <div class="vip-tip">
+        <strong>🥾 팁:</strong> 케이블카로 오른 뒤 내리막 위주 평탄 코스라 체력 부담이 적어요.
+      </div>
+    `
+  },
+  6: {
+    title: "뮈렌 (Mürren)",
+    subtitle: "절벽 위 차 없는 마을 · 1,645m",
+    elev: "1,645m",
+    icon: "🏘️",
+    accent: "#d6597a",
+    tag: "쉴트호른 관문 · 수영장·미니골프 혜택",
+    content: `
+      <h4>개요</h4>
+      <p>라우터브룬넨 계곡 절벽 위의 <b>자동차 없는 청정 마을</b>. <b>해발 1,645m</b>. 슈테헬베르크/라우터브룬넨에 주차 후 케이블카·열차로 진입.</p>
+
+      <h4>VIP 패스 혜택 (벵엔/뮈렌권)</h4>
+      <p>✓ <b>야외 수영장 무료입장</b> (5월 말~8월 말)<br>
+      ✓ <b>미니 골프 50% 할인</b> (5월 말~10월 초)</p>
+
+      <h4>연계</h4>
+      <p>007 촬영지 <b>쉴트호른·피츠 글로리아</b>로 오르는 관문.</p>
+
+      <div class="vip-tip">
+        <strong>⚠️ 2026 주의:</strong> 라우터브룬넨–그뤼치알프 케이블카가 정비 휴무일 수 있으니 운행 사전 확인.
+      </div>
+    `
+  },
   3: {
     title: "휘르스트 (First)",
     subtitle: "절벽 산책로 · 액티비티 천국 · 2,168m",
-    price: "곤돌라 왕복 CHF 76",
-    priceNote: "융프라우 트래블 패스 무료",
-    duration: "반나절~하루",
-    highlight: "4종 액티비티 30% 할인 · 바흐알프제 하이킹",
+    elev: "2,168m",
+    icon: "🪂",
+    accent: "#f2a93b",
+    tag: "4종 액티비티 30% 할인 · 바흐알프제 하이킹",
     content: `
       <h4>VIP 패스 혜택</h4>
       <p>✓ <b>4종 액티비티 30% 할인</b> — 플라이어·글라이더(휘르스트, ~10.25), 마운틴 카트·트로티바이크(슈렉펠트, 5.9~10.25)<br>
@@ -101,10 +145,10 @@ const courseData = {
   4: {
     title: "쉬니게 플라테 (Schynige Platte)",
     subtitle: "빈티지 톱니열차 전망대 · 1,967m",
-    price: "레스토랑 할인",
-    priceNote: "VIP 패스로 레스토랑 할인 (6.13–10.25)",
-    duration: "반나절",
-    highlight: "3봉 정면 + 알파인 식물원",
+    elev: "1,967m",
+    icon: "🌺",
+    accent: "#2f7d5a",
+    tag: "100년 톱니열차 · 알파인 식물원 · 3봉 정면",
     content: `
       <h4>개요</h4>
       <p>빌더스빌에서 100년 넘은 <b>빈티지 톱니바퀴 열차</b>로 오르는 전망대. <b>해발 1,967m</b>.</p>
@@ -122,10 +166,10 @@ const courseData = {
   5: {
     title: "하더 쿨룸 (Harder Kulm)",
     subtitle: "Top of Interlaken · 1,322m",
-    price: "푸니쿨라 왕복 CHF 44",
-    priceNote: "레스토랑 할인 (4.3–11.29) · 컵라면 CHF 6",
-    duration: "2~3시간",
-    highlight: "두 호수 야경·일몰 전망대",
+    elev: "1,322m",
+    icon: "🌅",
+    accent: "#d6597a",
+    tag: "두 호수 일몰·야경 · DAY1 저녁 코스",
     content: `
       <h4>개요</h4>
       <p>인터라켄을 내려다보는 전망대. <b>해발 1,322m</b>, 푸니쿨라로 약 10분. 막차 약 21:40이라 일몰·야경에 최적.</p>
@@ -139,106 +183,132 @@ const courseData = {
         <strong>🍽️ VIP 혜택:</strong> 4.3–11.29 레스토랑 할인, <b>컵라면 CHF 6</b>. DAY 1 저녁 야경 코스로 추천.
       </div>
     `
-  },
-  6: {
-    title: "뮈렌 (Mürren)",
-    subtitle: "절벽 위 차 없는 마을 · 1,645m",
-    price: "케이블카·열차 이용",
-    priceNote: "쉴트호른(피츠 글로리아)의 관문",
-    duration: "반나절",
-    highlight: "벵엔 야외수영장·미니골프 혜택",
-    content: `
-      <h4>개요</h4>
-      <p>라우터브룬넨 계곡 절벽 위의 <b>자동차 없는 청정 마을</b>. <b>해발 1,645m</b>. 슈테헬베르크/라우터브룬넨에 주차 후 케이블카·열차로 진입.</p>
-
-      <h4>VIP 패스 혜택 (벵엔/뮈렌권)</h4>
-      <p>✓ <b>야외 수영장 무료입장</b> (5월 말~8월 말)<br>
-      ✓ <b>미니 골프 50% 할인</b> (5월 말~10월 초)</p>
-
-      <h4>연계</h4>
-      <p>007 촬영지 <b>쉴트호른·피츠 글로리아</b>로 오르는 관문.</p>
-
-      <div class="vip-tip">
-        <strong>⚠️ 2026 주의:</strong> 라우터브룬넨–그뤼치알프 케이블카가 정비 휴무일 수 있으니 운행 사전 확인.
-      </div>
-    `
-  },
-  7: {
-    title: "멘리헨 (Männlichen)",
-    subtitle: "로열 워크 파노라마 · 2,230m",
-    price: "케이블카 왕복",
-    priceNote: "패스 시 무료/할인",
-    duration: "약 1시간 하이킹",
-    highlight: "로열 워크 평탄 하이킹",
-    content: `
-      <h4>개요</h4>
-      <p><b>해발 2,230m</b>. 그린델발트/벵엔에서 케이블카로 오르는 능선 전망대.</p>
-
-      <h4>로열 워크</h4>
-      <p>✓ 멘리헨 → 클라이네 샤이덱 <b>"로열 워크"</b> (약 1시간, 평탄)<br>
-      ✓ 아이거·묀히·융프라우 3봉 파노라마<br>
-      ✓ 부부·가족 동반 무난</p>
-
-      <div class="vip-tip">
-        <strong>🥾 팁:</strong> 케이블카로 오른 뒤 내리막 위주 평탄 코스라 체력 부담이 적어요.
-      </div>
-    `
   }
 };
 
-// DOM 요소
-const hotspots = document.querySelectorAll('.vip-hotspot');
-const vipPanel = document.getElementById('vipPanel');
-const vipOverlay = document.getElementById('vipOverlay');
+// 카드 표시 순서 (고도 높은 순)
+const CARD_ORDER = ['1', '2', '8', '7', '3', '4', '6', '5'];
+
+// ===== DOM =====
+const cardsWrap   = document.getElementById('vipCards');
+const hotspots    = Array.from(document.querySelectorAll('.vip-hotspot'));
+const vipPanel    = document.getElementById('vipPanel');
+const vipOverlay  = document.getElementById('vipOverlay');
 const closeButton = document.getElementById('closePanel');
-const courseTitle = document.getElementById('courseTitle');
-const courseNumber = document.getElementById('courseNumber');
+const courseHeader  = document.getElementById('courseHeader');
+const courseTitle   = document.getElementById('courseTitle');
+const courseNumber  = document.getElementById('courseNumber');
 const courseContent = document.getElementById('courseContent');
 
-// 핫스팟 클릭 이벤트
-hotspots.forEach(hotspot => {
-  hotspot.addEventListener('click', (e) => {
-    const courseId = hotspot.dataset.course;
-    const course = courseData[courseId];
-    
-    // 활성화 상태 업데이트
-    hotspots.forEach(h => h.classList.remove('active'));
-    hotspot.classList.add('active');
-    
-    // 패널 정보 업데이트
-    courseTitle.textContent = course.title;
-    courseNumber.textContent = `#${courseId} · ${course.subtitle}`;
-    courseContent.innerHTML = course.content;
-    
-    // 패널 열기
-    vipPanel.classList.add('active');
-    vipOverlay.classList.add('active');
-    
-    // 모바일에서 상단으로 스크롤
-    if (window.innerWidth < 900) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  });
+// ===== 카드 렌더링 (배경과 분리된 명소 카드) =====
+CARD_ORDER.forEach(id => {
+  const c = courseData[id];
+  if (!c) return;
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'vip-card';
+  el.dataset.course = id;
+  el.style.setProperty('--accent', c.accent);
+  el.innerHTML = `
+    <div class="vip-card__top">
+      <div class="vip-card__ico">${c.icon}</div>
+      <div class="vip-card__no">${id}</div>
+    </div>
+    <h3>${c.title.replace(/\s*\(.*\)$/, '')}</h3>
+    <div class="vip-card__elev">⛰️ ${c.elev}</div>
+    <div class="vip-card__tag">${c.tag}</div>
+    <div class="vip-card__cta">상세 보기 <span>→</span></div>
+  `;
+  cardsWrap.appendChild(el);
 });
+const cards = Array.from(document.querySelectorAll('.vip-card'));
 
-// 패널 닫기
+// ===== 스크롤 진입 애니메이션 =====
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const idx = cards.indexOf(entry.target);
+        entry.target.style.transitionDelay = `${(Math.max(idx, 0) % 4) * 70}ms`;
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  cards.forEach(c => io.observe(c));
+} else {
+  cards.forEach(c => c.classList.add('in'));
+}
+
+// ===== 선택 로직 =====
+function setActive(id) {
+  hotspots.forEach(h => h.classList.toggle('active', h.dataset.course === id));
+  cards.forEach(c => c.classList.toggle('active', c.dataset.course === id));
+}
+
+function openCourse(id, accent) {
+  const course = courseData[id];
+  if (!course) return;
+  setActive(id);
+
+  // 패널 색상 동기화
+  if (accent) {
+    courseHeader.style.setProperty('--accent', accent);
+    courseContent.style.setProperty('--accent', accent);
+  }
+  courseTitle.textContent = course.title;
+  courseNumber.textContent = `#${id} · ${course.subtitle}`;
+  courseContent.innerHTML = course.content;
+
+  // 본문 페이드 인 (재생성)
+  courseContent.classList.remove('swap');
+  void courseContent.offsetWidth; // reflow
+  courseContent.classList.add('swap');
+
+  vipPanel.classList.add('active');
+  vipOverlay.classList.add('active');
+
+  if (window.innerWidth < 900) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
 function closePanel() {
   vipPanel.classList.remove('active');
   vipOverlay.classList.remove('active');
   hotspots.forEach(h => h.classList.remove('active'));
+  cards.forEach(c => c.classList.remove('active'));
 }
 
+// 클릭 리플 효과
+function ripple(e, el) {
+  const rect = el.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const r = document.createElement('span');
+  r.className = 'vip-ripple';
+  r.style.width = r.style.height = `${size}px`;
+  r.style.left = `${(e.clientX ?? rect.left + rect.width / 2) - rect.left - size / 2}px`;
+  r.style.top  = `${(e.clientY ?? rect.top + rect.height / 2) - rect.top - size / 2}px`;
+  el.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+}
+
+// 핫스팟 클릭
+hotspots.forEach(h => {
+  h.addEventListener('click', () => {
+    openCourse(h.dataset.course, courseData[h.dataset.course]?.accent);
+  });
+});
+
+// 카드 클릭 (리플 + 패널)
+cards.forEach(c => {
+  c.addEventListener('click', (e) => {
+    ripple(e, c);
+    openCourse(c.dataset.course, courseData[c.dataset.course]?.accent);
+  });
+});
+
+// 닫기
 closeButton.addEventListener('click', closePanel);
 vipOverlay.addEventListener('click', closePanel);
-
-// Escape 키로도 닫기
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closePanel();
-  }
-});
-
-// 반응형 핫스팟 위치 조정 (이미지 크기 변화에 대응)
-window.addEventListener('resize', () => {
-  // 핫스팟은 percentage로 설정되어 있으므로 자동 조정됨
-});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
