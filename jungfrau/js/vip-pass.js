@@ -189,9 +189,20 @@ const courseData = {
 // 카드 표시 순서 (고도 높은 순)
 const CARD_ORDER = ['1', '2', '8', '7', '3', '4', '6', '5'];
 
+// 지도 위 카드 위치 (스테이지 기준 %)
+const CARD_POS = {
+  '1': { left: 50, top: 14 },  // 융프라우요흐
+  '2': { left: 33, top: 30 },  // 아이거글렛쳐
+  '8': { left: 64, top: 30 },  // 클라이네 샤이덱
+  '7': { left: 80, top: 44 },  // 멘리헨
+  '3': { left: 85, top: 70 },  // 휘르스트
+  '6': { left: 15, top: 50 },  // 뮈렌
+  '4': { left: 16, top: 74 },  // 쉬니게 플라테
+  '5': { left: 48, top: 80 }   // 하더 쿨룸
+};
+
 // ===== DOM =====
-const cardsWrap   = document.getElementById('vipCards');
-const hotspots    = Array.from(document.querySelectorAll('.vip-hotspot'));
+const mapCards    = document.getElementById('vipMapCards');
 const vipPanel    = document.getElementById('vipPanel');
 const vipOverlay  = document.getElementById('vipOverlay');
 const closeButton = document.getElementById('closePanel');
@@ -200,49 +211,32 @@ const courseTitle   = document.getElementById('courseTitle');
 const courseNumber  = document.getElementById('courseNumber');
 const courseContent = document.getElementById('courseContent');
 
-// ===== 카드 렌더링 (배경과 분리된 명소 카드) =====
+// ===== 지도 위 명소 카드 렌더링 =====
 CARD_ORDER.forEach(id => {
   const c = courseData[id];
-  if (!c) return;
+  const pos = CARD_POS[id];
+  if (!c || !pos) return;
   const el = document.createElement('button');
   el.type = 'button';
-  el.className = 'vip-card';
+  el.className = 'vip-map-card';
   el.dataset.course = id;
   el.style.setProperty('--accent', c.accent);
+  el.style.left = pos.left + '%';
+  el.style.top = pos.top + '%';
   el.innerHTML = `
-    <div class="vip-card__top">
-      <div class="vip-card__ico">${c.icon}</div>
-      <div class="vip-card__no">${id}</div>
+    <div class="vip-map-card__top">
+      <div class="vip-map-card__ico">${c.icon}</div>
+      <div class="vip-map-card__no">${id}</div>
     </div>
     <h3>${c.title.replace(/\s*\(.*\)$/, '')}</h3>
-    <div class="vip-card__elev">⛰️ ${c.elev}</div>
-    <div class="vip-card__tag">${c.tag}</div>
-    <div class="vip-card__cta">상세 보기 <span>→</span></div>
+    <div class="vip-map-card__elev">⛰️ ${c.elev}</div>
   `;
-  cardsWrap.appendChild(el);
+  mapCards.appendChild(el);
 });
-const cards = Array.from(document.querySelectorAll('.vip-card'));
-
-// ===== 스크롤 진입 애니메이션 =====
-if ('IntersectionObserver' in window) {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const idx = cards.indexOf(entry.target);
-        entry.target.style.transitionDelay = `${(Math.max(idx, 0) % 4) * 70}ms`;
-        entry.target.classList.add('in');
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-  cards.forEach(c => io.observe(c));
-} else {
-  cards.forEach(c => c.classList.add('in'));
-}
+const cards = Array.from(document.querySelectorAll('.vip-map-card'));
 
 // ===== 선택 로직 =====
 function setActive(id) {
-  hotspots.forEach(h => h.classList.toggle('active', h.dataset.course === id));
   cards.forEach(c => c.classList.toggle('active', c.dataset.course === id));
 }
 
@@ -276,34 +270,12 @@ function openCourse(id, accent) {
 function closePanel() {
   vipPanel.classList.remove('active');
   vipOverlay.classList.remove('active');
-  hotspots.forEach(h => h.classList.remove('active'));
   cards.forEach(c => c.classList.remove('active'));
 }
 
-// 클릭 리플 효과
-function ripple(e, el) {
-  const rect = el.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height);
-  const r = document.createElement('span');
-  r.className = 'vip-ripple';
-  r.style.width = r.style.height = `${size}px`;
-  r.style.left = `${(e.clientX ?? rect.left + rect.width / 2) - rect.left - size / 2}px`;
-  r.style.top  = `${(e.clientY ?? rect.top + rect.height / 2) - rect.top - size / 2}px`;
-  el.appendChild(r);
-  setTimeout(() => r.remove(), 600);
-}
-
-// 핫스팟 클릭
-hotspots.forEach(h => {
-  h.addEventListener('click', () => {
-    openCourse(h.dataset.course, courseData[h.dataset.course]?.accent);
-  });
-});
-
-// 카드 클릭 (리플 + 패널)
+// 지도 위 카드 클릭 → 상세 패널
 cards.forEach(c => {
-  c.addEventListener('click', (e) => {
-    ripple(e, c);
+  c.addEventListener('click', () => {
     openCourse(c.dataset.course, courseData[c.dataset.course]?.accent);
   });
 });

@@ -11,166 +11,66 @@
   .vip-stage {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 10;
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
     isolation: isolate;
-    background: #0c2030;
+    background: linear-gradient(180deg,#8fd3ef 0%,#cdeef7 55%,#eaf7ef 100%);
   }
-  /* 융프라우 배경화면 — 살아있는 듯 천천히 줌·패닝 (Ken Burns) */
-  .vip-stage__bg {
-    position: absolute;
-    inset: -4%;
-    width: 108%;
-    height: 108%;
-    background-image: url('assets/images/jungfrau-vip-pass-guide.jpg');
-    background-size: cover;
-    background-position: center;
-    transform: scale(1.04);
-    animation: vipKenBurns 32s ease-in-out infinite alternate;
-    will-change: transform;
-  }
-  @keyframes vipKenBurns {
-    0%   { transform: scale(1.04) translate(0, 0); }
-    50%  { transform: scale(1.12) translate(-1.5%, -1.2%); }
-    100% { transform: scale(1.07) translate(1.2%, 0.8%); }
-  }
-  /* 분위기용 그라데이션 */
-  .vip-stage__glow {
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(120% 80% at 50% -10%, rgba(91,176,214,.28), transparent 55%),
-      linear-gradient(180deg, rgba(8,20,32,.05) 0%, rgba(8,20,32,.10) 55%, rgba(8,20,32,.42) 100%);
-    pointer-events: none;
-    z-index: 1;
-  }
+  /* 만화풍 SVG 지도 */
+  .vip-stage__map { position:absolute; inset:0; width:100%; height:100%; display:block; }
   .vip-stage__badge {
-    position: absolute; left: 16px; top: 16px; z-index: 3;
+    position: absolute; left: 16px; top: 14px; z-index: 5;
     display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,.16); backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,.34);
-    color: #fff; font-weight: 700; font-size: 13px;
-    padding: 8px 14px; border-radius: 999px;
-    animation: vipFloat 5s ease-in-out infinite;
+    background: rgba(255,255,255,.8); border: 1px solid rgba(255,255,255,.95);
+    color: var(--ink); font-weight: 700; font-size: 12.5px;
+    padding: 7px 13px; border-radius: 999px; box-shadow: var(--shadow);
   }
-  @keyframes vipFloat { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-5px);} }
-
-  /* ===== 핫스팟 (배경 위 포인트) ===== */
-  .vip-hotspot {
-    position: absolute; z-index: 2;
-    width: 46px; height: 46px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.85);
-    background: rgba(46,111,176,.42);
-    backdrop-filter: blur(2px);
-    color: #fff; font-weight: 800; font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0,0,0,.35);
-    transition: transform .22s cubic-bezier(.34,1.56,.64,1), background .22s ease;
-    animation: vipHotIn .5s both;
-  }
-  @keyframes vipHotIn { from{ opacity:0; transform: translate(-50%,-50%) scale(.3);} to{ opacity:1; transform: translate(-50%,-50%) scale(1);} }
-  /* 맥동하는 링 */
-  .vip-hotspot::before {
-    content: ""; position: absolute; inset: -6px;
-    border-radius: 50%; border: 2px solid rgba(91,176,214,.7);
-    animation: vipPulse 2.2s ease-out infinite;
-  }
-  @keyframes vipPulse {
-    0%   { transform: scale(.7); opacity: .9; }
-    70%  { opacity: 0; }
-    100% { transform: scale(2.1); opacity: 0; }
-  }
-  .vip-hotspot:hover {
-    background: var(--alp-blue);
-    transform: translate(-50%, -50%) scale(1.18);
-  }
-  .vip-hotspot.active {
-    background: var(--sun);
-    border-color: #fff;
-    transform: translate(-50%, -50%) scale(1.22);
-    box-shadow: 0 0 0 4px rgba(242,169,59,.35), 0 6px 20px rgba(0,0,0,.4);
-  }
-  .vip-hotspot.active::before { border-color: rgba(242,169,59,.8); }
+  /* 지도 + 카드 오버레이 래퍼 */
+  .vip-mapwrap { position: relative; }
+  .vip-map-cards { position: absolute; inset: 0; z-index: 4; }
 
   .vip-hint { margin-top: 14px; color: var(--ink-soft); font-size: 14px; text-align: center; }
 
-  /* ===== 명소 카드 (배경과 분리) ===== */
-  .vip-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 18px;
-    margin-top: 8px;
-  }
-  .vip-card {
-    position: relative;
-    text-align: left;
-    background: var(--surface);
+  /* ===== 지도 위 명소 카드 ===== */
+  .vip-map-card {
+    position: absolute; transform: translate(-50%, -50%);
+    width: clamp(118px, 12.5vw, 152px);
+    text-align: left; cursor: pointer;
+    background: rgba(255,255,255,.93);
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 20px 18px 18px;
-    cursor: pointer;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s ease, border-color .2s ease;
-    /* 스크롤 진입 애니메이션 기본 상태 */
-    opacity: 0; transform: translateY(22px);
+    border-top: 3px solid var(--accent, var(--alp-blue));
+    border-radius: 12px; padding: 9px 11px 10px;
+    box-shadow: 0 6px 16px rgba(8,20,32,.22);
+    transition: transform .18s cubic-bezier(.34,1.5,.64,1), box-shadow .18s ease;
   }
-  .vip-card.in { opacity: 1; transform: none; }
-  .vip-card::before {
-    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
-    background: var(--accent, var(--alp-blue));
-    transform: scaleY(0); transform-origin: top;
-    transition: transform .25s ease;
+  .vip-map-card:hover, .vip-map-card.active {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 12px 28px rgba(8,20,32,.34);
+    z-index: 7;
   }
-  .vip-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
-    border-color: color-mix(in srgb, var(--accent, var(--alp-blue)) 45%, var(--line));
+  .vip-map-card.active { outline: 2px solid var(--accent, var(--alp-blue)); outline-offset: 1px; }
+  /* 카드가 가리키는 지점 */
+  .vip-map-card::after {
+    content: ""; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%);
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent, var(--alp-blue)); box-shadow: 0 0 0 3px rgba(255,255,255,.9);
   }
-  .vip-card:hover::before, .vip-card.active::before { transform: scaleY(1); }
-  .vip-card.active {
-    border-color: var(--accent, var(--alp-blue));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, var(--alp-blue)) 40%, transparent), var(--shadow-lg);
-  }
-  .vip-card__top { display: flex; align-items: center; gap: 12px; }
-  .vip-card__ico {
-    width: 46px; height: 46px; flex: none;
-    border-radius: 13px;
+  .vip-map-card__top { display: flex; align-items: center; gap: 7px; }
+  .vip-map-card__ico {
+    width: 30px; height: 30px; flex: none; border-radius: 9px; font-size: 17px;
     display: grid; place-items: center;
-    font-size: 24px;
-    background: color-mix(in srgb, var(--accent, var(--alp-blue)) 14%, #fff);
-    transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+    background: color-mix(in srgb, var(--accent, var(--alp-blue)) 16%, #fff);
   }
-  .vip-card:hover .vip-card__ico { transform: rotate(-8deg) scale(1.08); }
-  .vip-card__no {
-    margin-left: auto;
-    font-weight: 800; font-size: 13px; color: #fff;
-    background: var(--accent, var(--alp-blue));
-    width: 26px; height: 26px; border-radius: 50%;
+  .vip-map-card__no {
+    margin-left: auto; width: 20px; height: 20px; border-radius: 50%;
+    font-size: 11px; font-weight: 800; color: #fff; background: var(--accent, var(--alp-blue));
     display: grid; place-items: center;
   }
-  .vip-card h3 { margin: 14px 0 4px; font-size: 17.5px; color: var(--ink); }
-  .vip-card .vip-card__elev { color: var(--ink-soft); font-size: 13px; font-weight: 600; }
-  .vip-card .vip-card__tag { margin-top: 10px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.5; }
-  .vip-card .vip-card__cta {
-    display: inline-flex; align-items: center; gap: 4px;
-    margin-top: 12px; font-weight: 700; font-size: 13.5px;
-    color: var(--accent, var(--alp-blue));
-  }
-  .vip-card .vip-card__cta span { transition: transform .2s ease; }
-  .vip-card:hover .vip-card__cta span { transform: translateX(4px); }
-  /* 클릭 리플 */
-  .vip-ripple {
-    position: absolute; border-radius: 50%;
-    background: color-mix(in srgb, var(--accent, var(--alp-blue)) 22%, transparent);
-    transform: scale(0); pointer-events: none;
-    animation: vipRipple .55s ease-out forwards;
-  }
-  @keyframes vipRipple { to { transform: scale(2.4); opacity: 0; } }
+  .vip-map-card h3 { margin: 8px 0 2px; font-size: 13.5px; line-height: 1.25; color: var(--ink); }
+  .vip-map-card__elev { font-size: 11.5px; font-weight: 600; color: var(--ink-soft); }
 
   /* ===== 상세 패널 ===== */
   .vip-info-panel {
@@ -235,12 +135,19 @@
       border-radius: 18px 18px 0 0;
     }
     .vip-info-panel.active { right: 0; }
-    .vip-hotspot { width: 38px; height: 38px; font-size: 15px; }
+  }
+  /* 모바일: 지도 위 카드를 지도 아래 그리드로 펼침 */
+  @media (max-width: 720px) {
+    .vip-map-cards {
+      position: static; inset: auto; margin-top: 14px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .vip-map-card { position: static; transform: none; width: auto; }
+    .vip-map-card::after { display: none; }
+    .vip-map-card:hover, .vip-map-card.active { transform: translateY(-3px); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .vip-stage__bg { animation: none; }
-    .vip-hotspot, .vip-hotspot::before, .vip-stage__badge { animation: none; }
-    .vip-card { opacity: 1; transform: none; }
+    .vip-map-card { transition: none; }
   }
 </style>
 </head>
@@ -264,41 +171,157 @@
   <div class="wrap">
     <p class="breadcrumb"><a href="index.html">홈</a> › 🎟️ VIP 패스</p>
     <h1>🎟️ 융프라우 여름 VIP 패스 인터렉티브 가이드</h1>
-    <p>지도 위의 번호 또는 아래 명소 카드를 누르면 해당 코스의 요금·시간·팁이 옆에서 펼쳐집니다. 2025.4.5–11.30 여름 시즌 패스 정보입니다.</p>
+    <p>만화풍 지도 위의 명소 카드를 누르면 해당 코스의 요금·시간·팁이 옆에서 펼쳐집니다. 2025.4.5–11.30 여름 시즌 패스 정보입니다.</p>
   </div>
 </header>
 
 <main>
-  <!-- 1) 배경화면(인터렉티브 맵) -->
+  <!-- 1) 만화풍 지도 + 지도 위 명소 카드 -->
   <section class="block">
     <div class="wrap">
-      <div class="vip-stage" id="vipStage">
-        <div class="vip-stage__bg"></div>
-        <div class="vip-stage__glow"></div>
-        <div class="vip-stage__badge">🏔️ Jungfrau Region · Summer VIP Pass</div>
-        <!-- 핫스팟 (공식 지도 마커 위치에 맞춤) -->
-        <div class="vip-hotspot" data-course="1" style="left:59%;top:7%">1</div>
-        <div class="vip-hotspot" data-course="2" style="left:56%;top:19%">2</div>
-        <div class="vip-hotspot" data-course="8" style="left:54%;top:26%">8</div>
-        <div class="vip-hotspot" data-course="7" style="left:54%;top:33%">7</div>
-        <div class="vip-hotspot" data-course="6" style="left:74%;top:34%">6</div>
-        <div class="vip-hotspot" data-course="3" style="left:14%;top:37%">3</div>
-        <div class="vip-hotspot" data-course="4" style="left:53%;top:52%">4</div>
-        <div class="vip-hotspot" data-course="5" style="left:55%;top:83%">5</div>
-      </div>
-      <p class="vip-hint">💡 지도의 번호에 마우스를 올리면 맥동하는 핀이 보이고, 누르면 상세 패널이 열립니다.</p>
-    </div>
-  </section>
+      <div class="vip-mapwrap">
+        <div class="vip-stage" id="vipStage">
+          <svg class="vip-stage__map" viewBox="0 0 1000 625" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="vipSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#6fc0e8"/>
+                <stop offset="0.42" stop-color="#a3d8ef"/>
+                <stop offset="0.78" stop-color="#dceef2"/>
+                <stop offset="1" stop-color="#edf5ec"/>
+              </linearGradient>
+              <radialGradient id="vipSun" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#fff7d9" stop-opacity="0.95"/>
+                <stop offset="0.5" stop-color="#fdebb4" stop-opacity="0.45"/>
+                <stop offset="1" stop-color="#fdebb4" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="vipFar1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#c2d6e7"/><stop offset="1" stop-color="#d6e6f0"/>
+              </linearGradient>
+              <linearGradient id="vipFar2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#a0c0db"/><stop offset="1" stop-color="#bcd5e7"/>
+              </linearGradient>
+              <linearGradient id="vipRock" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#94a1ad"/><stop offset="0.5" stop-color="#74828f"/><stop offset="1" stop-color="#5d6b78"/>
+              </linearGradient>
+              <linearGradient id="vipRockShade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#65717d"/><stop offset="1" stop-color="#4a5762"/>
+              </linearGradient>
+              <linearGradient id="vipSnow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dcebf4"/>
+              </linearGradient>
+              <linearGradient id="vipSnowShade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#e7f0f7"/><stop offset="1" stop-color="#c2d6e7"/>
+              </linearGradient>
+              <linearGradient id="vipForestFar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#84bb8c"/><stop offset="1" stop-color="#6aa978"/>
+              </linearGradient>
+              <linearGradient id="vipForestNear" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#5da069"/><stop offset="1" stop-color="#478757"/>
+              </linearGradient>
+              <linearGradient id="vipMeadow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#a6d68d"/><stop offset="1" stop-color="#82c46d"/>
+              </linearGradient>
+              <linearGradient id="vipWater" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#a6dcef"/><stop offset="0.5" stop-color="#5cb6e0"/><stop offset="1" stop-color="#3a97c8"/>
+              </linearGradient>
+              <filter id="vipHaze" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="3.2"/></filter>
+            </defs>
 
-  <!-- 2) 명소 카드 (배경과 분리, 클릭 반응) -->
-  <section class="block section-alt">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="kicker">8 Courses</span>
-        <h2>🚠 명소 카드로 탐색하기</h2>
-        <p>카드를 누르면 지도의 핀이 함께 강조되고, 상세 정보 패널이 열립니다.</p>
+            <rect width="1000" height="625" fill="url(#vipSky)"/>
+            <circle cx="172" cy="120" r="150" fill="url(#vipSun)"/>
+            <circle cx="172" cy="120" r="36" fill="#fff8de"/>
+
+            <!-- 구름 -->
+            <g fill="#ffffff">
+              <g opacity="0.82"><ellipse cx="788" cy="84" rx="54" ry="19"/><ellipse cx="832" cy="76" rx="40" ry="21"/><ellipse cx="742" cy="90" rx="34" ry="15"/></g>
+              <g opacity="0.66"><ellipse cx="486" cy="58" rx="44" ry="14"/><ellipse cx="522" cy="52" rx="30" ry="15"/></g>
+            </g>
+
+            <!-- 먼 산맥 (대기원근, 흐릿) -->
+            <g filter="url(#vipHaze)">
+              <path d="M0 318 L80 262 L150 292 L228 240 L300 286 L382 246 L470 292 L560 240 L650 288 L742 246 L840 292 L930 252 L1000 286 L1000 360 L0 360 Z" fill="url(#vipFar1)" opacity="0.85"/>
+            </g>
+            <path d="M0 360 L96 300 L176 342 L256 278 L344 336 L432 284 L524 340 L624 282 L724 340 L824 288 L924 336 L1000 300 L1000 410 L0 410 Z" fill="url(#vipFar2)" opacity="0.92"/>
+
+            <!-- 주봉 매시프 (바위) -->
+            <path d="M210 412 L286 300 L330 250 L362 162 L398 236 L446 282 L498 214 L542 122 L588 210 L632 252 L670 196 L702 150 L748 236 L792 318 L824 412 Z" fill="url(#vipRock)"/>
+            <!-- 그늘진 우면 -->
+            <g fill="url(#vipRockShade)" opacity="0.9">
+              <path d="M362 162 L398 236 L362 412 Z"/>
+              <path d="M542 122 L588 210 L542 412 Z"/>
+              <path d="M702 150 L748 236 L702 412 Z"/>
+            </g>
+            <!-- 만년설 능선/설원 -->
+            <g fill="url(#vipSnow)">
+              <path d="M362 162 L338 232 L386 232 Z"/>
+              <path d="M542 122 L506 212 L582 212 Z"/>
+              <path d="M702 150 L676 224 L730 224 Z"/>
+            </g>
+            <!-- 능선 음영(설원 그늘) -->
+            <g fill="url(#vipSnowShade)" opacity="0.85">
+              <path d="M362 162 L386 232 L362 232 Z"/>
+              <path d="M542 122 L582 212 L542 212 Z"/>
+              <path d="M702 150 L730 224 L702 224 Z"/>
+            </g>
+            <!-- 빙하 설선 띠 -->
+            <path d="M286 300 L330 250 L362 162 L398 236 L446 282 L498 214 L542 122 L588 210 L632 252 L670 196 L702 150 L748 236 L792 318 L760 330 Q620 300 470 322 Q360 336 312 326 Z" fill="#ffffff" opacity="0.55"/>
+            <!-- 빙하 혀 (묀히↔융프라우 사이) -->
+            <path d="M600 250 Q612 320 626 372 Q640 350 656 320 Q648 286 636 250 Z" fill="#e3f0f8" opacity="0.85"/>
+            <!-- 바위 능선 디테일 -->
+            <g stroke="#5a6772" stroke-width="1.4" fill="none" opacity="0.5" stroke-linecap="round">
+              <path d="M362 170 L386 250 M362 170 L340 250 M542 132 L570 240 M542 132 L516 240 M702 158 L726 246 M702 158 L682 246"/>
+            </g>
+
+            <!-- 중경 숲 언덕 -->
+            <path d="M0 402 Q160 358 330 396 T660 400 T1000 386 L1000 470 L0 470 Z" fill="url(#vipForestFar)"/>
+            <path d="M0 452 Q220 404 460 452 T1000 446 L1000 625 L0 625 Z" fill="url(#vipForestNear)"/>
+            <!-- 계곡 초원 -->
+            <path d="M250 560 Q500 470 760 558 L760 625 L250 625 Z" fill="url(#vipMeadow)"/>
+
+            <!-- 강 -->
+            <path d="M512 470 Q505 520 470 552 Q448 572 430 588" stroke="#7fc8e8" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.85"/>
+
+            <!-- 두 호수 (툰·브리엔츠) -->
+            <path d="M70 560 Q160 538 250 552 Q360 568 430 590 Q330 612 200 606 Q110 600 70 580 Z" fill="url(#vipWater)"/>
+            <path d="M560 588 Q650 562 760 558 Q880 556 960 576 Q900 606 770 606 Q650 606 560 596 Z" fill="url(#vipWater)"/>
+            <g fill="#ffffff" opacity="0.4">
+              <ellipse cx="190" cy="566" rx="48" ry="4"/><ellipse cx="250" cy="576" rx="30" ry="3"/>
+              <ellipse cx="700" cy="574" rx="44" ry="4"/><ellipse cx="800" cy="582" rx="28" ry="3"/>
+            </g>
+
+            <!-- 인터라켄 마을 -->
+            <g>
+              <rect x="470" y="520" width="22" height="20" fill="#f6f2ea"/><polygon points="467,520 481,507 495,520" fill="#c64f6e"/>
+              <rect x="498" y="526" width="19" height="15" fill="#f6f2ea"/><polygon points="495,526 507,516 520,526" fill="#2e6fb0"/>
+              <rect x="450" y="528" width="17" height="13" fill="#f6f2ea"/><polygon points="447,528 458,519 470,528" fill="#e09a3a"/>
+              <rect x="523" y="529" width="15" height="12" fill="#f6f2ea"/><polygon points="520,529 530,521 541,529" fill="#7a8a99"/>
+            </g>
+
+            <!-- 숲 텍스처 (전경 침엽수 군락) -->
+            <g fill="#3f7d51" opacity="0.92">
+              <g><polygon points="92,492 74,534 110,534"/><polygon points="92,472 78,504 106,504"/><rect x="88" y="534" width="8" height="9" fill="#6b4f33"/></g>
+              <g><polygon points="146,508 130,544 162,544"/><polygon points="146,490 134,520 158,520"/><rect x="142" y="544" width="8" height="8" fill="#6b4f33"/></g>
+              <g><polygon points="900,492 882,534 918,534"/><polygon points="900,472 886,504 914,504"/><rect x="896" y="534" width="8" height="9" fill="#6b4f33"/></g>
+              <g><polygon points="852,510 838,544 866,544"/><polygon points="852,492 840,520 864,520"/><rect x="848" y="544" width="7" height="8" fill="#6b4f33"/></g>
+            </g>
+            <g fill="#4d8c5d" opacity="0.55">
+              <circle cx="320" cy="500" r="9"/><circle cx="340" cy="506" r="11"/><circle cx="360" cy="500" r="8"/>
+              <circle cx="640" cy="500" r="10"/><circle cx="662" cy="507" r="12"/><circle cx="684" cy="500" r="8"/>
+            </g>
+
+            <!-- 봉우리 이름 -->
+            <g fill="#ffffff" font-size="12.5" font-weight="700" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif" opacity="0.92" stroke="#5a6772" stroke-width="2.4" paint-order="stroke">
+              <text x="362" y="262">아이거</text>
+              <text x="542" y="232">묀히</text>
+              <text x="702" y="252">융프라우</text>
+            </g>
+          </svg>
+          <div class="vip-stage__badge">🏔️ Jungfrau Region · Summer VIP Pass</div>
+        </div>
+        <!-- 지도 위 명소 카드 (JS가 생성) -->
+        <div class="vip-map-cards" id="vipMapCards"></div>
       </div>
-      <div class="vip-cards" id="vipCards"><!-- JS가 카드 생성 --></div>
+      <p class="vip-hint">💡 지도 위의 명소 카드를 누르면 해당 코스의 요금·시간·팁이 옆에서 펼쳐집니다.</p>
     </div>
   </section>
 
