@@ -52,6 +52,11 @@ img { max-width: 100%; display: block; }
 }
 .nav-links a:hover { background: var(--snow); color: var(--alp-blue-d); text-decoration: none; }
 .nav-links a.active { background: var(--alp-blue); color: #fff; }
+.nav-links a.nav-back {
+  margin-right: 6px; color: var(--alp-blue-d); font-weight: 700;
+  border: 1px solid var(--line);
+}
+.nav-links a.nav-back:hover { background: var(--alp-blue); color: #fff; border-color: var(--alp-blue); }
 .nav-toggle { display: none; margin-left: auto; background: none; border: 0; font-size: 26px; cursor: pointer; color: var(--alp-blue-d); }
 
 /* ===== Hero ===== */
