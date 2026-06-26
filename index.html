@@ -1137,6 +1137,7 @@ function selectStop(id){
           <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 톨비</div><div class="font-bold">€${leg.toll}</div></div>
         </div>
         ${leg.tollNote?`<div class="text-[11px] text-slate-400 mt-2">ℹ ${leg.tollNote}</div>`:''}
+        <div class="text-[11px] text-emerald-800 bg-emerald-50 rounded-lg px-3 py-2 mt-2">🔄 <b>교대 운전 권장</b> — 운전자끼리 번갈아 약 <b>${fmtHours(leg.hours/2)}씩</b> 맡으면 부담이 절반. 1~2시간마다 휴게소에서 교대하고, 쉬는 사람은 내비·주차·통행권을 챙기면 효율적이에요.</div>
         <div class="text-[10.5px] text-slate-400 mt-1">* ${ROUTE.fuel.note} · 톨/연료는 추정치</div>`;
     }
     if(tips.length){
@@ -1519,6 +1520,7 @@ const CHECKLIST_SEED = [
   { cat: '자동차 · 운전', icon: '🚗', items: [
     '오스트리아 비네트 (Vignette) 구매 확인', '슬로베니아 비네트 구매 확인', '체코 통행료/비네트 확인',
     '차량 등록증 · 그린카드(보험증) 차내 비치', '반사 안전조끼 (운전석·조수석 의무)', '경고 삼각대',
+    '운전자 전원 국제운전면허증(IDP)+면허 원본 (교대 운전 대비)', '운전 교대 순번·구간 사전 합의 (장거리 분담)',
     '구급상자 (차량 비치 의무)', '주차 디스크 (Parking disc)', '휴대폰 차량 거치대', '차량용 USB 충전기',
     '구글맵 오프라인 지도 다운로드', '비상 연락처 (렌터카사 · 보험사 · 영사관)' ]
   },
