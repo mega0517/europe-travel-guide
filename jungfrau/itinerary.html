@@ -10,8 +10,16 @@
   .itin-layout{display:flex;gap:28px;align-items:flex-start;}
   .itin-map{flex:0 0 40%;position:sticky;top:80px;}
   .itin-map h4{margin:0 0 12px;font-size:15px;font-weight:600;}
-  .itin-map iframe{width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+  .map-frame{position:relative;}
+  .itin-map iframe{display:block;width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+  .map-pulse{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#ef4444;pointer-events:none;opacity:0;z-index:6;}
+  .map-pulse.on{animation:pulseBlink 1s ease-out 8;}
+  @keyframes pulseBlink{0%{transform:scale(.5);opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,.65)}70%{opacity:.35;box-shadow:0 0 0 20px rgba(239,68,68,0)}100%{transform:scale(.5);opacity:0;box-shadow:0 0 0 0 rgba(239,68,68,0)}}
   .itin-days{flex:1 1 0;min-width:0;}
+  li[data-place]{cursor:pointer;}
+  li[data-place] .what{text-decoration:underline dotted #94a3b8;text-underline-offset:3px;}
+  li[data-place]:hover .what{color:#2b6cb0;text-decoration-color:#2b6cb0;}
+  li[data-place].place-active{background:#eef4fb;border-radius:8px;}
   .map-hint{margin:10px 0 0;font-size:12px;color:#64748b;line-height:1.5;}
   .map-hint a{color:#2b6cb0;font-weight:600;}
   .day-head{cursor:pointer;transition:background .15s;}
@@ -65,8 +73,11 @@
       <!-- 좌측 고정 지도 -->
       <div class="itin-map">
         <h4>🗺️ 전체 동선 지도</h4>
-        <iframe id="itinMap" src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" title="융프라우 3박4일 전체 동선 지도" allowfullscreen="" loading="lazy"></iframe>
-        <p class="map-hint">💡 아래 <b>DAY 제목</b>을 누르면 그날 동선이 지도에 표시돼요. <a href="#" onclick="resetRoute();return false;">전체 보기</a></p>
+        <div class="map-frame">
+          <iframe id="itinMap" src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" title="융프라우 3박4일 전체 동선 지도" allowfullscreen="" loading="lazy"></iframe>
+          <span class="map-pulse" id="mapPulse" aria-hidden="true"></span>
+        </div>
+        <p class="map-hint">💡 <b>DAY 제목</b>을 누르면 그날 동선이, <b>장소</b>를 누르면 그 위치가 지도에 깜박여요. <a href="#" onclick="resetRoute();return false;">전체 보기</a></p>
       </div>
 
       <!-- 우측 스크롤 일정 -->
@@ -83,11 +94,11 @@
         </div>
         <div class="day-body">
           <ul class="tl">
-            <li><span class="time">오전</span> · <span class="what">잘츠부르크 출발</span><div class="desc">인터라켄까지 약 <b>590km, 6시간</b>(휴식 포함 7시간). 독일 뮌헨 경유(A8) 또는 오스트리아·리히텐슈타인 경유 루트. 국경에서 <b>스위스 비넷</b> 확인. <b>운전은 둘이 번갈아</b> — 약 3시간씩 맡으면 부담이 절반.</div></li>
+            <li data-place="Salzburg, Austria"><span class="time">오전</span> · <span class="what">잘츠부르크 출발</span><div class="desc">인터라켄까지 약 <b>590km, 6시간</b>(휴식 포함 7시간). 독일 뮌헨 경유(A8) 또는 오스트리아·리히텐슈타인 경유 루트. 국경에서 <b>스위스 비넷</b> 확인. <b>운전은 둘이 번갈아</b> — 약 3시간씩 맡으면 부담이 절반.</div></li>
             <li><span class="time">중간</span> · <span class="what">점심 겸 휴식 정차</span><div class="desc">독일 알고이 또는 리히텐슈타인 인근 휴게소. 장거리라 2회 정도 쉬어 가기.</div></li>
-            <li><span class="time">오후</span> · <span class="what">인터라켄/그린델발트 체크인</span><div class="desc">숙소 주차 후 짐 풀기. 산악마을은 차량 진입 제한이 있으니 숙소 주차 위치를 미리 확인.</div></li>
-            <li><span class="time">저녁</span> · <span class="what">하더 쿨름 — Top of Interlaken</span><div class="desc">푸니쿨라 왕복 CHF 44, 막차 약 21:40. 두 호수와 인터라켄 야경·일몰로 첫날을 가볍게 시작.</div></li>
-            <li><span class="time">밤</span> · <span class="what">인터라켄 시내 저녁</span><div class="desc">장거리 운전 뒤라 무리 없이. 마트(Coop/Migros)에서 다음 날 도시락·물 장보기.</div></li>
+            <li data-place="Interlaken, Switzerland"><span class="time">오후</span> · <span class="what">인터라켄/그린델발트 체크인</span><div class="desc">숙소 주차 후 짐 풀기. 산악마을은 차량 진입 제한이 있으니 숙소 주차 위치를 미리 확인.</div></li>
+            <li data-place="Harder Kulm, Interlaken"><span class="time">저녁</span> · <span class="what">하더 쿨름 — Top of Interlaken</span><div class="desc">푸니쿨라 왕복 CHF 44, 막차 약 21:40. 두 호수와 인터라켄 야경·일몰로 첫날을 가볍게 시작.</div></li>
+            <li data-place="Interlaken, Switzerland"><span class="time">밤</span> · <span class="what">인터라켄 시내 저녁</span><div class="desc">장거리 운전 뒤라 무리 없이. 마트(Coop/Migros)에서 다음 날 도시락·물 장보기.</div></li>
           </ul>
           <div class="note warn"><b>⚠️ 장거리 주의</b>운전을 번갈아 해도 6시간 이동은 피로가 쌓입니다. 1~2시간마다 휴게소에서 <b>교대</b>하고, 산악 야간 운전은 그날 컨디션이 가장 좋은 사람이 맡으세요. 하더 쿨름이 부담되면 첫날은 호숫가 산책·저녁만으로 충분해요.</div>
         </div>
@@ -105,11 +116,11 @@
         </div>
         <div class="day-body">
           <ul class="tl">
-            <li><span class="time">07:30</span> · <span class="what">그린델발트 터미널 주차</span><div class="desc">1일 주차 약 CHF 30. <b>아이거 익스프레스</b> 곤돌라 탑승역. 굿모닝 티켓(오전 할인) 노리면 일찍 출발.</div></li>
-            <li><span class="time">08:00</span> · <span class="what">아이거 익스프레스로 오름</span><div class="desc">곤돌라 15분 → 아이거글레처 환승 → 산악열차 → 정상까지 약 45분.</div></li>
-            <li><span class="time">오전</span> · <span class="what">스핑크스 전망대 · 얼음궁전</span><div class="desc">360° 파노라마, 빙하 속 얼음 터널. 융프라우·묀히 조망.</div></li>
-            <li><span class="time">점심</span> · <span class="what">🍜 해발 3,454m 신라면</span><div class="desc">정상 셀프 레스토랑 컵라면 약 CHF 7.90. 융프라우 트래블 패스 바우처로 교환 가능.</div></li>
-            <li><span class="time">오후</span> · <span class="what">알레치 빙하 · 플라토 설원</span><div class="desc">유네스코 세계유산, 알프스 최장 빙하. 야외 설원 산책.</div></li>
+            <li data-place="Grindelwald Terminal"><span class="time">07:30</span> · <span class="what">그린델발트 터미널 주차</span><div class="desc">1일 주차 약 CHF 30. <b>아이거 익스프레스</b> 곤돌라 탑승역. 굿모닝 티켓(오전 할인) 노리면 일찍 출발.</div></li>
+            <li data-place="Eigergletscher"><span class="time">08:00</span> · <span class="what">아이거 익스프레스로 오름</span><div class="desc">곤돌라 15분 → 아이거글레처 환승 → 산악열차 → 정상까지 약 45분.</div></li>
+            <li data-place="Sphinx Observatory, Jungfraujoch"><span class="time">오전</span> · <span class="what">스핑크스 전망대 · 얼음궁전</span><div class="desc">360° 파노라마, 빙하 속 얼음 터널. 융프라우·묀히 조망.</div></li>
+            <li data-place="Jungfraujoch"><span class="time">점심</span> · <span class="what">🍜 해발 3,454m 신라면</span><div class="desc">정상 셀프 레스토랑 컵라면 약 CHF 7.90. 융프라우 트래블 패스 바우처로 교환 가능.</div></li>
+            <li data-place="Aletsch Glacier"><span class="time">오후</span> · <span class="what">알레치 빙하 · 플라토 설원</span><div class="desc">유네스코 세계유산, 알프스 최장 빙하. 야외 설원 산책.</div></li>
             <li><span class="time">하산</span> · <span class="what">산악열차로 내려오기</span><div class="desc">올라갈 때 곤돌라, 내려올 때 열차로 양쪽 경험. 클라이네 샤이덱 경유.</div></li>
           </ul>
           <div class="note tip"><b>💡 절약 팁</b>왕복 풀권은 CHF 239~. <b>융프라우 트래블 패스</b>가 있으면 연계권 CHF 63부터. <a href="attractions.html#pass">패스 비교</a>에서 손익을 계산하세요.</div>
@@ -128,11 +139,11 @@
         </div>
         <div class="day-body">
           <ul class="tl">
-            <li><span class="time">오전</span> · <span class="what">그린델발트 곤돌라역 주차 → First</span><div class="desc">곤돌라 왕복 약 CHF 76(패스 시 무료/할인). 정상 2,168m.</div></li>
-            <li><span class="time">오전</span> · <span class="what">퍼스트 클리프 워크 by Tissot</span><div class="desc">절벽에 매달린 무료 산책로. 아찔한 전망 포토존.</div></li>
-            <li><span class="time">점심</span> · <span class="what">바흐알프제 하이킹</span><div class="desc">First에서 편도 약 1시간(왕복 2시간), 평이한 난이도. 호수에 비치는 설산 반영이 압권. 부부 동반 무난.</div></li>
-            <li><span class="time">오후</span> · <span class="what">짚라인·마운틴 카트·트로티바이크</span><div class="desc">퍼스트 플라이어(최고 84km/h), 마운틴 카트, 킥보드. 각 약 CHF 17~21, 어드벤처 패키지 CHF 60~.</div></li>
-            <li><span class="time">저녁</span> · <span class="what">그린델발트 마을 저녁</span><div class="desc">Bebbis에서 치즈퐁뒤·라클렛으로 알프스 정찬.</div></li>
+            <li data-place="Grindelwald First"><span class="time">오전</span> · <span class="what">그린델발트 곤돌라역 주차 → First</span><div class="desc">곤돌라 왕복 약 CHF 76(패스 시 무료/할인). 정상 2,168m.</div></li>
+            <li data-place="First Cliff Walk by Tissot"><span class="time">오전</span> · <span class="what">퍼스트 클리프 워크 by Tissot</span><div class="desc">절벽에 매달린 무료 산책로. 아찔한 전망 포토존.</div></li>
+            <li data-place="Bachalpsee"><span class="time">점심</span> · <span class="what">바흐알프제 하이킹</span><div class="desc">First에서 편도 약 1시간(왕복 2시간), 평이한 난이도. 호수에 비치는 설산 반영이 압권. 부부 동반 무난.</div></li>
+            <li data-place="First Flyer, Grindelwald"><span class="time">오후</span> · <span class="what">짚라인·마운틴 카트·트로티바이크</span><div class="desc">퍼스트 플라이어(최고 84km/h), 마운틴 카트, 킥보드. 각 약 CHF 17~21, 어드벤처 패키지 CHF 60~.</div></li>
+            <li data-place="Grindelwald"><span class="time">저녁</span> · <span class="what">그린델발트 마을 저녁</span><div class="desc">Bebbis에서 치즈퐁뒤·라클렛으로 알프스 정찬.</div></li>
           </ul>
         </div>
       </div>
@@ -149,12 +160,12 @@
         </div>
         <div class="day-body">
           <ul class="tl">
-            <li><span class="time">아침</span> · <span class="what">체크아웃 → 라우터브룬넨 이동</span><div class="desc">그린델발트에서 자동차 약 30~40분. 짐 싣고 폭포 계곡으로.</div></li>
-            <li><span class="time">09:00</span> · <span class="what">트뤼멜바흐 폭포</span><div class="desc">산 내부 빙하수 폭포, 엘리베이터 진입. 입장 CHF 16, 무료 주차. 비가 와도 OK인 실내형.</div></li>
-            <li><span class="time">오전</span> · <span class="what">슈타우바흐 폭포</span><div class="desc">297m 높이, 무료. 마을 주차 후 도보. 사진 명소.</div></li>
-            <li><span class="time">정오</span> · <span class="what">밀라노로 출발 🇮🇹</span><div class="desc">라우터브룬넨 → 밀라노 약 <b>250km, 3.5~4시간</b>. 브리크(Brig)에서 <b>심플론 고개/터널</b> 또는 고타르 터널을 넘어 이탈리아 진입. 국경에서 통행권·서류 확인.</div></li>
-            <li><span class="time">중간</span> · <span class="what">(선택) 도모도솔라 / 호반 휴식</span><div class="desc">심플론 경유 시 이탈리아 도모도솔라, 또는 마조레 호수 쪽에서 잠시 쉬어가기 좋음.</div></li>
-            <li><span class="time">저녁</span> · <span class="what">밀라노 도착</span><div class="desc">밀라노에서 다음 일정 시작. 도심은 <b>ZTL 통행제한구역</b>이 있으니 숙소·주차 위치 미리 확인.</div></li>
+            <li data-place="Lauterbrunnen"><span class="time">아침</span> · <span class="what">체크아웃 → 라우터브룬넨 이동</span><div class="desc">그린델발트에서 자동차 약 30~40분. 짐 싣고 폭포 계곡으로.</div></li>
+            <li data-place="Trümmelbach Falls"><span class="time">09:00</span> · <span class="what">트뤼멜바흐 폭포</span><div class="desc">산 내부 빙하수 폭포, 엘리베이터 진입. 입장 CHF 16, 무료 주차. 비가 와도 OK인 실내형.</div></li>
+            <li data-place="Staubbach Falls, Lauterbrunnen"><span class="time">오전</span> · <span class="what">슈타우바흐 폭포</span><div class="desc">297m 높이, 무료. 마을 주차 후 도보. 사진 명소.</div></li>
+            <li data-place="Milano, Italia"><span class="time">정오</span> · <span class="what">밀라노로 출발 🇮🇹</span><div class="desc">라우터브룬넨 → 밀라노 약 <b>250km, 3.5~4시간</b>. 브리크(Brig)에서 <b>심플론 고개/터널</b> 또는 고타르 터널을 넘어 이탈리아 진입. 국경에서 통행권·서류 확인.</div></li>
+            <li data-place="Domodossola, Italy"><span class="time">중간</span> · <span class="what">(선택) 도모도솔라 / 호반 휴식</span><div class="desc">심플론 경유 시 이탈리아 도모도솔라, 또는 마조레 호수 쪽에서 잠시 쉬어가기 좋음.</div></li>
+            <li data-place="Milano, Italia"><span class="time">저녁</span> · <span class="what">밀라노 도착</span><div class="desc">밀라노에서 다음 일정 시작. 도심은 <b>ZTL 통행제한구역</b>이 있으니 숙소·주차 위치 미리 확인.</div></li>
           </ul>
           <div class="note warn"><b>⚠️ 출국일 운전 시간 안배</b>오전 폭포 관광 + 4시간 운전이므로, 라우터브룬넨에서는 정오~13시 전후로 출발하는 게 안전합니다. 알프스 고개·터널 구간은 <b>교대로 번갈아</b> 운전해 집중력을 유지하세요. 폭포를 줄이고 일찍 출발하는 것도 방법.</div>
         </div>
@@ -201,6 +212,24 @@
     var map=document.getElementById('itinMap'); if(map&&ITIN_MAP_HOME) map.src=ITIN_MAP_HOME;
     var prev=document.querySelector('.day-head.active'); if(prev) prev.classList.remove('active');
   }
+  function blinkPulse(){
+    var p=document.getElementById('mapPulse'); if(!p) return;
+    p.classList.remove('on'); void p.offsetWidth; p.classList.add('on');
+  }
+  function showPlace(li){
+    var place=li.getAttribute('data-place'); var map=document.getElementById('itinMap');
+    if(!place||!map) return;
+    map.src='https://maps.google.com/maps?q='+encodeURIComponent(place)+'&z=15&hl=ko&output=embed';
+    var prevD=document.querySelector('.day-head.active'); if(prevD) prevD.classList.remove('active');
+    var prevP=document.querySelector('li.place-active'); if(prevP) prevP.classList.remove('place-active');
+    li.classList.add('place-active');
+    map.addEventListener('load',function once(){ map.removeEventListener('load',once); blinkPulse(); });
+    blinkPulse();
+  }
+  document.addEventListener('click',function(e){
+    var li=e.target.closest&&e.target.closest('li[data-place]');
+    if(li){ showPlace(li); }
+  });
 </script>
 </body>
 </html>

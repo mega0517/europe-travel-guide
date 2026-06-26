@@ -10,8 +10,16 @@
   .itin-layout{display:flex;gap:28px;align-items:flex-start;}
   .itin-map{flex:0 0 40%;position:sticky;top:80px;}
   .itin-map h4{margin:0 0 12px;font-size:15px;font-weight:600;}
-  .itin-map iframe{width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+  .map-frame{position:relative;}
+  .itin-map iframe{display:block;width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+  .map-pulse{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#ef4444;pointer-events:none;opacity:0;z-index:6;}
+  .map-pulse.on{animation:pulseBlink 1s ease-out 8;}
+  @keyframes pulseBlink{0%{transform:scale(.5);opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,.65)}70%{opacity:.35;box-shadow:0 0 0 20px rgba(239,68,68,0)}100%{transform:scale(.5);opacity:0;box-shadow:0 0 0 0 rgba(239,68,68,0)}}
   .itin-days{flex:1 1 0;min-width:0;}
+  li[data-place]{cursor:pointer;}
+  li[data-place] .what{text-decoration:underline dotted #94a3b8;text-underline-offset:3px;}
+  li[data-place]:hover .what{color:#2b6cb0;text-decoration-color:#2b6cb0;}
+  li[data-place].place-active{background:#eef4fb;border-radius:8px;}
   .map-hint{margin:10px 0 0;font-size:12px;color:#64748b;line-height:1.5;}
   .map-hint a{color:#2b6cb0;font-weight:600;}
   .day-head{cursor:pointer;transition:background .15s;}
@@ -69,8 +77,11 @@
       <!-- 좌측 고정 지도 -->
       <div class="itin-map">
         <h4>🗺️ 전체 여정 지도</h4>
-        <iframe id="itinMap" src="https://maps.google.com/maps?q=Milano,%20Italia&z=12&hl=ko&output=embed" title="밀라노 2박3일 전체 여정 지도" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        <p class="map-hint">💡 아래 <b>DAY 제목</b>을 누르면 그날 동선이 지도에 표시돼요. <a href="#" onclick="resetRoute();return false;">전체 보기</a></p>
+        <div class="map-frame">
+          <iframe id="itinMap" src="https://maps.google.com/maps?q=Milano,%20Italia&z=12&hl=ko&output=embed" title="밀라노 2박3일 전체 여정 지도" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <span class="map-pulse" id="mapPulse" aria-hidden="true"></span>
+        </div>
+        <p class="map-hint">💡 <b>DAY 제목</b>을 누르면 그날 동선이, <b>장소</b>를 누르면 그 위치가 지도에 깜박여요. <a href="#" onclick="resetRoute();return false;">전체 보기</a></p>
       </div>
 
       <!-- 우측 스크롤 일정 -->
@@ -87,11 +98,11 @@
         </div>
         <div class="day-body">
           <ul class="tl">
-            <li><span class="time">정오</span> · <span class="what">라우터브룬넨 출발 🇨🇭→🇮🇹</span><div class="desc">밀라노까지 약 <b>250km, 3.5~4시간</b>. 브리크(Brig)에서 <b>심플론 고개/터널</b> 또는 고타르 터널을 넘어 이탈리아 진입. 국경에서 통행권·서류 확인. <b>운전은 번갈아</b> — 고개·터널 구간은 컨디션 좋은 사람이.</div></li>
-            <li><span class="time">중간</span> · <span class="what">(선택) 도모도솔라 / 마조레 호수 휴식</span><div class="desc">심플론 경유 시 이탈리아 첫 마을 도모도솔라, 또는 마조레 호반에서 점심·커피 한 잔.</div></li>
-            <li><span class="time">오후</span> · <span class="what">밀라노 숙소 체크인</span><div class="desc"><b>ZTL 밖 주차 가능한 숙소</b>인지 미리 확인. 도심 진입로가 ZTL 안이면 자동 단속 대상. 차는 숙소 차고·인근 주차장에 두고 지하철·트램으로 이동.</div></li>
-            <li><span class="time">저녁</span> · <span class="what">나빌리 운하 아페리티보</span><div class="desc">Navigli 운하변에서 첫 저녁 겸 아페리티보(음료+안주). 장거리 운전 뒤라 무리 없이 가볍게.</div></li>
-            <li><span class="time">밤</span> · <span class="what">두오모 야경 산책 (선택)</span><div class="desc">체력이 남으면 조명 켜진 두오모 광장 야경. 소매치기 주의하며 가볍게 한 바퀴.</div></li>
+            <li data-place="Lauterbrunnen, Switzerland"><span class="time">정오</span> · <span class="what">라우터브룬넨 출발 🇨🇭→🇮🇹</span><div class="desc">밀라노까지 약 <b>250km, 3.5~4시간</b>. 브리크(Brig)에서 <b>심플론 고개/터널</b> 또는 고타르 터널을 넘어 이탈리아 진입. 국경에서 통행권·서류 확인. <b>운전은 번갈아</b> — 고개·터널 구간은 컨디션 좋은 사람이.</div></li>
+            <li data-place="Domodossola, Italy"><span class="time">중간</span> · <span class="what">(선택) 도모도솔라 / 마조레 호수 휴식</span><div class="desc">심플론 경유 시 이탈리아 첫 마을 도모도솔라, 또는 마조레 호반에서 점심·커피 한 잔.</div></li>
+            <li data-place="Milano, Italia"><span class="time">오후</span> · <span class="what">밀라노 숙소 체크인</span><div class="desc"><b>ZTL 밖 주차 가능한 숙소</b>인지 미리 확인. 도심 진입로가 ZTL 안이면 자동 단속 대상. 차는 숙소 차고·인근 주차장에 두고 지하철·트램으로 이동.</div></li>
+            <li data-place="Navigli, Milano"><span class="time">저녁</span> · <span class="what">나빌리 운하 아페리티보</span><div class="desc">Navigli 운하변에서 첫 저녁 겸 아페리티보(음료+안주). 장거리 운전 뒤라 무리 없이 가볍게.</div></li>
+            <li data-place="Duomo di Milano"><span class="time">밤</span> · <span class="what">두오모 야경 산책 (선택)</span><div class="desc">체력이 남으면 조명 켜진 두오모 광장 야경. 소매치기 주의하며 가볍게 한 바퀴.</div></li>
           </ul>
           <div class="note warn"><b>⚠️ 도착일 ZTL·주차</b>밀라노 도착 즉시 가장 흔한 실수가 ZTL 무단 진입입니다. 내비가 도심 지름길로 안내해도 ZTL 표지(빨간 원)를 보면 진입 금지. 숙소까지 ZTL 우회 경로를 미리 확인하세요.</div>
         </div>
@@ -109,12 +120,12 @@
         </div>
         <div class="day-body">
           <ul class="tl">
-            <li><span class="time">09:00</span> · <span class="what">두오모 대성당 + 옥상 테라스</span><div class="desc">통합권으로 내부와 옥상까지. 135개 첨탑 숲과 도시·알프스 조망. 오전 일찍 가야 덜 붐빔. 어깨·무릎 가리는 복장.</div></li>
-            <li><span class="time">11:00</span> · <span class="what">갤러리아 비토리오 에마누엘레 2세</span><div class="desc">유리 돔 아케이드, 명품 쇼핑가. 황소 모자이크에서 발뒤꿈치 돌리기 행운 의식. 옆 스칼라 극장도.</div></li>
+            <li data-place="Duomo di Milano"><span class="time">09:00</span> · <span class="what">두오모 대성당 + 옥상 테라스</span><div class="desc">통합권으로 내부와 옥상까지. 135개 첨탑 숲과 도시·알프스 조망. 오전 일찍 가야 덜 붐빔. 어깨·무릎 가리는 복장.</div></li>
+            <li data-place="Galleria Vittorio Emanuele II"><span class="time">11:00</span> · <span class="what">갤러리아 비토리오 에마누엘레 2세</span><div class="desc">유리 돔 아케이드, 명품 쇼핑가. 황소 모자이크에서 발뒤꿈치 돌리기 행운 의식. 옆 스칼라 극장도.</div></li>
             <li><span class="time">점심</span> · <span class="what">🍝 밀라노식 점심</span><div class="desc">리소토 알라 밀라네제·코톨레타(밀라노식 커틀릿). 가까운 곳은 <a href="food.html">맛집 페이지</a> 참고.</div></li>
-            <li><span class="time">14:00</span> · <span class="what">스포르체스코 성 &amp; 셈피오네 공원</span><div class="desc">성 안뜰·미술관(미켈란젤로 론다니니 피에타). 더우면 뒤편 공원 그늘에서 휴식.</div></li>
-            <li><span class="time">16:00</span> · <span class="what">🖼️ 최후의 만찬 (예약 시간 엄수)</span><div class="desc">산타 마리아 델레 그라치에. <b>예약한 시간</b>에만 입장, 관람 약 15분. 늦으면 입장 불가하니 시간 맞춰 도착.</div></li>
-            <li><span class="time">저녁</span> · <span class="what">브레라 지구 산책 &amp; 저녁</span><div class="desc">예술가 동네 브레라의 골목·미술관·아페리티보. 분위기 좋은 트라토리아에서 마무리.</div></li>
+            <li data-place="Castello Sforzesco"><span class="time">14:00</span> · <span class="what">스포르체스코 성 &amp; 셈피오네 공원</span><div class="desc">성 안뜰·미술관(미켈란젤로 론다니니 피에타). 더우면 뒤편 공원 그늘에서 휴식.</div></li>
+            <li data-place="Santa Maria delle Grazie, Milano"><span class="time">16:00</span> · <span class="what">🖼️ 최후의 만찬 (예약 시간 엄수)</span><div class="desc">산타 마리아 델레 그라치에. <b>예약한 시간</b>에만 입장, 관람 약 15분. 늦으면 입장 불가하니 시간 맞춰 도착.</div></li>
+            <li data-place="Pinacoteca di Brera"><span class="time">저녁</span> · <span class="what">브레라 지구 산책 &amp; 저녁</span><div class="desc">예술가 동네 브레라의 골목·미술관·아페리티보. 분위기 좋은 트라토리아에서 마무리.</div></li>
           </ul>
           <div class="note tip"><b>💡 예약 순서가 일정을 좌우</b>최후의 만찬 예약 시간을 먼저 확정한 뒤, 그 시간을 기준으로 두오모·성 방문을 앞뒤로 배치하세요. 도보·지하철로 대부분 15~25분 거리라 동선이 유연합니다.</div>
         </div>
@@ -133,11 +144,11 @@
         <div class="day-body">
           <ul class="tl">
             <li><span class="time">아침</span> · <span class="what">체크아웃 &amp; 짐 싣기</span><div class="desc">출발 전 ZTL 밖 경로로 차를 빼고, 마지막 일정은 도보·대중교통으로.</div></li>
-            <li><span class="time">오전</span> · <span class="what">산탐브로조 성당 / 못 본 명소</span><div class="desc">로마네스크 명작 산탐브로조, 또는 전날 못 본 브레라 미술관·운하 등 취향대로.</div></li>
-            <li><span class="time">오전</span> · <span class="what">몬테나폴레오네 쇼핑가 (선택)</span><div class="desc">패션 1번지에서 윈도쇼핑·기념품. 일요일은 일부 매장 단축 영업이니 확인.</div></li>
+            <li data-place="Basilica di Sant'Ambrogio, Milano"><span class="time">오전</span> · <span class="what">산탐브로조 성당 / 못 본 명소</span><div class="desc">로마네스크 명작 산탐브로조, 또는 전날 못 본 브레라 미술관·운하 등 취향대로.</div></li>
+            <li data-place="Via Monte Napoleone, Milano"><span class="time">오전</span> · <span class="what">몬테나폴레오네 쇼핑가 (선택)</span><div class="desc">패션 1번지에서 윈도쇼핑·기념품. 일요일은 일부 매장 단축 영업이니 확인.</div></li>
             <li><span class="time">점심</span> · <span class="what">가벼운 점심 후 출발 🚗</span><div class="desc">밀라노 → 피란 약 <b>500km, 5~5.5시간</b>. 베네치아 인근을 지나 슬로베니아 진입. <b>이탈리아·슬로베니아 통행권(비넷)</b> 확인. 긴 구간이니 <b>운전자끼리 약 2.5시간씩 교대</b>.</div></li>
-            <li><span class="time">중간</span> · <span class="what">(선택) 베로나 / 트리에스테 경유 휴식</span><div class="desc">장거리라 1~2회 정차. 베로나 잠깐 들르거나 트리에스테 해안에서 쉬어가기 좋음.</div></li>
-            <li><span class="time">저녁</span> · <span class="what">피란 도착 🇸🇮</span><div class="desc">아드리아 해안 마을 피란에서 다음 일정 시작. 구시가는 차량 진입 제한이니 외곽 주차장 확인.</div></li>
+            <li data-place="Verona, Italy"><span class="time">중간</span> · <span class="what">(선택) 베로나 / 트리에스테 경유 휴식</span><div class="desc">장거리라 1~2회 정차. 베로나 잠깐 들르거나 트리에스테 해안에서 쉬어가기 좋음.</div></li>
+            <li data-place="Piran, Slovenia"><span class="time">저녁</span> · <span class="what">피란 도착 🇸🇮</span><div class="desc">아드리아 해안 마을 피란에서 다음 일정 시작. 구시가는 차량 진입 제한이니 외곽 주차장 확인.</div></li>
           </ul>
           <div class="note warn"><b>⚠️ 출국일 운전 시간 안배</b>오전 일정 + 5시간 운전이라 점심 무렵에는 출발하는 게 안전합니다. 긴 구간은 <b>운전자끼리 번갈아(약 2.5시간씩)</b> 맡아 피로를 나누세요. 쇼핑·명소를 욕심내기보다 여유 있게 도로에 오르세요.</div>
         </div>
@@ -184,6 +195,24 @@
     var map=document.getElementById('itinMap'); if(map&&ITIN_MAP_HOME) map.src=ITIN_MAP_HOME;
     var prev=document.querySelector('.day-head.active'); if(prev) prev.classList.remove('active');
   }
+  function blinkPulse(){
+    var p=document.getElementById('mapPulse'); if(!p) return;
+    p.classList.remove('on'); void p.offsetWidth; p.classList.add('on');
+  }
+  function showPlace(li){
+    var place=li.getAttribute('data-place'); var map=document.getElementById('itinMap');
+    if(!place||!map) return;
+    map.src='https://maps.google.com/maps?q='+encodeURIComponent(place)+'&z=15&hl=ko&output=embed';
+    var prevD=document.querySelector('.day-head.active'); if(prevD) prevD.classList.remove('active');
+    var prevP=document.querySelector('li.place-active'); if(prevP) prevP.classList.remove('place-active');
+    li.classList.add('place-active');
+    map.addEventListener('load',function once(){ map.removeEventListener('load',once); blinkPulse(); });
+    blinkPulse();
+  }
+  document.addEventListener('click',function(e){
+    var li=e.target.closest&&e.target.closest('li[data-place]');
+    if(li){ showPlace(li); }
+  });
 </script>
 </body>
 </html>
