@@ -6,6 +6,18 @@
 <title>3박4일 상세 일정 · 융프라우 자동차 여행</title>
 <meta name="description" content="잘츠부르크 출발–융프라우–밀라노 도착, 날짜별 자동차 동선과 플랜B">
 <link rel="stylesheet" href="css/style.css">
+<style>
+  .itin-layout{display:flex;gap:28px;align-items:flex-start;}
+  .itin-map{flex:0 0 40%;position:sticky;top:80px;}
+  .itin-map h4{margin:0 0 12px;font-size:15px;font-weight:600;}
+  .itin-map iframe{width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+  .itin-days{flex:1 1 0;min-width:0;}
+  @media (max-width:880px){
+    .itin-layout{display:block;}
+    .itin-map{position:sticky;top:60px;z-index:5;background:#fff;padding-bottom:12px;margin-bottom:18px;}
+    .itin-map iframe{height:240px;min-height:0;}
+  }
+</style>
 </head>
 <body>
 <nav class="nav">
@@ -40,6 +52,15 @@
         <b style="font-weight:400;display:inline">잘츠부르크(오스트리아)</b> → <b style="font-weight:400;display:inline">융프라우 지역(스위스, 3박)</b> → <b style="font-weight:400;display:inline">밀라노(이탈리아)</b>. 3개국을 지나므로 <b style="font-weight:400;display:inline">스위스 비넷 + 오스트리아 비넷</b>이 모두 필요하고, 밀라노行은 알프스 고개·터널을 넘습니다. 자세한 국경·통행권은 <a href="driving.html">자동차·주차</a> 페이지를 보세요.
       </div>
 
+      <div class="itin-layout">
+      <!-- 좌측 고정 지도 -->
+      <div class="itin-map">
+        <h4>🗺️ 전체 동선 지도</h4>
+        <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" title="융프라우 3박4일 전체 동선 지도" allowfullscreen="" loading="lazy"></iframe>
+      </div>
+
+      <!-- 우측 스크롤 일정 -->
+      <div class="itin-days">
       <!-- DAY 0 / 1 -->
       <div class="day">
         <div class="day-head">
@@ -50,10 +71,6 @@
           </div>
         </div>
         <div class="day-body">
-          <div class="map-container" style="margin-bottom:20px;">
-            <h4 style="margin-bottom:14px;font-size:16px;font-weight:600;">📍 다른 명소도 지도에서 확인</h4>
-            <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" width="100%" height="300" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy"></iframe>
-          </div>
           <ul class="tl">
             <li><span class="time">오전</span> · <span class="what">잘츠부르크 출발</span><div class="desc">인터라켄까지 약 <b>590km, 6시간</b>(휴식 포함 7시간). 독일 뮌헨 경유(A8) 또는 오스트리아·리히텐슈타인 경유 루트. 국경에서 <b>스위스 비넷</b> 확인.</div></li>
             <li><span class="time">중간</span> · <span class="what">점심 겸 휴식 정차</span><div class="desc">독일 알고이 또는 리히텐슈타인 인근 휴게소. 장거리라 2회 정도 쉬어 가기.</div></li>
@@ -84,10 +101,6 @@
             <li><span class="time">하산</span> · <span class="what">산악열차로 내려오기</span><div class="desc">올라갈 때 곤돌라, 내려올 때 열차로 양쪽 경험. 클라이네 샤이덱 경유.</div></li>
           </ul>
           <div class="note tip"><b>💡 절약 팁</b>왕복 풀권은 CHF 239~. <b>융프라우 트래블 패스</b>가 있으면 연계권 CHF 63부터. <a href="attractions.html#pass">패스 비교</a>에서 손익을 계산하세요.</div>
-          <div class="map-container" style="margin-top:20px;">
-            <h4 style="margin-bottom:14px;font-size:14px;font-weight:600;">📍 DAY 2 동선 지도</h4>
-            <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" width="100%" height="250" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy"></iframe>
-          </div>
         </div>
       </div>
 
@@ -108,10 +121,6 @@
             <li><span class="time">오후</span> · <span class="what">짚라인·마운틴 카트·트로티바이크</span><div class="desc">퍼스트 플라이어(최고 84km/h), 마운틴 카트, 킥보드. 각 약 CHF 17~21, 어드벤처 패키지 CHF 60~.</div></li>
             <li><span class="time">저녁</span> · <span class="what">그린델발트 마을 저녁</span><div class="desc">Bebbis에서 치즈퐁뒤·라클렛으로 알프스 정찬.</div></li>
           </ul>
-          <div class="map-container" style="margin-top:20px;">
-            <h4 style="margin-bottom:14px;font-size:14px;font-weight:600;">📍 DAY 3 동선 지도</h4>
-            <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" width="100%" height="250" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy"></iframe>
-          </div>
         </div>
       </div>
 
@@ -134,12 +143,10 @@
             <li><span class="time">저녁</span> · <span class="what">밀라노 도착</span><div class="desc">밀라노에서 다음 일정 시작. 도심은 <b>ZTL 통행제한구역</b>이 있으니 숙소·주차 위치 미리 확인.</div></li>
           </ul>
           <div class="note warn"><b>⚠️ 출국일 운전 시간 안배</b>오전 폭포 관광 + 4시간 운전이므로, 라우터브룬넨에서는 정오~13시 전후로 출발하는 게 안전합니다. 폭포를 줄이고 일찍 출발하는 것도 방법.</div>
-          <div class="map-container" style="margin-top:20px;">
-            <h4 style="margin-bottom:14px;font-size:14px;font-weight:600;">📍 DAY 4 동선 지도</h4>
-            <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1mu9Kg5jrThyWAg3L4XAec87nrDtvE1MA" width="100%" height="250" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy"></iframe>
-          </div>
         </div>
       </div>
+      </div><!-- /itin-days -->
+      </div><!-- /itin-layout -->
 
       <!-- PLAN B -->
       <div class="section-head" style="margin-top:36px">
