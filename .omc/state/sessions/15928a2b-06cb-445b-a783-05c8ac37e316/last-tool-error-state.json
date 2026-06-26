@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls -lt /data3/bhkim/workspace/private/europe-travel-guide/.omc/state/sessions/ 2>/dev/null | head; echo \\\"---\\\"; cat /tmp/claude-1004/-data3-bhkim-workspace-private-europe-travel-guide/159...",
+  "error": "Exit code 1\ntotal 0\ndrwxrwxr-x 2 bhkim bhkim  71  6월 26 17:11 15928a2b-06cb-445b-a783-05c8ac37e316\ndrwxrwxr-x 2 bhkim bhkim  92  6월 26 17:08 260fcb4b-e941-415e-80d0-562f910b09b8\ndrwxrwxr-x 2 bhkim bhkim 188  6월 26 10:24 ee1764e8-d8c8-41b4-9708-ea25ad7e6a52\ndrwxrwxr-x 2 bhkim bhkim 116  6월 26 10:24 cd8c41ef-e0d5-4c57-b431-9810f26f5daf\ndrwxrwxr-x 2 bhkim bhkim 147  6월 26 10:24 a6e87833-9824-41a6-b7a0-2573e5dac183\ndrwxrwxr-x 2 bhkim bhkim 157  6월 26 10:24 9aa6ad0f-d1d0-42d4-a729-5a0697aa995b\ndrwxrw...",
+  "timestamp": "2026-06-26T08:46:42.064Z",
+  "retry_count": 1
+}

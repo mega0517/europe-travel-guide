@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1782230795113,
-  "projectRoot": "/Users/bhkim/MyClaude/europe-travel-guide",
+  "lastScanned": 1782463395316,
+  "projectRoot": "/data3/bhkim/workspace/private/europe-travel-guide",
   "techStack": {
     "languages": [],
     "frameworks": [],
@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && ls dist 2>/dev/null && echo BUILT || (npm install && npm run build)",
+    "buildCommand": null,
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -32,21 +32,11 @@
   },
   "customNotes": [],
   "directoryMap": {
-    "_workspace": {
-      "path": "_workspace",
-      "purpose": null,
-      "fileCount": 2,
-      "lastAccessed": 1782230795066,
-      "keyFiles": [
-        "01_airbnb-reviewer_data.json",
-        "02_travel-guide-reporter_outline.md"
-      ]
-    },
     "backend": {
       "path": "backend",
       "purpose": null,
-      "fileCount": 4,
-      "lastAccessed": 1782230795066,
+      "fileCount": 3,
+      "lastAccessed": 1782463395310,
       "keyFiles": [
         "README.md",
         "requirements.txt"
@@ -55,8 +45,8 @@
     "frontend": {
       "path": "frontend",
       "purpose": null,
-      "fileCount": 11,
-      "lastAccessed": 1782230795066,
+      "fileCount": 10,
+      "lastAccessed": 1782463395311,
       "keyFiles": [
         "README.md",
         "eslint.config.js",
@@ -65,11 +55,24 @@
         "package.json"
       ]
     },
+    "jungfrau": {
+      "path": "jungfrau",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1782463395311,
+      "keyFiles": [
+        "attractions.html",
+        "driving.html",
+        "food-tips.html",
+        "index.html",
+        "itinerary.html"
+      ]
+    },
     "backend/app": {
       "path": "backend/app",
       "purpose": "Application code",
       "fileCount": 6,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463395314,
       "keyFiles": [
         "__init__.py",
         "config.py",
@@ -80,7 +83,7 @@
       "path": "backend/tests",
       "purpose": "Test files",
       "fileCount": 3,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463395315,
       "keyFiles": [
         "conftest.py",
         "test_e2e.py",
@@ -91,7 +94,7 @@
       "path": "frontend/public",
       "purpose": "Public files",
       "fileCount": 2,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463395315,
       "keyFiles": [
         "favicon.svg",
         "icons.svg"
@@ -101,117 +104,21 @@
       "path": "frontend/src",
       "purpose": "Source code",
       "fileCount": 3,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463395315,
       "keyFiles": [
         "App.tsx",
         "index.css",
         "main.tsx"
       ]
+    },
+    "jungfrau/assets": {
+      "path": "jungfrau/assets",
+      "purpose": "Static assets",
+      "fileCount": 0,
+      "lastAccessed": 1782463395316,
+      "keyFiles": []
     }
   },
-  "hotPaths": [
-    {
-      "path": "index.html",
-      "accessCount": 60,
-      "lastAccessed": 1782312598144,
-      "type": "file"
-    },
-    {
-      "path": "CLAUDE.md",
-      "accessCount": 14,
-      "lastAccessed": 1782222130911,
-      "type": "file"
-    },
-    {
-      "path": "_workspace/03_airbnb-reviewer_data.json",
-      "accessCount": 11,
-      "lastAccessed": 1782313015750,
-      "type": "file"
-    },
-    {
-      "path": "숙소_검토_보고서.md",
-      "accessCount": 9,
-      "lastAccessed": 1782284465271,
-      "type": "file"
-    },
-    {
-      "path": ".claude/skills/europe-trip-orchestrator/SKILL.md",
-      "accessCount": 7,
-      "lastAccessed": 1782222074491,
-      "type": "file"
-    },
-    {
-      "path": "밀라노_숙소_단점_리뷰.md",
-      "accessCount": 4,
-      "lastAccessed": 1782313020330,
-      "type": "file"
-    },
-    {
-      "path": "_workspace/01_airbnb-reviewer_data.json",
-      "accessCount": 2,
-      "lastAccessed": 1782282101444,
-      "type": "file"
-    },
-    {
-      "path": "milan-report.html",
-      "accessCount": 2,
-      "lastAccessed": 1782311885558,
-      "type": "file"
-    },
-    {
-      "path": ".claude/agents/airbnb-reviewer.md",
-      "accessCount": 1,
-      "lastAccessed": 1782139670916,
-      "type": "file"
-    },
-    {
-      "path": ".claude/skills/airbnb-review-report/SKILL.md",
-      "accessCount": 1,
-      "lastAccessed": 1782139724192,
-      "type": "file"
-    },
-    {
-      "path": ".claude/agents/travel-guide-reporter.md",
-      "accessCount": 1,
-      "lastAccessed": 1782221980991,
-      "type": "file"
-    },
-    {
-      "path": ".claude/skills/travel-guide-report/SKILL.md",
-      "accessCount": 1,
-      "lastAccessed": 1782222022035,
-      "type": "file"
-    },
-    {
-      "path": "_workspace/02_travel-guide-reporter_outline.md",
-      "accessCount": 1,
-      "lastAccessed": 1782222215201,
-      "type": "file"
-    },
-    {
-      "path": "여행_가이드_보고서.md",
-      "accessCount": 1,
-      "lastAccessed": 1782222317280,
-      "type": "file"
-    },
-    {
-      "path": "숙소_비교_검토_보고서.html",
-      "accessCount": 1,
-      "lastAccessed": 1782222603781,
-      "type": "file"
-    },
-    {
-      "path": "travel-guide-report.html",
-      "accessCount": 1,
-      "lastAccessed": 1782230250355,
-      "type": "file"
-    },
-    {
-      "path": "밀라노_숙소_단점_리뷰.html",
-      "accessCount": 1,
-      "lastAccessed": 1782313021130,
-      "type": "file"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }
