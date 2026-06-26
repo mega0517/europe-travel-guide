@@ -59,6 +59,10 @@
           class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
           🚠 <span class="hidden sm:inline">융프라우 가이드</span>
         </a>
+        <a href="milan/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="밀라노 시티 가이드"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🏛️ <span class="hidden sm:inline">밀라노 가이드</span>
+        </a>
       </h1>
       <div id="t-detail" class="hidden">
         <p id="t-sub" class="text-[10.5px] md:text-[12.5px] opacity-80 mt-0.5"></p>
@@ -1242,7 +1246,8 @@ const AB_DEFECT_REPORT = {
 };
 /* 도시별 전용 상세 가이드 사이트(있으면 카드에 별도 버튼 노출). 인터라켄=융프라우 자동차 여행 가이드 */
 const AB_GUIDE = {
-  interlaken: { href: 'jungfrau/index.html', label: '🚠 융프라우 자동차 여행 가이드 (코스·패스·주차·맛집) →' }
+  interlaken: { href: 'jungfrau/index.html', label: '🚠 융프라우 자동차 여행 가이드 (코스·패스·주차·맛집) →' },
+  milan: { href: 'milan/index.html', label: '🏛️ 밀라노 시티 가이드 (명소·ZTL 운전·주차·맛집) →' }
 };
 /* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
    해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
