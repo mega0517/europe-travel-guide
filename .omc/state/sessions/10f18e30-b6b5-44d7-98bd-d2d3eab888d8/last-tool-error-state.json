@@ -1,7 +1,0 @@
-{
-  "tool_name": "mcp__claude-in-chrome__tabs_create_mcp",
-  "tool_input_preview": "{}",
-  "error": "No tab group exists for this session yet. Call tabs_context_mcp with createIfEmpty: true first — that creates this session's group and returns its tab IDs.",
-  "timestamp": "2026-06-26T02:05:03.276Z",
-  "retry_count": 1
-}
