@@ -12,7 +12,15 @@
   .itin-map h4{margin:0 0 12px;font-size:15px;font-weight:600;}
   .itin-map iframe{width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
   .itin-days{flex:1 1 0;min-width:0;}
+  .map-hint{margin:10px 0 0;font-size:12px;color:#64748b;line-height:1.5;}
+  .map-hint a{color:#2b6cb0;font-weight:600;}
+  .day-head{cursor:pointer;transition:background .15s;}
+  .day-head:hover{background:#eef4fb;}
+  .day-head .route-hint{margin-left:auto;flex:0 0 auto;font-size:12px;font-weight:600;color:#2b6cb0;background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:6px 12px;white-space:nowrap;}
+  .day-head.active{background:#e3eefb;}
+  .day-head.active .route-hint{background:#2b6cb0;color:#fff;border-color:transparent;}
   @media (max-width:880px){
+    .day-head .route-hint{padding:5px 9px;font-size:11px;}
     .itin-layout{display:block;}
     .itin-map{position:sticky;top:60px;z-index:20;background:#fff;margin:0 -20px 18px;padding:10px 20px 12px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
     .itin-map h4{margin:0 0 8px;font-size:14px;}
@@ -61,19 +69,21 @@
       <!-- 좌측 고정 지도 -->
       <div class="itin-map">
         <h4>🗺️ 전체 여정 지도</h4>
-        <iframe src="https://maps.google.com/maps?q=Milano,%20Italia&z=12&hl=ko&output=embed" title="밀라노 2박3일 전체 여정 지도" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="itinMap" src="https://maps.google.com/maps?q=Milano,%20Italia&z=12&hl=ko&output=embed" title="밀라노 2박3일 전체 여정 지도" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <p class="map-hint">💡 아래 <b>DAY 제목</b>을 누르면 그날 동선이 지도에 표시돼요. <a href="#" onclick="resetRoute();return false;">전체 보기</a></p>
       </div>
 
       <!-- 우측 스크롤 일정 -->
       <div class="itin-days">
       <!-- DAY 1 -->
       <div class="day">
-        <div class="day-head">
+        <div class="day-head" onclick="showRoute(this)" data-mode="" data-stops="Lauterbrunnen, Switzerland | Domodossola, Italy | Navigli, Milano">
           <div class="day-badge">DAY 1<small>7/10 금</small></div>
           <div>
             <h3>알프스 넘어 밀라노 도착 &amp; 첫 저녁</h3>
             <div class="sub">이동일 + 가벼운 적응 · 운하 야경 아페리티보</div>
           </div>
+          <span class="route-hint">🗺️ 경로 보기</span>
         </div>
         <div class="day-body">
           <ul class="tl">
@@ -89,12 +99,13 @@
 
       <!-- DAY 2 -->
       <div class="day">
-        <div class="day-head">
+        <div class="day-head" onclick="showRoute(this)" data-mode="w" data-stops="Duomo di Milano | Galleria Vittorio Emanuele II | Castello Sforzesco | Santa Maria delle Grazie, Milano | Pinacoteca di Brera">
           <div class="day-badge">DAY 2<small>7/11 토</small></div>
           <div>
             <h3>밀라노 핵심 1일 — 두오모부터 최후의 만찬까지</h3>
             <div class="sub">도보+지하철 도심 관광 · 예약 시간 중심으로</div>
           </div>
+          <span class="route-hint">🗺️ 경로 보기</span>
         </div>
         <div class="day-body">
           <ul class="tl">
@@ -111,12 +122,13 @@
 
       <!-- DAY 3 -->
       <div class="day">
-        <div class="day-head">
+        <div class="day-head" onclick="showRoute(this)" data-mode="" data-stops="Sant'Ambrogio, Milano | Verona, Italy | Piran, Slovenia">
           <div class="day-badge">DAY 3<small>7/12 일</small></div>
           <div>
             <h3>오전 마무리 → 피란으로 출발</h3>
             <div class="sub">쇼핑·못 본 곳 정리 후 슬로베니아로</div>
           </div>
+          <span class="route-hint">🗺️ 경로 보기</span>
         </div>
         <div class="day-body">
           <ul class="tl">
@@ -156,5 +168,22 @@
   </div>
 </footer>
 <script src="js/main.js"></script>
+<script>
+  var ITIN_MAP_HOME = (document.getElementById('itinMap')||{}).src || '';
+  function showRoute(el){
+    var stops=(el.getAttribute('data-stops')||'').split('|').map(function(s){return s.trim();}).filter(Boolean);
+    var map=document.getElementById('itinMap');
+    if(!map||stops.length<2) return;
+    var daddr=stops.slice(1).map(encodeURIComponent).join('+to:');
+    var mode=el.getAttribute('data-mode');
+    map.src='https://maps.google.com/maps?saddr='+encodeURIComponent(stops[0])+'&daddr='+daddr+'&output=embed&hl=ko'+(mode?'&dirflg='+mode:'');
+    var prev=document.querySelector('.day-head.active'); if(prev) prev.classList.remove('active');
+    el.classList.add('active');
+  }
+  function resetRoute(){
+    var map=document.getElementById('itinMap'); if(map&&ITIN_MAP_HOME) map.src=ITIN_MAP_HOME;
+    var prev=document.querySelector('.day-head.active'); if(prev) prev.classList.remove('active');
+  }
+</script>
 </body>
 </html>
