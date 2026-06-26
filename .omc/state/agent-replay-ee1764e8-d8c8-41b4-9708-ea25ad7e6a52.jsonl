@@ -1,8 +1,0 @@
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"europe-trip-orchestrator"}
-{"t":0,"agent":"a7f0b4e","agent_type":"airbnb-reviewer","event":"agent_start","parent_mode":"none"}
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"cheliped-browser"}
-{"t":0,"agent":"a7f0b4e","agent_type":"airbnb-reviewer","event":"agent_stop","success":true,"duration_ms":596353}
-{"t":0,"agent":"a098ac5","agent_type":"airbnb-reviewer","event":"agent_start","parent_mode":"none"}
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"airbnb-review-report"}
-{"t":0,"agent":"system","event":"skill_invoked","skill_name":"cheliped-browser"}
-{"t":0,"agent":"a098ac5","agent_type":"airbnb-reviewer","event":"agent_stop","success":true,"duration_ms":684106}

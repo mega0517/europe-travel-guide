@@ -17,10 +17,46 @@
       "status": "completed",
       "completed_at": "2026-06-24T15:08:13.987Z",
       "duration_ms": 684106
+    },
+    {
+      "agent_id": "ae4c4582ddf8dd7e1",
+      "agent_type": "airbnb-reviewer",
+      "started_at": "2026-06-25T01:13:51.911Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-25T01:27:16.118Z",
+      "duration_ms": 804207
+    },
+    {
+      "agent_id": "a06724715f2efa6d4",
+      "agent_type": "airbnb-reviewer",
+      "started_at": "2026-06-25T02:33:02.232Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-25T02:33:30.791Z",
+      "duration_ms": 28559
+    },
+    {
+      "agent_id": "a01ae74c8c641efef",
+      "agent_type": "airbnb-reviewer",
+      "started_at": "2026-06-25T02:35:29.572Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-25T02:48:51.593Z",
+      "duration_ms": 802021
+    },
+    {
+      "agent_id": "a2a334d3eed4d354f",
+      "agent_type": "airbnb-reviewer",
+      "started_at": "2026-06-25T05:59:33.420Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-25T06:11:41.766Z",
+      "duration_ms": 728346
     }
   ],
-  "total_spawned": 2,
-  "total_completed": 2,
+  "total_spawned": 13,
+  "total_completed": 13,
   "total_failed": 0,
-  "last_updated": "2026-06-24T15:08:14.090Z"
+  "last_updated": "2026-06-25T06:11:41.868Z"
 }

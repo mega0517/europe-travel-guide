@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1782230795113,
+  "lastScanned": 1782463966120,
   "projectRoot": "/Users/bhkim/MyClaude/europe-travel-guide",
   "techStack": {
     "languages": [],
@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/bhkim/.claude/skills/cheliped-browser/scripts && ls dist 2>/dev/null && echo BUILT || (npm install && npm run build)",
+    "buildCommand": null,
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -35,18 +35,21 @@
     "_workspace": {
       "path": "_workspace",
       "purpose": null,
-      "fileCount": 2,
-      "lastAccessed": 1782230795066,
+      "fileCount": 5,
+      "lastAccessed": 1782463966076,
       "keyFiles": [
         "01_airbnb-reviewer_data.json",
-        "02_travel-guide-reporter_outline.md"
+        "02_travel-guide-reporter_outline.md",
+        "03_airbnb-reviewer_data.json",
+        "04_airbnb-reviewer_piran_data.json",
+        "06_airbnb-reviewer_piran-cleanup_data.json"
       ]
     },
     "backend": {
       "path": "backend",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1782230795066,
+      "lastAccessed": 1782463966076,
       "keyFiles": [
         "README.md",
         "requirements.txt"
@@ -56,7 +59,7 @@
       "path": "frontend",
       "purpose": null,
       "fileCount": 11,
-      "lastAccessed": 1782230795066,
+      "lastAccessed": 1782463966078,
       "keyFiles": [
         "README.md",
         "eslint.config.js",
@@ -65,11 +68,37 @@
         "package.json"
       ]
     },
+    "jungfrau": {
+      "path": "jungfrau",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1782463966081,
+      "keyFiles": [
+        "attractions.html",
+        "driving.html",
+        "food-tips.html",
+        "index.html",
+        "itinerary.html"
+      ]
+    },
+    "milan": {
+      "path": "milan",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1782463966082,
+      "keyFiles": [
+        "attractions.html",
+        "driving.html",
+        "food.html",
+        "index.html",
+        "itinerary.html"
+      ]
+    },
     "backend/app": {
       "path": "backend/app",
       "purpose": "Application code",
       "fileCount": 6,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463966085,
       "keyFiles": [
         "__init__.py",
         "config.py",
@@ -80,7 +109,7 @@
       "path": "backend/tests",
       "purpose": "Test files",
       "fileCount": 3,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463966086,
       "keyFiles": [
         "conftest.py",
         "test_e2e.py",
@@ -91,7 +120,7 @@
       "path": "frontend/public",
       "purpose": "Public files",
       "fileCount": 2,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463966088,
       "keyFiles": [
         "favicon.svg",
         "icons.svg"
@@ -101,19 +130,26 @@
       "path": "frontend/src",
       "purpose": "Source code",
       "fileCount": 3,
-      "lastAccessed": 1782230795067,
+      "lastAccessed": 1782463966088,
       "keyFiles": [
         "App.tsx",
         "index.css",
         "main.tsx"
       ]
+    },
+    "jungfrau/assets": {
+      "path": "jungfrau/assets",
+      "purpose": "Static assets",
+      "fileCount": 0,
+      "lastAccessed": 1782463966090,
+      "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "index.html",
-      "accessCount": 60,
-      "lastAccessed": 1782312598144,
+      "accessCount": 75,
+      "lastAccessed": 1782439167692,
       "type": "file"
     },
     {
@@ -141,9 +177,57 @@
       "type": "file"
     },
     {
+      "path": "piran-report.html",
+      "accessCount": 7,
+      "lastAccessed": 1782355685331,
+      "type": "file"
+    },
+    {
+      "path": "milan/index.html",
+      "accessCount": 5,
+      "lastAccessed": 1782459823924,
+      "type": "file"
+    },
+    {
+      "path": "milan/driving.html",
+      "accessCount": 5,
+      "lastAccessed": 1782459935554,
+      "type": "file"
+    },
+    {
       "path": "밀라노_숙소_단점_리뷰.md",
       "accessCount": 4,
       "lastAccessed": 1782313020330,
+      "type": "file"
+    },
+    {
+      "path": "milan/itinerary.html",
+      "accessCount": 4,
+      "lastAccessed": 1782460243706,
+      "type": "file"
+    },
+    {
+      "path": "milan-report.html",
+      "accessCount": 3,
+      "lastAccessed": 1782350041137,
+      "type": "file"
+    },
+    {
+      "path": "_workspace/06_airbnb-reviewer_piran-cleanup_data.json",
+      "accessCount": 3,
+      "lastAccessed": 1782353601787,
+      "type": "file"
+    },
+    {
+      "path": "milan/food.html",
+      "accessCount": 3,
+      "lastAccessed": 1782460203688,
+      "type": "file"
+    },
+    {
+      "path": "milan/attractions.html",
+      "accessCount": 3,
+      "lastAccessed": 1782460208769,
       "type": "file"
     },
     {
@@ -153,21 +237,39 @@
       "type": "file"
     },
     {
-      "path": "milan-report.html",
+      "path": "밀라노_숙소_단점_리뷰.html",
       "accessCount": 2,
-      "lastAccessed": 1782311885558,
+      "lastAccessed": 1782350056436,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/airbnb-review-report/SKILL.md",
+      "accessCount": 2,
+      "lastAccessed": 1782350069716,
+      "type": "file"
+    },
+    {
+      "path": "_workspace/04_airbnb-reviewer_piran_data.json",
+      "accessCount": 2,
+      "lastAccessed": 1782355355771,
+      "type": "file"
+    },
+    {
+      "path": "피란_숙소_단점_리뷰.md",
+      "accessCount": 2,
+      "lastAccessed": 1782355455777,
+      "type": "file"
+    },
+    {
+      "path": "jungfrau/css/style.css",
+      "accessCount": 2,
+      "lastAccessed": 1782438727502,
       "type": "file"
     },
     {
       "path": ".claude/agents/airbnb-reviewer.md",
       "accessCount": 1,
       "lastAccessed": 1782139670916,
-      "type": "file"
-    },
-    {
-      "path": ".claude/skills/airbnb-review-report/SKILL.md",
-      "accessCount": 1,
-      "lastAccessed": 1782139724192,
       "type": "file"
     },
     {
@@ -207,9 +309,39 @@
       "type": "file"
     },
     {
-      "path": "밀라노_숙소_단점_리뷰.html",
+      "path": "jungfrau/vip-pass.html",
       "accessCount": 1,
-      "lastAccessed": 1782313021130,
+      "lastAccessed": 1782406018969,
+      "type": "file"
+    },
+    {
+      "path": "jungfrau/index.html",
+      "accessCount": 1,
+      "lastAccessed": 1782438719095,
+      "type": "file"
+    },
+    {
+      "path": "jungfrau/itinerary.html",
+      "accessCount": 1,
+      "lastAccessed": 1782438732721,
+      "type": "file"
+    },
+    {
+      "path": "jungfrau/js/main.js",
+      "accessCount": 1,
+      "lastAccessed": 1782438764478,
+      "type": "file"
+    },
+    {
+      "path": "milan/css/style.css",
+      "accessCount": 1,
+      "lastAccessed": 1782438829355,
+      "type": "file"
+    },
+    {
+      "path": "milan/js/main.js",
+      "accessCount": 1,
+      "lastAccessed": 1782438834065,
       "type": "file"
     }
   ],
