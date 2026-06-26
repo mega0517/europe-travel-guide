@@ -6,6 +6,19 @@
 <title>2박3일 상세 일정 · 밀라노 시티 가이드</title>
 <meta name="description" content="융프라우에서 알프스를 넘어 도착–밀라노 2박3일–피란으로 출발, 날짜별 동선과 플랜B">
 <link rel="stylesheet" href="css/style.css">
+<style>
+  .itin-layout{display:flex;gap:28px;align-items:flex-start;}
+  .itin-map{flex:0 0 40%;position:sticky;top:80px;}
+  .itin-map h4{margin:0 0 12px;font-size:15px;font-weight:600;}
+  .itin-map iframe{width:100%;height:calc(100vh - 140px);min-height:420px;border:0;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+  .itin-days{flex:1 1 0;min-width:0;}
+  @media (max-width:880px){
+    .itin-layout{display:block;}
+    .itin-map{position:sticky;top:60px;z-index:20;background:#fff;margin:0 -20px 18px;padding:10px 20px 12px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
+    .itin-map h4{margin:0 0 8px;font-size:14px;}
+    .itin-map iframe{height:200px;min-height:0;border-radius:10px;box-shadow:none;}
+  }
+</style>
 </head>
 <body>
 <nav class="nav">
@@ -44,11 +57,15 @@
         무리한 강행군보다 <b style="font-weight:400;display:inline">하루 2~3개 핵심 명소 + 충분한 휴식</b>이 원칙이에요. 한낮 더위가 심한 7월엔 정오~오후를 실내·카페·아페리티보로 쉬어 가고, 도심 이동은 <b style="font-weight:400;display:inline">지하철·트램</b>을 적극 활용해 다리 부담을 줄이세요. 두오모 옥상은 엘리베이터, 명소 간 거리는 대부분 도보 15~25분이라 천천히 다녀도 충분합니다.
       </div>
 
-      <div class="map-container" style="margin-bottom:24px;">
-        <div style="padding:16px 16px 0;"><h4 style="font-size:16px;font-weight:600;">📍 전체 여정 지도</h4></div>
-        <iframe src="https://maps.google.com/maps?q=Milano,%20Italia&z=12&hl=ko&output=embed" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="itin-layout">
+      <!-- 좌측 고정 지도 -->
+      <div class="itin-map">
+        <h4>🗺️ 전체 여정 지도</h4>
+        <iframe src="https://maps.google.com/maps?q=Milano,%20Italia&z=12&hl=ko&output=embed" title="밀라노 2박3일 전체 여정 지도" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
 
+      <!-- 우측 스크롤 일정 -->
+      <div class="itin-days">
       <!-- DAY 1 -->
       <div class="day">
         <div class="day-head">
@@ -89,9 +106,6 @@
             <li><span class="time">저녁</span> · <span class="what">브레라 지구 산책 &amp; 저녁</span><div class="desc">예술가 동네 브레라의 골목·미술관·아페리티보. 분위기 좋은 트라토리아에서 마무리.</div></li>
           </ul>
           <div class="note tip"><b>💡 예약 순서가 일정을 좌우</b>최후의 만찬 예약 시간을 먼저 확정한 뒤, 그 시간을 기준으로 두오모·성 방문을 앞뒤로 배치하세요. 도보·지하철로 대부분 15~25분 거리라 동선이 유연합니다.</div>
-          <div class="map-container" style="margin-top:20px;">
-            <iframe src="https://maps.google.com/maps?q=Duomo%20di%20Milano&z=14&hl=ko&output=embed" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
         </div>
       </div>
 
@@ -116,6 +130,8 @@
           <div class="note warn"><b>⚠️ 출국일 운전 시간 안배</b>오전 일정 + 5시간 운전이라 점심 무렵에는 출발하는 게 안전합니다. 긴 구간은 <b>운전자끼리 번갈아(약 2.5시간씩)</b> 맡아 피로를 나누세요. 쇼핑·명소를 욕심내기보다 여유 있게 도로에 오르세요.</div>
         </div>
       </div>
+      </div><!-- /itin-days -->
+      </div><!-- /itin-layout -->
 
       <!-- PLAN B -->
       <div class="section-head" style="margin-top:36px">
