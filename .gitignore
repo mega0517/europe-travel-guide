@@ -31,3 +31,7 @@ venv/
 node_modules/
 dist/
 
+# ── OMC operational state (not committed; .omc/skills is the exception) ───────
+**/.omc/*
+!**/.omc/skills/
+

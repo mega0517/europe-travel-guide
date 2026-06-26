@@ -1,7 +1,0 @@
-{
-  "tool_name": "Agent",
-  "tool_input_preview": "{\"description\":\"에어비앤비 숙소 검토 보고서 작성\",\"prompt\":\"프로젝트 /Users/bhkim/MyClaude/europe-travel-guide 의 추천 에어비앤비 숙소에 대한 **검토 보고서**를 작성하라. `airbnb-review-report` 스킬을 따른다(먼저 그 SKILL.md를 읽어라). 최종 산출물: `/Users/bhk...",
-  "error": "Agent type 'airbnb-reviewer' not found. Available agents: claude, claude-code-guide, Explore, frontend-builder, general-purpose, oh-my-claudecode:analyst, oh-my-claudecode:architect, oh-my-claudecode:code-reviewer, oh-my-claudecode:code-simplifier, oh-my-claudecode:critic, oh-my-claudecode:debugger, oh-my-claudecode:designer, oh-my-claudecode:document-specialist, oh-my-claudecode:executor, oh-my-claudecode:explore, oh-my-claudecode:git-master, oh-my-claudecode:planner, oh-my-claudecode:qa-tester...",
-  "timestamp": "2026-06-22T14:51:31.757Z",
-  "retry_count": 1
-}

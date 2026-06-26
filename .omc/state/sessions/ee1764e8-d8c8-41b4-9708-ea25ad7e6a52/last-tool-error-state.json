@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/private/tmp/claude-501/-Users-bhkim-MyClaude-europe-travel-guide/ee1764e8-d8c8-41b4-9708-ea25ad7e6a52/tasks/btzz3bf8t.output\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/bhkim/MyClaude/europe-travel-guide.",
-  "timestamp": "2026-06-25T06:09:28.852Z",
-  "retry_count": 1
-}
