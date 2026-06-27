@@ -4,8 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>볼거리·명소 · 밀라노 시티 가이드</title>
-<meta name="description" content="두오모, 최후의 만찬, 스포르체스코 성, 갤러리아 등 밀라노 명소 요금·예약·소요시간·꿀팁 총정리">
+<meta name="description" content="두오모, 최후의 만찬, 스포르체스코 성, 갤러리아 등 밀라노 명소 — 사진·상세 소개 팝업 + 요금·예약·소요시간·꿀팁 총정리">
 <link rel="stylesheet" href="css/style.css">
+<style>
+  /* ===== 명소 카드 그리드 ===== */
+  .spot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;}
+  .spot-card{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow);cursor:pointer;text-align:left;padding:0;transition:transform .18s ease,box-shadow .18s ease;}
+  .spot-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+  .spot-card__img{height:148px;background-size:cover;background-position:center;background-color:#efe2d8;background-image:linear-gradient(135deg,#e7cdbf,#f5e9df);position:relative;}
+  .spot-card__img::after{content:attr(data-emoji);position:absolute;inset:0;display:grid;place-items:center;font-size:42px;opacity:.5;}
+  .spot-card__img.loaded::after{display:none;}
+  .spot-card__meta{position:absolute;top:10px;left:10px;background:rgba(42,35,32,.62);color:#fff;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+  .spot-card__star{position:absolute;top:10px;right:10px;background:var(--glacier);color:#fff;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:999px;}
+  .spot-card__body{padding:13px 15px 15px;}
+  .spot-card__body h3{margin:0 0 5px;font-size:15.5px;color:var(--ink);}
+  .spot-card__body p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.55;}
+  .spot-card__more{margin-top:10px;font-size:12.5px;font-weight:700;color:var(--alp-blue);}
+
+  /* ===== 팝업(모달) ===== */
+  .spot-overlay{position:fixed;inset:0;background:rgba(42,35,32,.55);z-index:99;opacity:0;pointer-events:none;transition:opacity .25s ease;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+  .spot-overlay.active{opacity:1;pointer-events:auto;}
+  .spot-modal{position:fixed;z-index:100;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;width:min(640px,94vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;background:var(--surface);border-radius:20px;box-shadow:0 24px 70px rgba(0,0,0,.4);transition:opacity .26s ease,transform .26s cubic-bezier(.22,.61,.36,1);}
+  .spot-modal.active{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+  .spot-modal__hero{position:relative;height:230px;background-size:cover;background-position:center;background-color:#e3cfc2;flex:none;}
+  .spot-modal__hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,35,32,0) 40%,rgba(42,35,32,.72));}
+  .spot-modal__title{position:absolute;left:22px;bottom:16px;right:22px;z-index:2;color:#fff;}
+  .spot-modal__title h3{margin:0;font-size:24px;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+  .spot-modal__title .sub{font-size:13px;font-weight:600;opacity:.95;margin-top:4px;text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  .spot-modal__close{position:absolute;top:14px;right:14px;z-index:3;width:40px;height:40px;border:none;border-radius:50%;background:rgba(42,35,32,.5);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;transition:background .2s ease;}
+  .spot-modal__close:hover{background:rgba(42,35,32,.82);}
+  .spot-modal__body{padding:20px 22px 24px;overflow-y:auto;}
+  .spot-modal__body h4{margin:18px 0 9px;font-size:13px;font-weight:700;color:var(--alp-blue);text-transform:uppercase;letter-spacing:.08em;}
+  .spot-modal__body h4:first-child{margin-top:0;}
+  .spot-modal__body p{margin:0 0 11px;font-size:14px;line-height:1.7;color:var(--ink-soft);}
+  .spot-modal__body b{color:var(--ink);font-weight:600;}
+  .spot-modal__body ul{margin:0 0 12px;padding-left:18px;}
+  .spot-modal__body li{font-size:14px;line-height:1.7;color:var(--ink-soft);margin-bottom:4px;}
+  .spot-pills{margin:0 0 4px;}
+  .spot-wiki{background:var(--snow);border-left:3px solid var(--alp-blue);padding:12px 14px;border-radius:6px;font-size:13.5px;line-height:1.7;color:var(--ink-soft);margin:0 0 14px;}
+  .spot-wiki .ld{font-size:11px;font-weight:700;color:var(--alp-blue-d);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;}
+  .spot-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+  .spot-links a{font-size:13px;font-weight:700;padding:9px 14px;border-radius:999px;text-decoration:none;}
+  .spot-links a.gmap{background:var(--alp-blue);color:#fff;}
+  .spot-links a.wiki{background:var(--snow);color:var(--alp-blue-d);border:1px solid var(--line);}
+  body.modal-open{overflow:hidden;}
+  @media (max-width:560px){
+    .spot-modal__hero{height:180px;}
+    .spot-modal__title h3{font-size:20px;}
+  }
+</style>
 </head>
 <body>
 <nav class="nav">
@@ -16,7 +63,7 @@
       <a href="../index.html" class="nav-back">← 유럽 가이드</a>
       <a href="index.html">홈</a>
       <a href="itinerary.html">2박3일 일정</a>
-      <a href="attractions.html">볼거리·명소</a>
+      <a href="attractions.html" class="active">볼거리·명소</a>
       <a href="driving.html">🚗 운전·ZTL·주차</a>
       <a href="food.html">맛집·쇼핑</a>
     </div>
@@ -27,7 +74,7 @@
   <div class="wrap">
     <p class="breadcrumb"><a href="index.html">홈</a> › 볼거리·명소</p>
     <h1>⛪ 볼거리 · 명소</h1>
-    <p>밀라노 핵심 명소를 요금·예약·소요시간·꿀팁과 함께 정리했어요. ★ 표시는 2박3일이라면 놓치지 말 곳.</p>
+    <p>밀라노 핵심 명소를 <b>사진·상세 소개 팝업</b>과 함께 정리했어요. ⭐ 표시는 2박3일이라면 놓치지 말 곳. 요금·운영시간은 방문 전 공식 사이트에서 확인하세요.</p>
   </div>
 </header>
 
@@ -35,65 +82,38 @@
   <section class="block">
     <div class="wrap">
       <div class="note tip">
+        <b>🖼️ 사진을 누르면 상세 소개가 열려요</b>
+        아래 명소 카드의 <b>사진이나 카드</b>를 누르면 큰 사진과 함께 위키백과 요약·하이라이트·요금·예약·꿀팁·지도 링크가 팝업으로 펼쳐집니다. 사진은 위키백과에서 자동으로 불러와요(네트워크 상황에 따라 잠시 걸릴 수 있어요).
+      </div>
+
+      <div class="note">
         <b>🎟️ 예약이 필요한 곳부터 잡으세요</b>
         <b style="font-weight:400;display:inline">최후의 만찬</b>은 사전 예약 필수(매진 빠름), <b style="font-weight:400;display:inline">두오모</b>는 온라인 예약 시 줄을 크게 단축할 수 있습니다. 나머지는 현장 구매로도 충분해요.
       </div>
 
-      <!-- TOP SIGHTS -->
-      <div class="section-head">
+      <!-- 핵심 명소 -->
+      <div class="section-head" style="margin-top:34px">
         <span class="kicker">Must-See</span>
         <h2>핵심 명소</h2>
+        <p>2박3일이라면 우선 도는 네 곳. ⭐ 표시.</p>
       </div>
-      <div class="grid cols-2">
-        <div class="card" id="duomo">
-          <h3>★ 두오모 대성당 &amp; 옥상 테라스</h3>
-          <p>밀라노의 상징. 600년 걸려 지은 고딕 대성당과 135개 첨탑. 옥상 테라스에서 첨탑 숲과 도시·맑은 날 알프스 조망.</p>
-          <p style="margin-top:8px"><span class="pill">통합권 €15~30</span><span class="pill">옥상 계단/엘리베이터</span><span class="pill">1.5~2시간</span><span class="pill">복장 규정</span></p>
-          <p style="margin-top:8px"><b>꿀팁:</b> 내부+옥상 통합권을 온라인 예약하면 줄 단축. 오전 일찍 또는 해질녘이 덜 붐비고 사진도 예뻐요.</p>
-        </div>
-        <div class="card" id="lastsupper">
-          <h3>★ 최후의 만찬 (산타 마리아 델레 그라치에)</h3>
-          <p>레오나르도 다빈치의 벽화. 보존을 위해 15분 단위로 소수만 입장, 관람 약 15분.</p>
-          <p style="margin-top:8px"><span class="pill">€15 + 예약비</span><span class="pill">사전 예약 필수</span><span class="pill">관람 15분</span><span class="pill">시간 엄수</span></p>
-          <p style="margin-top:8px"><b>꿀팁:</b> 공식 사이트(cenacolovinciano)에서 <b>수 주 전</b> 예약. 매진 시 입장 포함 가이드 투어로 우회 가능. 예약 시간보다 일찍 도착.</p>
-        </div>
-        <div class="card" id="galleria">
-          <h3>★ 갤러리아 비토리오 에마누엘레 2세</h3>
-          <p>유리 돔 아케이드의 '응접실'. 명품 부티크·역사적 카페. 황소 모자이크에서 발뒤꿈치 돌리기 행운 의식.</p>
-          <p style="margin-top:8px"><span class="pill">무료(통행)</span><span class="pill">두오모 옆</span><span class="pill">30분~</span></p>
-          <p style="margin-top:8px"><b>꿀팁:</b> 두오모 ↔ 스칼라 극장을 잇는 통로라 동선상 자연히 지나갑니다. 밤 조명도 멋져요.</p>
-        </div>
-        <div class="card" id="sforza">
-          <h3>★ 스포르체스코 성 &amp; 셈피오네 공원</h3>
-          <p>밀라노 공국의 성채. 안뜰과 박물관(미켈란젤로 론다니니 피에타), 뒤로는 넓은 셈피오네 공원.</p>
-          <p style="margin-top:8px"><span class="pill">성뜰 무료</span><span class="pill">박물관 €5~10</span><span class="pill">1~1.5시간</span></p>
-          <p style="margin-top:8px"><b>꿀팁:</b> 무더운 한낮엔 공원 그늘에서 쉬기 좋아요. 두오모에서 도보 15분/지하철 한 정거장.</p>
-        </div>
-      </div>
+      <div class="spot-grid" id="grid-top"></div>
 
-      <!-- ART & CULTURE -->
+      <!-- 예술 · 문화 -->
       <div class="section-head" style="margin-top:40px">
         <span class="kicker">Art &amp; Culture</span>
         <h2>예술 · 문화</h2>
+        <p>시간과 취향에 따라 더해 가는 미술관·극장·성당.</p>
       </div>
-      <div class="grid cols-3">
-        <div class="card"><h3>브레라 미술관</h3><p>라파엘로·카라바조·만테냐 명작. 예술가 동네 브레라 골목과 함께. €12 내외, 1~2시간.</p></div>
-        <div class="card"><h3>스칼라 극장 &amp; 박물관</h3><p>세계 최고 오페라 극장. 공연이 없어도 박물관·객석 견학 가능. 갤러리아 바로 옆.</p></div>
-        <div class="card"><h3>산탐브로조 성당</h3><p>밀라노 수호성인의 로마네스크 명작. 무료 입장, 조용하고 고풍스러움. Day 3 오전 추천.</p></div>
-        <div class="card"><h3>암브로시아나 회화관</h3><p>다빈치·카라바조 소장. 최후의 만찬 매진 시 좋은 대안. €15 내외.</p></div>
-        <div class="card"><h3>나빌리 운하(Navigli)</h3><p>다빈치가 설계에 참여한 운하 지구. 저녁 아페리티보·야경 산책 명소. <a href="food.html">맛집 페이지</a> 참고.</p></div>
-        <div class="card"><h3>몬테나폴레오네 쇼핑가</h3><p>세계적 패션 1번지. 윈도쇼핑만으로도 볼거리. <a href="food.html#shopping">쇼핑 섹션</a>에서 더 보기.</p></div>
-      </div>
+      <div class="spot-grid" id="grid-art"></div>
 
-      <!-- NEARBY -->
+      <!-- 근교 -->
       <div class="section-head" style="margin-top:40px">
         <span class="kicker">Day Trip</span>
         <h2>시간이 남으면 — 근교</h2>
+        <p>기차로 약 1시간. 더위를 피하는 호반·중세 도시 당일치기.</p>
       </div>
-      <div class="grid cols-2">
-        <div class="card"><h3>코모 호수</h3><p>기차로 약 1시간. 알프스 자락의 우아한 호반 마을(벨라조·코모). 더위를 피해 호수 유람선도 좋음.</p></div>
-        <div class="card"><h3>베르가모 알타</h3><p>기차로 약 1시간. 성벽으로 둘러싸인 언덕 위 중세 구시가. 푸니쿨라로 올라가는 전망이 일품.</p></div>
-      </div>
+      <div class="spot-grid" id="grid-nearby"></div>
 
       <div class="map-container" style="margin-top:28px;">
         <div style="padding:16px 16px 0;"><h4 style="font-size:16px;font-weight:600;">📍 명소 위치 지도</h4></div>
@@ -108,12 +128,258 @@
   </section>
 </main>
 
+<!-- 명소 상세 팝업 -->
+<div class="spot-overlay" id="spotOverlay"></div>
+<div class="spot-modal" id="spotModal" role="dialog" aria-modal="true" aria-labelledby="spotModalTitle">
+  <div class="spot-modal__hero" id="spotModalHero">
+    <button class="spot-modal__close" id="spotModalClose" aria-label="닫기">✕</button>
+    <div class="spot-modal__title">
+      <h3 id="spotModalTitle">명소</h3>
+      <div class="sub" id="spotModalSub"></div>
+    </div>
+  </div>
+  <div class="spot-modal__body" id="spotModalBody"></div>
+</div>
+
 <footer class="foot">
   <div class="wrap">
     <div><strong>밀라노 시티 가이드</strong><br>2026.7.10–7.12 · 자매 부부 2쌍 자가용 여행</div>
-    <div>요금·운영시간은 2026년 여름 기준이며 변동될 수 있어요.<br>방문 전 각 명소 공식 사이트에서 예약·운영 확인 권장.</div>
+    <div>사진·요약 출처: 위키백과 · 요금·운영시간은 2026년 여름 기준이며 변동될 수 있어요.<br>방문 전 각 명소 공식 사이트에서 예약·운영 확인 권장.</div>
   </div>
 </footer>
+
 <script src="js/main.js"></script>
+<script>
+/* ====== 명소 데이터 ====== */
+var SPOTS = {
+  top: [
+    { id:'duomo', emoji:'⛪', star:true, name:'두오모 대성당 & 옥상 테라스', sub:'Duomo di Milano · 고딕 대성당',
+      wiki:'밀라노 대성당', wikiEn:'Milan Cathedral', map:'Duomo di Milano',
+      blurb:'밀라노의 상징. 600년에 걸쳐 지은 고딕 대성당과 135개 첨탑. 옥상 테라스에서 첨탑 숲과 도시·맑은 날 알프스 조망.',
+      ko:'밀라노 대성당(두오모)은 이탈리아 최대 규모의 고딕 양식 성당으로, 1386년 착공해 약 600년에 걸쳐 완성되었습니다. 135개의 첨탑과 3,400여 개의 조각상이 솟은 흰 대리석 외관이 장관이며, 꼭대기를 장식한 황금 성모상(마돈니나)이 상징입니다. 옥상 테라스에 올라 첨탑 숲과 밀라노 시가지, 맑은 날엔 알프스까지 조망할 수 있습니다.',
+      facts:['통합권 €15~30','옥상 계단/엘리베이터','관람 1.5~2시간','어깨·무릎 가리는 복장 규정'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>흰 대리석 고딕 외관과 135개 첨탑</li><li>옥상 테라스에서 첨탑 숲·도시 조망(맑은 날 알프스)</li><li>내부 스테인드글라스와 황금 마돈니나</li></ul>'},
+        {h:'예약·요금', html:'<p>내부+옥상 <b>통합권을 온라인 예약</b>하면 줄을 크게 단축할 수 있어요. 옥상은 계단권이 더 싸고 엘리베이터권은 편해요.</p>'},
+        {h:'꿀팁', html:'<p>오전 일찍 또는 해질녘이 덜 붐비고 사진도 예뻐요. <b>어깨·무릎을 가리는 복장</b>이어야 입장 가능합니다.</p>'}
+      ]},
+    { id:'lastsupper', emoji:'🎨', star:true, name:'최후의 만찬', sub:'The Last Supper · 다빈치 벽화',
+      wiki:'최후의 만찬 (레오나르도 다 빈치)', wikiEn:'The Last Supper (Leonardo)', map:'Santa Maria delle Grazie Milan',
+      blurb:'산타 마리아 델레 그라치에 수도원 식당의 레오나르도 다빈치 벽화. 보존을 위해 15분 단위 소수만 입장, 관람 약 15분.',
+      ko:'〈최후의 만찬〉은 레오나르도 다 빈치가 1495~1498년 산타 마리아 델레 그라치에 수도원 식당 벽에 그린 벽화로, 예수가 제자 중 한 명의 배신을 예고하는 순간의 동요를 담았습니다. 원근법과 인물의 심리 묘사로 르네상스 회화의 정점으로 꼽히며, 유네스코 세계유산입니다. 보존을 위해 15분 단위로 소수만 입장하고 관람 시간도 약 15분으로 제한됩니다.',
+      facts:['€15 + 예약 수수료','사전 예약 필수(매진 빠름)','관람 약 15분','예약 시간 엄수'],
+      sections:[
+        {h:'예약 방법', html:'<p>공식 사이트(cenacolovinciano)에서 <b>수 주 전</b> 예약하세요. 매진 시 <b>입장 포함 가이드 투어</b>로 우회할 수 있어요.</p>'},
+        {h:'꿀팁', html:'<p>예약 시간보다 <b>일찍 도착</b>해 신원 확인을 마치세요. 늦으면 입장이 거절될 수 있어요. 매진이면 <b>암브로시아나 회화관</b>이 좋은 대안.</p>'}
+      ]},
+    { id:'galleria', emoji:'🛍️', star:true, name:'갤러리아 비토리오 에마누엘레 2세', sub:'Galleria Vittorio Emanuele II · 유리돔 아케이드',
+      wiki:'비토리오 에마누엘레 2세 갤러리아', wikiEn:'Galleria Vittorio Emanuele II', map:'Galleria Vittorio Emanuele II',
+      blurb:"유리 돔 아케이드의 '밀라노 응접실'. 명품 부티크·역사적 카페. 황소 모자이크에서 발뒤꿈치 돌리기 행운 의식.",
+      ko:"비토리오 에마누엘레 2세 갤러리아는 1877년 완공된 십자형 유리 돔 아케이드로, '밀라노의 응접실(살로토)'로 불립니다. 두오모 광장과 스칼라 극장을 잇는 통로에 명품 부티크와 역사적인 카페가 들어서 있으며, 바닥의 황소 모자이크 위에서 발뒤꿈치를 돌리면 행운이 온다는 속설이 유명합니다.",
+      facts:['무료(통행)','두오모 옆','30분~'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>철·유리 돔 천장과 모자이크 바닥</li><li>황소 모자이크 행운 의식</li><li>두오모↔스칼라를 잇는 동선, 밤 조명도 멋짐</li></ul>'},
+        {h:'꿀팁', html:'<p>두오모 ↔ 스칼라 극장을 잇는 통로라 <b>동선상 자연히 지나갑니다</b>. 카페 자릿값(코페르토)은 비싼 편이에요.</p>'}
+      ]},
+    { id:'sforza', emoji:'🏰', star:true, name:'스포르체스코 성 & 셈피오네 공원', sub:'Castello Sforzesco · 성채·박물관',
+      wiki:'스포르체스코 성', wikiEn:'Sforza Castle', map:'Castello Sforzesco',
+      blurb:'밀라노 공국의 성채. 안뜰과 박물관(미켈란젤로 론다니니 피에타), 뒤로는 넓은 셈피오네 공원.',
+      ko:'스포르체스코 성은 15세기 밀라노 공국의 스포르차 가문이 세운 성채로, 레오나르도 다 빈치와 브라만테도 장식·설계에 참여했습니다. 여러 시립 박물관을 품고 있으며, 미켈란젤로의 미완성 유작 〈론다니니 피에타〉가 대표 소장품입니다. 성 뒤로는 넓은 셈피오네 공원이 펼쳐져 휴식하기 좋습니다.',
+      facts:['성뜰 무료','박물관 €5~10','1~1.5시간'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>웅장한 성문(필라레테 탑)과 안뜰</li><li>미켈란젤로 〈론다니니 피에타〉</li><li>뒤편 셈피오네 공원·평화의 문</li></ul>'},
+        {h:'꿀팁', html:'<p>무더운 한낮엔 <b>공원 그늘</b>에서 쉬기 좋아요. 두오모에서 도보 15분/지하철 한 정거장.</p>'}
+      ]}
+  ],
+  art: [
+    { id:'brera', emoji:'🖼️', name:'브레라 미술관', sub:'Pinacoteca di Brera · 회화관',
+      wiki:'브레라 미술관', wikiEn:'Pinacoteca di Brera', map:'Pinacoteca di Brera',
+      blurb:'라파엘로·카라바조·만테냐 명작. 예술가 동네 브레라 골목과 함께. €12 내외, 1~2시간.',
+      ko:"브레라 미술관은 이탈리아 회화의 보고로, 라파엘로의 〈성모의 결혼〉, 만테냐의 〈죽은 그리스도〉, 카라바조 등 거장의 명작을 소장하고 있습니다. 예술학교와 함께 있어 예술가들이 모이는 브레라 골목과 어우러져 산책하기 좋습니다.",
+      facts:['€12 내외','1~2시간','브레라 골목 인접'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>만테냐 〈죽은 그리스도〉의 강렬한 단축법</li><li>라파엘로 〈성모의 결혼〉</li><li>감성적인 브레라 골목 산책</li></ul>'}
+      ]},
+    { id:'scala', emoji:'🎭', name:'스칼라 극장 & 박물관', sub:'Teatro alla Scala · 오페라 극장',
+      wiki:'라 스칼라', wikiEn:'La Scala', map:'Teatro alla Scala',
+      blurb:'세계 최고 오페라 극장. 공연이 없어도 박물관·객석 견학 가능. 갤러리아 바로 옆.',
+      ko:'라 스칼라(스칼라 극장)는 1778년 개관한 세계 최고 수준의 오페라 극장으로, 베르디·푸치니의 여러 작품이 이곳에서 초연되었습니다. 공연이 없는 날에도 부속 박물관과 발코니 객석을 견학할 수 있어 오페라 팬이 아니어도 둘러볼 만합니다. 갤러리아 바로 옆에 있습니다.',
+      facts:['박물관 €12 내외','갤러리아 옆','공연은 별도 예약'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>화려한 객석과 무대를 보는 박물관 견학</li><li>오페라 역사 자료·악기·의상</li><li>저녁 공연(시즌별 별도 예약)</li></ul>'}
+      ]},
+    { id:'ambrogio', emoji:'⛪', name:'산탐브로조 성당', sub:"Basilica di Sant'Ambrogio · 로마네스크",
+      wiki:'산탐브로조 성당', wikiEn:"Basilica of Sant'Ambrose", map:"Basilica di Sant'Ambrogio Milan",
+      blurb:'밀라노 수호성인의 로마네스크 명작. 무료 입장, 조용하고 고풍스러움. Day 3 오전 추천.',
+      ko:'산탐브로조 성당은 4세기 밀라노의 수호성인 성 암브로시오가 세운 성당으로, 11~12세기에 재건된 롬바르디아 로마네스크 건축의 걸작입니다. 두 개의 종탑과 기둥으로 둘러싸인 아트리움(앞뜰)이 특징이며, 무료 입장으로 조용하고 고풍스러운 분위기를 즐길 수 있습니다.',
+      facts:['무료 입장','로마네스크 걸작','Day 3 오전 추천'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>기둥 아트리움과 두 종탑</li><li>황금 제단(달도 제단)</li><li>고요한 분위기, 무료 관람</li></ul>'}
+      ]},
+    { id:'ambrosiana', emoji:'🖌️', name:'암브로시아나 회화관', sub:'Pinacoteca Ambrosiana · 회화관',
+      wiki:'암브로시아나 회화관', wikiEn:'Pinacoteca Ambrosiana', map:'Pinacoteca Ambrosiana',
+      blurb:'다빈치·카라바조 소장. 최후의 만찬 매진 시 좋은 대안. €15 내외.',
+      ko:"암브로시아나 회화관은 1618년 설립된 유서 깊은 미술관으로, 레오나르도 다 빈치의 〈음악가의 초상〉과 방대한 친필 노트 〈코덱스 아틀란티쿠스〉, 카라바조의 〈과일 바구니〉, 라파엘로의 〈아테네 학당〉 밑그림 등을 소장합니다. 최후의 만찬이 매진일 때 좋은 대안입니다.",
+      facts:['€15 내외','두오모 인근','최후의 만찬 대안'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>다 빈치 〈음악가의 초상〉·코덱스 아틀란티쿠스</li><li>카라바조 〈과일 바구니〉</li><li>라파엘로 〈아테네 학당〉 대형 밑그림(카르토네)</li></ul>'}
+      ]},
+    { id:'navigli', emoji:'🛶', name:'나빌리 운하', sub:'Navigli · 운하 지구',
+      wiki:'나빌리', wikiEn:'Navigli', map:'Navigli Milan',
+      blurb:'다빈치가 설계에 참여한 운하 지구. 저녁 아페리티보·야경 산책 명소.',
+      ko:'나빌리는 레오나르도 다 빈치도 설계에 관여한 밀라노의 운하 지구입니다. 운하 나빌리오 그란데를 따라 식당·바·갤러리와 빈티지 가게가 늘어서 있으며, 해질녘 아페리티보(음료+안주)와 야경 산책 명소로 사랑받습니다.',
+      facts:['저녁 아페리티보','야경 산책','지하철 Porta Genova'],
+      sections:[
+        {h:'꿀팁', html:'<p>저녁 시간이 가장 활기차요. 운하변 아페리티보·식당은 <a href="food.html">맛집 페이지</a>를 참고하세요. 매월 마지막 일요일엔 골동품 시장도 열려요.</p>'}
+      ]},
+    { id:'montenapoleone', emoji:'👜', name:'몬테나폴레오네 쇼핑가', sub:'Via Monte Napoleone · 패션 1번지',
+      wiki:'Via Monte Napoleone', wikiEn:'Via Monte Napoleone', map:'Via Monte Napoleone',
+      blurb:'세계적 패션 1번지. 윈도쇼핑만으로도 볼거리.',
+      ko:"비아 몬테나폴레오네는 세계적인 명품 부티크가 모인 밀라노 패션의 1번지로, '쿼드릴라테로 델라 모다(패션 사각지대)'의 중심 거리입니다. 구매하지 않아도 화려한 쇼윈도와 우아한 건축을 구경하는 것만으로 즐겁습니다.",
+      facts:['윈도쇼핑 무료','명품 부티크','몬테나폴레오네역'],
+      sections:[
+        {h:'꿀팁', html:'<p>인근 비아 델라 스피가·산탄드레아까지 묶어 둘러보세요. 자세한 쇼핑 정보는 <a href="food.html#shopping">쇼핑 섹션</a>에서.</p>'}
+      ]}
+  ],
+  nearby: [
+    { id:'como', emoji:'🏞️', name:'코모 호수', sub:'Lago di Como · 호반 휴양지',
+      wiki:'코모호', wikiEn:'Lake Como', map:'Lake Como',
+      blurb:'기차로 약 1시간. 알프스 자락의 우아한 호반 마을(벨라조·코모). 더위를 피해 호수 유람선도 좋음.',
+      ko:'코모 호수는 알프스 자락에 자리한 Y자 모양의 빙하호로, 우아한 별장과 정원, 벨라조·코모·바렌나 같은 호반 마을로 유명합니다. 밀라노에서 기차로 약 1시간이며, 여름 더위를 피해 호수 유람선을 타고 마을을 오가기 좋습니다.',
+      facts:['기차 약 1시간','벨라조·코모·바렌나','호수 유람선'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>벨라조 — 호수의 진주로 불리는 마을</li><li>호반 별장·정원(빌라 카를로타 등)</li><li>호수 유람선으로 마을 호핑</li></ul>'}
+      ]},
+    { id:'bergamo', emoji:'🏘️', name:'베르가모 알타', sub:'Bergamo Alta · 중세 구시가',
+      wiki:'베르가모', wikiEn:'Bergamo', map:'Città Alta Bergamo',
+      blurb:'기차로 약 1시간. 성벽으로 둘러싸인 언덕 위 중세 구시가. 푸니쿨라로 올라가는 전망이 일품.',
+      ko:"베르가모는 베네치아 성벽(유네스코 세계유산)으로 둘러싸인 언덕 위 구시가 '치타 알타(윗마을)'로 유명합니다. 푸니쿨라를 타고 올라 중세 광장(피아차 베키아)과 두오모, 롬바르디아 평원의 전망을 즐길 수 있습니다. 밀라노에서 기차로 약 1시간.",
+      facts:['기차 약 1시간','베네치아 성벽(유네스코)','푸니쿨라'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>피아차 베키아와 콜레오니 예배당</li><li>베네치아 성벽 산책로 전망</li><li>푸니쿨라로 오르는 윗마을</li></ul>'}
+      ]}
+  ]
+};
+
+/* ====== 위키백과 사진/요약 로더 ====== */
+var _wikiCache = {};
+function fetchWiki(lang, title){
+  var key = lang+':'+title;
+  if(_wikiCache[key]!==undefined) return Promise.resolve(_wikiCache[key]);
+  return fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ _wikiCache[key]=j; return j; })
+    .catch(function(){ _wikiCache[key]=null; return null; });
+}
+// 이미지는 ko→en 보완, 요약은 한국어만(ko 위키 또는 s.ko 폴백)
+function loadSpotMedia(s){
+  return fetchWiki('ko', s.wiki).then(function(jk){
+    var okKo = jk && jk.type !== 'disambiguation';
+    var thumb = okKo && jk.thumbnail && jk.thumbnail.source;
+    var full  = okKo && jk.originalimage && jk.originalimage.source;
+    var koExtract = okKo ? jk.extract : null;
+    if(thumb){
+      return { thumb:thumb, full:full||thumb, extract: koExtract || s.ko || null };
+    }
+    return fetchWiki('en', s.wikiEn || s.wiki).then(function(je){
+      var et = je && je.thumbnail && je.thumbnail.source;
+      var ef = je && je.originalimage && je.originalimage.source;
+      return {
+        thumb: thumb || et || null,
+        full: full || ef || et || thumb || null,
+        extract: koExtract || s.ko || null
+      };
+    });
+  });
+}
+
+/* ====== 카드 렌더 ====== */
+var SPOT_INDEX = {};
+function gmapUrl(q){ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q); }
+function wikiUrl(s){ return 'https://ko.wikipedia.org/wiki/'+encodeURIComponent(s.wiki); }
+
+function renderGrid(groupId, list){
+  var grid = document.getElementById(groupId);
+  if(!grid) return;
+  list.forEach(function(s){
+    SPOT_INDEX[s.id] = s;
+    var btn = document.createElement('button');
+    btn.className = 'spot-card';
+    btn.type = 'button';
+    btn.id = s.id;
+    btn.innerHTML =
+      '<div class="spot-card__img" data-emoji="'+s.emoji+'"><span class="spot-card__meta">'+s.emoji+' '+s.sub+'</span>'+
+      (s.star?'<span class="spot-card__star">⭐ 필수</span>':'')+'</div>'+
+      '<div class="spot-card__body"><h3>'+s.name+'</h3><p>'+s.blurb+'</p>'+
+      '<div class="spot-card__more">사진·상세 보기 →</div></div>';
+    btn.addEventListener('click', function(){ openSpot(s); });
+    grid.appendChild(btn);
+    var imgEl = btn.querySelector('.spot-card__img');
+    s._media = loadSpotMedia(s);
+    s._media.then(function(m){
+      if(m && m.thumb){ imgEl.style.backgroundImage = 'url("'+m.thumb+'")'; imgEl.classList.add('loaded'); }
+    });
+  });
+}
+
+/* ====== 팝업 ====== */
+var overlay = document.getElementById('spotOverlay');
+var modal = document.getElementById('spotModal');
+function openSpot(s){
+  document.getElementById('spotModalTitle').textContent = s.name;
+  document.getElementById('spotModalSub').textContent = s.emoji+'  '+s.sub;
+  var hero = document.getElementById('spotModalHero');
+  hero.style.backgroundImage = '';
+  var body = document.getElementById('spotModalBody');
+  var html = '';
+  html += '<p>'+s.blurb+'</p>';
+  if(s.facts && s.facts.length){
+    html += '<div class="spot-pills">';
+    s.facts.forEach(function(f){ html += '<span class="pill">'+f+'</span>'; });
+    html += '</div>';
+  }
+  html += '<div class="spot-wiki" id="spotWikiBox"><span class="ld">위키백과 요약</span><span id="spotWikiText">불러오는 중…</span></div>';
+  (s.sections||[]).forEach(function(sec){ html += '<h4>'+sec.h+'</h4>'+sec.html; });
+  html += '<div class="spot-links">'+
+    '<a class="gmap" href="'+gmapUrl(s.map)+'" target="_blank" rel="noopener">🗺️ 구글 지도</a>'+
+    '<a class="wiki" href="'+wikiUrl(s)+'" target="_blank" rel="noopener">📖 위키백과</a>'+
+    '</div>';
+  body.innerHTML = html;
+  body.scrollTop = 0;
+  (s._media || loadSpotMedia(s)).then(function(m){
+    if(m && m.full){ hero.style.backgroundImage = 'url("'+m.full+'")'; }
+    var t = document.getElementById('spotWikiText');
+    if(t){ t.textContent = (m && m.extract) ? m.extract : '위키백과 요약을 불러오지 못했어요. 아래 링크에서 확인해 주세요.'; }
+  });
+  overlay.classList.add('active');
+  modal.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeSpot(){
+  overlay.classList.remove('active');
+  modal.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+overlay.addEventListener('click', closeSpot);
+document.getElementById('spotModalClose').addEventListener('click', closeSpot);
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSpot(); });
+
+/* ====== 초기화 ====== */
+renderGrid('grid-top', SPOTS.top);
+renderGrid('grid-art', SPOTS.art);
+renderGrid('grid-nearby', SPOTS.nearby);
+
+/* ====== 해시 딥링크 (#lastsupper 등) — 스크롤 + 팝업 자동 열기 ====== */
+function handleHash(){
+  var id = (location.hash || '').replace('#','');
+  if(id && SPOT_INDEX[id]){
+    var card = document.getElementById(id);
+    if(card){ card.scrollIntoView({behavior:'smooth', block:'center'}); }
+    openSpot(SPOT_INDEX[id]);
+  }
+}
+handleHash();
+window.addEventListener('hashchange', handleHash);
+</script>
 </body>
 </html>
