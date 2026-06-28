@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>문경자매부부 유럽중부 여행 · 여행 가이드</title>
+<!-- 초기 로딩 가속: 외부 호스트 연결 미리 준비 -->
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://a.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://b.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://c.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://router.project-osrm.org">
+<link rel="dns-prefetch" href="https://ko.wikipedia.org">
+<link rel="dns-prefetch" href="https://en.wikipedia.org">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<!-- [성능 테스트] Tailwind 런타임 CDN 대신 미리 빌드한 정적 CSS 사용 -->
+<link rel="stylesheet" href="tailwind.css">
+<style>
+  /* Leaflet 마커/팝업 등 Tailwind로 다루기 어려운 부분만 최소 보강 */
+  .mk-num{background:#c0392b;color:#fff;border-radius:9999px;text-align:center;font-weight:700;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .mk-wp{background:#fff;border:2px solid #9aa7b1;border-radius:9999px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+  #map{position:absolute;inset:0}
+  /* 모던 팝업: 둥근 모서리·부드러운 그림자 (서체는 기본 유지) */
+  .leaflet-popup-content-wrapper{border-radius:15px;box-shadow:0 12px 36px rgba(27,23,20,.22);padding:2px}
+  .leaflet-popup-tip{box-shadow:0 12px 36px rgba(27,23,20,.16)}
+  /* 선택된 지점의 말풍선 강조 (지도 이동 없이 색상만) */
+  .leaflet-popup.popup-active .leaflet-popup-content-wrapper{background:#c0392b;color:#fff;box-shadow:0 10px 30px rgba(192,57,43,.5)}
+  .leaflet-popup.popup-active .leaflet-popup-content-wrapper a{color:#ffe;}
+  .leaflet-popup.popup-active .leaflet-popup-tip{background:#c0392b}
+  .leaflet-popup.popup-active .leaflet-popup-close-button{color:#fff}
+  /* 얇고 모던한 스크롤바 */
+  .nice-scroll{scrollbar-width:thin;scrollbar-color:#d6cab8 transparent}
+  .nice-scroll::-webkit-scrollbar{width:9px;height:9px}
+  .nice-scroll::-webkit-scrollbar-thumb{background:#d6cab8;border-radius:9999px;border:2px solid transparent;background-clip:content-box}
+  .nice-scroll:hover::-webkit-scrollbar-thumb{background:#c3b49d;background-clip:content-box}
+  /* 증분형 더보기: 래퍼가 레이아웃에 영향 주지 않도록 contents 처리 */
+  .dc{display:contents}
+  .is-hidden{display:none!important}
+  /* 모바일: 헤더 라벨이 보이도록 제목이 여러 줄이 되는 대신, 나머지 본문 줄간격을 촘촘히 */
+  @media (max-width:767px){
+    #daylist, #daylist p, #daylist div,
+    #p-body, #p-body p, #p-body li, #p-body div,
+    #detail-col, #d-content, #d-content p, #d-content li,
+    #t-detail, #t-sub, #t-meta{line-height:1.32}
+  }
+</style>
+</head>
+<body class="min-h-screen md:h-screen md:overflow-hidden font-sans text-ink bg-paper">
+<div id="app" class="flex flex-col md:flex-row h-auto md:h-screen md:overflow-hidden">
+
+  <!-- 좌: 지도 (모바일에서는 상단 고정) -->
+  <div class="sticky top-0 z-[20] md:relative md:z-auto min-w-0 h-[46vh] md:h-auto md:flex-1">
+    <div id="map"></div>
+    <div onclick="toggleTitle()" title="클릭하여 자세히 보기"
+      class="absolute z-[1000] top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[580px] bg-ink/75 backdrop-blur-md text-white px-4 py-2.5 md:px-6 md:py-4 rounded-2xl text-center cursor-pointer select-none hover:bg-ink/85 transition shadow-xl ring-1 ring-white/10">
+      <h1 class="text-[14px] md:text-[18px] font-semibold tracking-tight flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 leading-snug">
+        <span id="t-title"></span><span id="t-caret" class="text-[10px] opacity-70 font-normal">▾</span>
+        <button type="button" onclick="openChecklist(event)" title="여행 준비물 체크리스트"
+          class="ml-1 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0">
+          🎒 <span>준비물</span>
+        </button>
+        <a href="travel-guide-report.html" onclick="event.stopPropagation()" title="여행 가이드 보고서"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          📋 <span>여행 보고서</span>
+        </a>
+        <a href="jungfrau/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="융프라우 자동차 여행 가이드"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🚠 <span>융프라우 가이드</span>
+        </a>
+        <a href="milan/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="밀라노 시티 가이드"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🏛️ <span>밀라노 가이드</span>
+        </a>
+      </h1>
+      <div id="t-detail" class="hidden">
+        <p id="t-sub" class="text-[10.5px] md:text-[12.5px] opacity-80 mt-0.5"></p>
+        <div id="t-meta" class="text-[10px] md:text-[11.5px] opacity-70 mt-1 md:mt-1.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 중: 여정 선택 열 -->
+  <div class="nice-scroll shrink-0 w-full md:w-[262px] bg-sand/40 border-t md:border-t-0 md:border-l border-sand overflow-y-auto flex flex-col">
+    <div class="sticky top-0 bg-sand/55 backdrop-blur z-[5] border-b border-sand px-3.5 pt-3.5 pb-3">
+      <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone mb-2 px-0.5">Itinerary</div>
+      <button type="button" onclick="showFullRoute()"
+        class="w-full flex items-center justify-center gap-2 bg-accent text-white text-[13px] font-bold rounded-xl py-2.5 hover:bg-red-700 active:scale-[.99] transition shadow-sm">
+        🗺 여정 선택 <span class="font-normal opacity-80 text-[11.5px]">· 전체 노선 보기</span>
+      </button>
+    </div>
+    <div id="daylist" class="px-2.5 py-2.5"></div>
+  </div>
+
+  <!-- 우: 추천 숙소/식당 열 -->
+  <aside class="nice-scroll shrink-0 w-full md:w-[36%] md:max-w-[480px] bg-white overflow-y-auto shadow-[-10px_0_40px_rgba(27,23,20,.16)] flex flex-col">
+    <div class="sticky top-0 z-[5] bg-white">
+      <div class="relative h-[200px] md:h-[232px] bg-ink overflow-hidden">
+        <div id="p-photo" class="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-700"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-ink/5"></div>
+        <div class="absolute inset-x-0 bottom-0 px-5 pb-4">
+          <span id="p-chip" class="inline-block bg-accent text-white text-[11.5px] font-bold px-2.5 py-1 rounded-full mb-2 shadow"></span>
+          <h2 id="p-name" class="text-white text-[21px] font-bold tracking-tight drop-shadow-lg"></h2>
+          <div id="p-sub" class="text-white/80 text-[13px] mt-1 drop-shadow"></div>
+        </div>
+      </div>
+    </div>
+    <div id="p-body" class="px-5 pt-3 pb-10"></div>
+  </aside>
+
+  <!-- 우(데스크톱 전용): 클릭한 식당·명소 상세 (위치 임베드) -->
+  <aside id="detail-col" class="nice-scroll hidden xl:flex shrink-0 w-[28%] max-w-[380px] bg-paper border-l border-sand overflow-y-auto flex-col">
+    <div id="d-empty" class="m-auto px-7 py-10 text-center text-stone/80 text-[13px] leading-relaxed">
+      <div class="text-[34px] mb-3">🗺️</div>
+      추천 식당이나 <b>가볼 만한 곳</b>을 클릭하면<br>여기에서 위치와 정보를<br>한 화면에 볼 수 있어요.
+    </div>
+    <div id="d-content" class="hidden flex-col"></div>
+  </aside>
+</div>
+
+<!-- 준비물 체크리스트 모달 -->
+<div id="cl-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-3 md:p-5">
+  <div id="cl-backdrop" onclick="closeChecklist()" class="absolute inset-0 bg-ink/60 backdrop-blur-sm"></div>
+  <div class="relative w-full max-w-[560px] max-h-[88vh] md:max-h-[86vh] bg-paper rounded-2xl shadow-2xl ring-1 ring-sand flex flex-col overflow-hidden">
+    <!-- 헤더 -->
+    <div class="shrink-0 bg-ink text-white px-5 pt-4 pb-3.5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-[17px] md:text-[19px] font-bold tracking-tight flex items-center gap-2">🎒 여행 준비물 체크리스트</h2>
+          <p class="text-white/60 text-[11.5px] mt-0.5">이동진 · 김숙경 · 김백현 · 김숙희 · 4인 · 7박 8일 중부유럽</p>
+          <span id="cl-sync-badge" class="inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5">이 기기에 저장</span>
+        </div>
+        <button type="button" onclick="closeChecklist()" title="닫기"
+          class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[20px] leading-none transition">×</button>
+      </div>
+      <!-- 사람별 진행률 칩 -->
+      <div id="cl-people" class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      <!-- 액션 바 -->
+      <div class="mt-3 flex items-center justify-end gap-3">
+        <button type="button" id="cl-edit-btn" onclick="clToggleEdit()"
+          class="shrink-0 inline-flex items-center gap-1 bg-white/12 hover:bg-white/22 ring-1 ring-white/20 rounded-full px-3 py-1 text-[11px] font-semibold transition whitespace-nowrap">✏️ 편집</button>
+        <button type="button" id="cl-save-btn" onclick="clManualSave()"
+          class="hidden shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold transition whitespace-nowrap ring-1 bg-white/8 ring-white/15 text-white/55">저장됨</button>
+        <button type="button" onclick="clResetToSeed()"
+          class="shrink-0 text-[11px] font-semibold text-white/60 hover:text-white underline decoration-white/25 hover:decoration-white transition whitespace-nowrap">기본값 복원</button>
+        <button type="button" onclick="resetChecklist()"
+          class="shrink-0 text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition whitespace-nowrap">전체 초기화</button>
+      </div>
+    </div>
+    <!-- 목록 -->
+    <div id="cl-list" class="nice-scroll flex-1 overflow-y-auto px-4 md:px-5 py-4"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Supabase (실시간 체크리스트 동기화 — config 비면 미사용, 로컬 폴백) · defer로 첫 페인트 비차단 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script>
+/* ===== 임베드 데이터 (Phase1·2 산출물) ===== */
+const ROUTE = {
+  "trip": { "title": "문경자매부부 유럽중부 여행", "subtitle": "부다페스트 → 오스트리아 · 스위스 · 이탈리아 · 슬로베니아 → 부다페스트", "car": "아우디 Q8 (자가용)", "start": "2026-07-06", "end": "2026-07-13" },
+  "stops": [
+    { "id": "budapest", "name": "부다페스트 (출발)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-06", "type": "start", "nights": 0 },
+    { "id": "salzburg", "name": "잘츠부르크", "country": "오스트리아", "lat": 47.8095, "lng": 13.0550, "day": "2026-07-06", "type": "stay", "nights": 1 },
+    { "id": "interlaken", "name": "인터라켄", "country": "스위스", "lat": 46.6863, "lng": 7.8632, "day": "2026-07-07", "type": "stay", "nights": 3 },
+    { "id": "milan", "name": "밀라노", "country": "이탈리아", "lat": 45.4642, "lng": 9.1900, "day": "2026-07-10", "type": "stay", "nights": 2 },
+    { "id": "piran", "name": "피란", "country": "슬로베니아", "lat": 45.5285, "lng": 13.5683, "day": "2026-07-12", "type": "stay", "nights": 1 },
+    { "id": "budapest_end", "name": "부다페스트 (도착)", "country": "헝가리", "lat": 47.4979, "lng": 19.0402, "day": "2026-07-13", "type": "end", "nights": 0 }
+  ],
+  "legs": [
+    { "from": "budapest", "to": "salzburg", "km": 400, "hours": 4.0, "toll": 14, "tollNote": "헝가리 e-마트리카 + 오스트리아 비네트" },
+    { "from": "salzburg", "to": "interlaken", "km": 565, "hours": 5.5, "toll": 50, "tollNote": "아를베르크 터널 통행료 + 스위스 연간 비네트(약 40 CHF)" },
+    { "from": "interlaken", "to": "milan", "km": 320, "hours": 3.7, "toll": 30, "tollNote": "심플론/고타르 터널 + 이탈리아 아우토스트라다" },
+    { "from": "milan", "to": "piran", "km": 500, "hours": 5.0, "toll": 46, "tollNote": "이탈리아 아우토스트라다 + 슬로베니아 비네트" },
+    { "from": "piran", "to": "budapest_end", "km": 545, "hours": 5.5, "toll": 25, "tollNote": "슬로베니아·오스트리아·헝가리 비네트/통행료" }
+  ],
+  "fuel": { "consumption": 11, "priceEur": 1.85, "note": "아우디 Q8 가솔린 11L/100km, 유럽 휘발유 약 €1.85/L 추정" },
+  "tips": [
+    "오스트리아·스위스·슬로베니아는 고속도로 비네트(Vignette) 필수. 스위스는 연간권(40 CHF)만 판매되니 국경 전 구매. 슬로베니아·오스트리아는 전자 비네트(e-vignette) 단기권 구매 가능.",
+    "이탈리아 밀라노 도심은 ZTL(Area C) 진입 제한 구역. 호텔 주차장 또는 외곽 주차 후 대중교통 권장. 위반 시 카메라 자동 과태료.",
+    "인터라켄 3박은 융프라우요흐·그린델발트·라우터브룬넨·쉴트호른 당일 여행 거점으로 활용. 정상은 산악열차/케이블카로 오르고 차는 산기슭(라우터브룬넨·그린델발트 터미널)에 주차.",
+    "피란 구시가는 차량 진입 제한 구역. 마을 입구 포르나체(Fornače) 또는 아르제(Arze) 대형 주차장에 주차하고 무료 셔틀버스로 구시가 이동.",
+    "스위스·이탈리아 알프스 구간은 한여름에도 고지대가 서늘하니 방한 준비. 슬로베니아 해안(피란)은 여름에 덥고 습하므로 에어컨 숙소 권장.",
+    "주차: 잘츠부르크 구시가는 보행자 구역이라 외곽 P&R 주차 후 도보 권장. 인터라켄·피란도 도심 외곽 주차장 활용."
+  ]
+};
+const POI = {
+  "budapest": {
+    "restaurants": [
+      {
+        "name": "Gettó Gulyás",
+        "note": "정통 헝가리 굴라쉬와 가정식, 출발 전 든든한 한 끼",
+        "price": "€€",
+        "cuisine": "헝가리"
+      },
+      {
+        "name": "New York Café",
+        "note": "세계에서 가장 아름다운 카페, 아침/커피",
+        "price": "€€€",
+        "cuisine": "카페"
+      },
+      {
+        "name": "Hungarikum Bisztró",
+        "note": "전통 헝가리 가정식, 푸짐한 양과 라이브 음악",
+        "price": "€€",
+        "cuisine": "헝가리"
+      },
+      {
+        "name": "Bors GasztroBár",
+        "note": "줄 서는 수프·바게트 맛집, 빠른 한 끼",
+        "price": "€",
+        "cuisine": "길거리/퓨전"
+      },
+      {
+        "name": "Stand25 Bisztró",
+        "note": "비브구르망 셰프의 모던 헝가리 비스트로",
+        "price": "€€",
+        "cuisine": "헝가리/모던"
+      },
+      {
+        "name": "Belvárosi Disznótoros",
+        "note": "현지인 줄서는 헝가리식 정육·구이 식당",
+        "price": "€",
+        "cuisine": "헝가리/구이"
+      }
+    ],
+    "highlights": [
+      "부다 성",
+      "어부의 요새",
+      "세체니 다리",
+      "성 이슈트반 대성당",
+      "국회의사당",
+      "영웅 광장",
+      "세체니 온천",
+      "겔레르트 언덕·치타델라",
+      "중앙시장",
+      "바치 거리",
+      "도하니 거리 시나고그",
+      "마차시 성당"
+    ]
+  },
+  "hallstatt": {
+    "restaurants": [
+      {
+        "name": "Restaurant zum Salzbaron",
+        "note": "호숫가 전망, 송어 요리",
+        "price": "€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Bräugasthof Hallstatt",
+        "note": "호수 바로 앞 전통 식당",
+        "price": "€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Café Derbl",
+        "note": "수제 케이크와 커피로 잠깐 쉬기 좋은 곳",
+        "price": "€",
+        "cuisine": "카페"
+      },
+      {
+        "name": "Restaurant Rudolfsturm",
+        "note": "마을 위 전망탑 레스토랑, 호수 파노라마",
+        "price": "€€€",
+        "cuisine": "오스트리아"
+      }
+    ],
+    "highlights": [
+      "할슈타트 호수 전망 포인트",
+      "마르크트 광장",
+      "소금 광산(잘츠벨텐)",
+      "스카이워크 전망대",
+      "가톨릭 교회·납골당(Beinhaus)",
+      "다흐슈타인 빙동굴",
+      "파이브핑거스 전망대",
+      "고사우 호수",
+      "할슈타트 박물관",
+      "보트하우스 포토스팟",
+      "바트 이슐(근교)",
+      "다흐슈타인 크리펜슈타인"
+    ]
+  },
+  "salzburg": {
+    "hotels": [
+      {
+        "name": "Leonardo Hotel Salzburg City Center",
+        "note": "예약 확정 숙소 — 구시가·중앙역 인근 4성, 자가용 접근 편리",
+        "price": "€€",
+        "parking": "자체 주차장(유료)",
+        "confirmed": true,
+        "lat": 47.7973385,
+        "lng": 13.0378267
+      }
+    ],
+    "restaurants": [
+      {
+        "name": "St. Peter Stiftskulinarium",
+        "note": "유럽에서 가장 오래된 레스토랑(803년~)",
+        "price": "€€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Augustiner Bräustübl",
+        "note": "수도원 맥주 양조장, 현지 분위기",
+        "price": "€",
+        "cuisine": "맥주/안주"
+      },
+      {
+        "name": "Zum Fidelen Affen",
+        "note": "현지인 단골 향토 선술집",
+        "price": "€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Café Tomaselli",
+        "note": "1700년대부터 이어진 오스트리아 최고(古) 카페",
+        "price": "€€",
+        "cuisine": "카페/디저트"
+      },
+      {
+        "name": "Gasthof Goldgasse",
+        "note": "구시가 골목의 모던 향토 요리",
+        "price": "€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Triangel",
+        "note": "축제극장 옆 지역 식재료 비스트로",
+        "price": "€€",
+        "cuisine": "오스트리아/모던"
+      }
+    ],
+    "highlights": [
+      "미라벨 정원",
+      "호엔잘츠부르크 성",
+      "모차르트 생가",
+      "게트라이데 거리",
+      "잘츠부르크 대성당",
+      "헬브룬 궁전·분수",
+      "묀히스베르크 전망대",
+      "레지덴츠 광장",
+      "카푸치너베르크",
+      "잘차흐 강변 산책",
+      "운터스베르크 케이블카",
+      "사운드 오브 뮤직 투어"
+    ],
+    "airbnb": []
+  },
+  "feldkirch": {
+    "hotels": [
+      {
+        "name": "Hotel Montfort",
+        "note": "구시가 인접 모던 호텔",
+        "price": "€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Gasthof Lingg",
+        "note": "중세 구시가 가족 운영 게스트하우스",
+        "price": "€",
+        "parking": "인근 주차 가능"
+      },
+      {
+        "name": "Hotel Bären",
+        "note": "전통 가옥 분위기의 4성, 조식 평 좋음",
+        "price": "€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Hotel Central Löwen",
+        "note": "기차역 근처 비즈니스 4성",
+        "price": "€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Gasthof Schäfle",
+        "note": "수상 경력의 향토 다이닝 결합 숙소",
+        "price": "€€",
+        "parking": "주차 가능"
+      }
+    ],
+    "restaurants": [
+      {
+        "name": "Rauch Café",
+        "note": "현지 인기 브런치/카페",
+        "price": "€€",
+        "cuisine": "카페"
+      },
+      {
+        "name": "Dogana",
+        "note": "포어아를베르크식 향토 요리",
+        "price": "€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Schäfle",
+        "note": "지역 식재료를 쓰는 모던 오스트리아 다이닝",
+        "price": "€€€",
+        "cuisine": "오스트리아"
+      },
+      {
+        "name": "Pizzeria Don Camillo",
+        "note": "가족 단위 인기 화덕 피자",
+        "price": "€",
+        "cuisine": "이탈리아"
+      },
+      {
+        "name": "Gasthaus zum Hirschen",
+        "note": "지역 맥주와 푸짐한 전통 메뉴",
+        "price": "€€",
+        "cuisine": "오스트리아"
+      }
+    ],
+    "highlights": [
+      "샤텐부르크 성",
+      "중세 구시가 골목",
+      "카타리넨 봉 전망",
+      "펠트키르히 대성당(돔)",
+      "야생동물공원 Wildpark",
+      "발두나 공원",
+      "리히텐슈타인 파두츠(근교)",
+      "라인강 자전거길",
+      "몬타폰 계곡",
+      "보덴 호수(근교)",
+      "브레겐츠(근교)",
+      "구시가 성문·탑"
+    ],
+    "airbnb": [
+      {
+        "name": "구시가 타운하우스",
+        "note": "중세 골목, 침실 2·4인, 전용 주차",
+        "price": "€€",
+        "area": "구시가"
+      },
+      {
+        "name": "몬타폰 알프스 샬레",
+        "note": "산 전망 4인, 주방 완비·주차",
+        "price": "€€",
+        "area": "근교 계곡"
+      }
+    ]
+  },
+  "lucerne": {
+    "hotels": [
+      {
+        "name": "Hotel des Balances",
+        "note": "로이스 강변, 카펠교 도보 1분",
+        "price": "€€€",
+        "parking": "인근 주차장(Altstadt) 제휴"
+      },
+      {
+        "name": "Hotel Waldstätterhof",
+        "note": "역 앞, 호수·구시가 접근 편리",
+        "price": "€€",
+        "parking": "발레파킹"
+      },
+      {
+        "name": "Hotel des Alpes",
+        "note": "구시가 강변 전망의 합리적 4성",
+        "price": "€€",
+        "parking": "인근 공영주차장"
+      },
+      {
+        "name": "Bürgenstock Resort",
+        "note": "호수 위 절벽 럭셔리 리조트(차로 30분)",
+        "price": "€€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Hotel Schweizerhof Luzern",
+        "note": "호숫가 역사적 5성 그랜드 호텔",
+        "price": "€€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Ibis Styles Luzern City",
+        "note": "역 근처 가성비 모던 숙소",
+        "price": "€",
+        "parking": "인근 주차장"
+      }
+    ],
+    "restaurants": [
+      {
+        "name": "Wirtshaus Galliker",
+        "note": "100년 전통 루체른 향토 요리",
+        "price": "€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Restaurant Old Swiss House",
+        "note": "테이블에서 굽는 비너슈니첼로 유명",
+        "price": "€€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Stadtkeller",
+        "note": "알프호른·요들 라이브가 있는 전통 레스토랑",
+        "price": "€€",
+        "cuisine": "스위스/공연"
+      },
+      {
+        "name": "Bachmann Confiserie",
+        "note": "루체른 명물 초콜릿·페이스트리",
+        "price": "€",
+        "cuisine": "카페/디저트"
+      },
+      {
+        "name": "Restaurant Schiff",
+        "note": "강변 테라스의 치즈 퐁뒤·라클렛",
+        "price": "€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "KKL Seebar & Lounge",
+        "note": "호수 전망 모던 다이닝·바",
+        "price": "€€€",
+        "cuisine": "모던/스위스"
+      }
+    ],
+    "highlights": [
+      "카펠교(Kapellbrücke)",
+      "빈사의 사자상",
+      "필라투스산",
+      "리기산",
+      "루체른 호수 유람선",
+      "슈프로이어교",
+      "무제크 성벽",
+      "교통박물관",
+      "빙하공원",
+      "예수교회",
+      "부르바키 파노라마",
+      "슈탄저호른(근교)"
+    ],
+    "airbnb": [
+      {
+        "name": "호수 전망 아파트",
+        "note": "구시가 도보, 2베드·4인, 발코니",
+        "price": "€€€",
+        "area": "호숫가"
+      },
+      {
+        "name": "루체른 패밀리 스튜디오",
+        "note": "역 인근, 4인, 주방·세탁기",
+        "price": "€€",
+        "area": "시내"
+      },
+      {
+        "name": "리기산 방향 샬레",
+        "note": "조용한 4인 2베드, 무료 주차",
+        "price": "€€",
+        "area": "근교"
+      }
+    ]
+  },
+  "jungfraujoch": {
+    "restaurants": [
+      {
+        "name": "Restaurant Crystal (Top of Europe)",
+        "note": "해발 3,454m 정상 전망 레스토랑",
+        "price": "€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Bollywood Restaurant",
+        "note": "정상 건물 내 인도식 뷔페(따뜻한 식사)",
+        "price": "€€",
+        "cuisine": "인도/뷔페"
+      },
+      {
+        "name": "Aletsch Self-Service",
+        "note": "빠르고 합리적인 셀프서비스 코너",
+        "price": "€",
+        "cuisine": "셀프서비스"
+      }
+    ],
+    "highlights": [
+      "유럽 최고봉 기차역(3,454m)",
+      "알레치 빙하 전망",
+      "스핑크스 전망대",
+      "얼음 궁전(Ice Palace)",
+      "융프라우 파노라마",
+      "플라토 설원",
+      "알파인 센세이션",
+      "린트 초콜릿 천국",
+      "아이거 북벽 조망",
+      "묀히 봉 조망",
+      "스노우 펀 파크",
+      "멘히스요흐 산장 트레킹"
+    ]
+  },
+  "interlaken": {
+    "hotels": [
+      {
+        "name": "Home in Kandergrund (호스트: Karin)",
+        "note": "예약 확정 숙소 — 에어비앤비, 칸더그룬트(인터라켄 근교 베르너 오버란트). 4인",
+        "price": "€€",
+        "parking": "자가용 주차",
+        "confirmed": true,
+        "lat": 46.5105,
+        "lng": 7.6620
+      }
+    ],
+    "restaurants": [
+      {
+        "name": "Restaurant Taverne (Hotel Interlaken)",
+        "note": "스위스 퐁뒤·라클렛",
+        "price": "€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Husi Bierhaus",
+        "note": "현지 맥주와 캐주얼 메뉴",
+        "price": "€€",
+        "cuisine": "스위스/펍"
+      },
+      {
+        "name": "Restaurant Schuh",
+        "note": "1818년부터의 카페·테라스, 알프스 전망",
+        "price": "€€",
+        "cuisine": "카페/스위스"
+      },
+      {
+        "name": "Sapori d'Italia",
+        "note": "화덕 피자와 파스타, 가족 외식",
+        "price": "€€",
+        "cuisine": "이탈리아"
+      },
+      {
+        "name": "Restaurant Bären",
+        "note": "전통 스위스 가정식·뢰스티",
+        "price": "€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Little Thai",
+        "note": "여행자에게 인기 있는 캐주얼 타이 음식",
+        "price": "€",
+        "cuisine": "타이"
+      }
+    ],
+    "highlights": [
+      "융프라우요흐",
+      "고르너그라트(체르마트·마터호른)",
+      "하더쿨름 전망대",
+      "그린델발트 피르스트",
+      "브리엔츠 호수",
+      "툰 호수",
+      "라우터브룬넨 계곡",
+      "슈타우브바흐 폭포",
+      "트뤼멜바흐 폭포",
+      "쉴트호른(피츠 글로리아)",
+      "뮈렌 마을",
+      "성 베아투스 동굴",
+      "발렌베르크 야외박물관"
+    ],
+    "airbnb": []
+  },
+  "zermatt": {
+    "restaurants": [
+      {
+        "name": "Chez Vrony",
+        "note": "마터호른 전망 산장 레스토랑(스키장 위)",
+        "price": "€€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Restaurant Schäferstube",
+        "note": "양고기·라클렛 전문",
+        "price": "€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Findlerhof",
+        "note": "마터호른을 마주 보는 테라스 산장식당",
+        "price": "€€€",
+        "cuisine": "스위스"
+      },
+      {
+        "name": "Bayard's Bäckerei",
+        "note": "산행 전 간단한 빵·커피",
+        "price": "€",
+        "cuisine": "베이커리"
+      },
+      {
+        "name": "Whymper-Stube",
+        "note": "마을 중심의 정통 치즈 퐁뒤 전문",
+        "price": "€€",
+        "cuisine": "스위스/퐁뒤"
+      }
+    ],
+    "highlights": [
+      "마터호른 전망(고르너그라트)",
+      "체르마트 마을 산책",
+      "마터호른 글래시어 파라다이스",
+      "수네가–로트호른",
+      "리펠 호수(거울 호수)",
+      "고르너 빙하",
+      "5호수 트레일",
+      "힌터도르프(옛 마을)",
+      "마터호른 박물관",
+      "클라인 마터호른 전망대",
+      "슈바르츠 호수",
+      "고르너그라트 등산열차"
+    ]
+  },
+  "milan": {
+    "hotels": [
+      {
+        "name": "Home in Milan (호스트: Massimo Claudio)",
+        "note": "예약 확정 숙소 — 에어비앤비, via Parravicini 3 (밀라노 중앙역 인근). 4인",
+        "price": "€€",
+        "parking": "주차 안내(호스트 확인)",
+        "confirmed": true,
+        "lat": 45.492899,
+        "lng": 9.209154
+      }
+    ],
+    "restaurants": [
+      {
+        "name": "Trattoria Milanese",
+        "note": "리소토 알라 밀라네제·코톨레타 정통",
+        "price": "€€",
+        "cuisine": "이탈리아"
+      },
+      {
+        "name": "Luini Panzerotti",
+        "note": "두오모 옆 명물 판제로티(간편식)",
+        "price": "€",
+        "cuisine": "이탈리아/길거리"
+      },
+      {
+        "name": "Ristorante Cracco",
+        "note": "갤러리아 내 미슐랭 파인다이닝",
+        "price": "€€€",
+        "cuisine": "이탈리아/파인다이닝"
+      },
+      {
+        "name": "Pizzeria Spontini",
+        "note": "두툼한 밀라노식 조각 피자",
+        "price": "€",
+        "cuisine": "피자"
+      },
+      {
+        "name": "Navigli 운하 아페리티보 바",
+        "note": "운하변에서 즐기는 저녁 아페리티보",
+        "price": "€€",
+        "cuisine": "바/아페리티보"
+      },
+      {
+        "name": "Ratanà",
+        "note": "전통 밀라노 요리를 모던하게 푼 인기 식당",
+        "price": "€€",
+        "cuisine": "이탈리아/모던"
+      },
+      {
+        "name": "Trattoria del Nuovo Macello",
+        "note": "현지인 사랑하는 미슐랭 비브구르망",
+        "price": "€€",
+        "cuisine": "이탈리아"
+      }
+    ],
+    "highlights": [
+      "두오모 대성당",
+      "갤러리아 비토리오 에마누엘레 2세",
+      "스포르체스코 성",
+      "최후의 만찬",
+      "브레라 미술관",
+      "스칼라 극장",
+      "나빌리 운하",
+      "두오모 옥상 테라스",
+      "산탐브로조 성당",
+      "몬테나폴레오네 쇼핑가",
+      "코모 호수(근교)",
+      "베르가모(근교)"
+    ],
+    "airbnb": []
+  },
+  "bled": {
+    "hotels": [
+      {
+        "name": "Grand Hotel Toplice",
+        "note": "블레드 호수 정면 클래식 5성",
+        "price": "€€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Hotel Triglav Bled",
+        "note": "호수 전망 부티크, 조용한 입지",
+        "price": "€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Vila Bled",
+        "note": "티토 전 별장을 개조한 역사적 호텔",
+        "price": "€€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Garden Village Bled",
+        "note": "글램핑·트리하우스 이색 숙소",
+        "price": "€€",
+        "parking": "주차 가능"
+      },
+      {
+        "name": "Hotel Park Bled",
+        "note": "원조 블레드 크림케이크 카페가 있는 호숫가 호텔",
+        "price": "€€",
+        "parking": "자체 주차장"
+      },
+      {
+        "name": "Penzion Berc",
+        "note": "목조 가족 게스트하우스, 가성비 좋음",
+        "price": "€",
+        "parking": "자체 주차장"
+      }
+    ],
+    "restaurants": [
+      {
+        "name": "Vila Prešeren",
+        "note": "호숫가 테라스, 블레드 크림케이크(크렘슈니타)",
+        "price": "€€",
+        "cuisine": "슬로베니아"
+      },
+      {
+        "name": "Ostarija Peglez'n",
+        "note": "현지 인기 생선·전통 요리",
+        "price": "€€",
+        "cuisine": "슬로베니아"
+      },
+      {
+        "name": "Sova Restaurant",
+        "note": "호수 전망 모던 슬로베니아 다이닝",
+        "price": "€€€",
+        "cuisine": "슬로베니아/파인"
+      },
+      {
+        "name": "Slaščičarna Šmon",
+        "note": "원조 블레드 크림케이크 디저트 가게",
+        "price": "€",
+        "cuisine": "카페/디저트"
+      },
+      {
+        "name": "Gostilna Murka",
+        "note": "정원이 있는 정통 슬로베니아 향토 식당",
+        "price": "€€",
+        "cuisine": "슬로베니아"
+      },
+      {
+        "name": "Pizzeria Rustika",
+        "note": "여행자 인기 화덕 피자·가성비",
+        "price": "€",
+        "cuisine": "이탈리아/피자"
+      }
+    ],
+    "highlights": [
+      "블레드 섬(플레트나 보트)",
+      "블레드 성",
+      "빈트가르 협곡",
+      "보힌 호수",
+      "오슬리차 전망대",
+      "호수 산책로",
+      "성 마르틴 교구교회",
+      "보글 케이블카",
+      "트리글라우 국립공원",
+      "블레드 토보간 썰매",
+      "사바강 래프팅",
+      "류블랴나(근교)"
+    ],
+    "airbnb": [
+      {
+        "name": "블레드 호수뷰 아파트",
+        "note": "발코니 2베드 4인, 주차",
+        "price": "€€",
+        "area": "호숫가"
+      },
+      {
+        "name": "블레드 가족 샬레",
+        "note": "정원·전용 주차, 4인 2베드",
+        "price": "€€",
+        "area": "마을"
+      }
+    ]
+  },
+  "piran": {
+    "hotels": [
+      { "name": "Hotel Piran", "note": "타르티니 광장 옆 해변가 4성, 바다 전망", "price": "€€€", "parking": "인근 공영주차(Arze)" },
+      { "name": "Art Hotel Tartini", "note": "타르티니 광장 정면 부티크 호텔", "price": "€€", "parking": "인근 공영주차" },
+      { "name": "Hotel Barbara Piran Beach", "note": "피에사 해변 가족형 리조트, 수영장", "price": "€€", "parking": "자체 주차장" },
+      { "name": "Max Piran", "note": "구시가의 로맨틱한 소형 호텔(6실)", "price": "€€", "parking": "인근 공영주차" },
+      { "name": "Memento Piran", "note": "항구 인근 모던 부티크", "price": "€€", "parking": "인근 공영주차" },
+      { "name": "PachaMama Pleasant Stay", "note": "구시가 게스트하우스, 가성비", "price": "€", "parking": "인근 공영주차" }
+    ],
+    "restaurants": [
+      { "name": "Pri Mari", "note": "현지인이 사랑하는 지중해·해산물", "price": "€€", "cuisine": "슬로베니아/해산물" },
+      { "name": "Fritolin pri Cantini", "note": "캐주얼 튀김 해산물, 셀프 주문", "price": "€", "cuisine": "해산물" },
+      { "name": "Cantina Klet", "note": "항구 광장 소박한 생선 요리", "price": "€", "cuisine": "해산물" },
+      { "name": "Restaurant Pavel 2", "note": "해변가 생선·조개 모둠", "price": "€€", "cuisine": "해산물" },
+      { "name": "Gostilna Park", "note": "가성비 좋은 현지 가정식", "price": "€", "cuisine": "슬로베니아" },
+      { "name": "Restaurant Neptun", "note": "전통 해산물 노포", "price": "€€", "cuisine": "해산물" }
+    ],
+    "highlights": [
+      "타르티니 광장",
+      "성 게오르기우스 대성당(전망 종탑)",
+      "피란 성벽(파노라마 전망)",
+      "푼타 등대·곶",
+      "세르게이 마셰라 해양박물관",
+      "피에사 해변",
+      "세초블레 염전 자연공원",
+      "포르토로주 리조트(인근)",
+      "타르티니 생가",
+      "미노리트 수도원",
+      "베네치아 하우스(붉은 집)",
+      "피란 항구·마리나"
+    ],
+    "airbnb": [
+      { "name": "타르티니 광장 바다뷰 아파트", "note": "바다 전망 2베드 4인, 인근 주차", "price": "€€", "area": "구시가" },
+      { "name": "피란 구시가 가족 아파트", "note": "4인 2베드, 에어컨·인근 주차", "price": "€€", "area": "구시가" }
+    ]
+  },
+  "budapest_end": {
+    "restaurants": [
+      {
+        "name": "Mazel Tov",
+        "note": "유대인 지구의 분위기 좋은 마무리 만찬",
+        "price": "€€",
+        "cuisine": "중동/지중해"
+      },
+      {
+        "name": "Central Market Hall",
+        "note": "중앙시장에서 마지막 헝가리 먹거리·기념품",
+        "price": "€",
+        "cuisine": "시장/헝가리"
+      },
+      {
+        "name": "Menza",
+        "note": "복고풍 인테리어의 현대 헝가리 비스트로",
+        "price": "€€",
+        "cuisine": "헝가리"
+      },
+      {
+        "name": "Szimpla Kert",
+        "note": "전설적인 폐허 펍(루인 바)에서 마지막 밤",
+        "price": "€€",
+        "cuisine": "바/펍"
+      },
+      {
+        "name": "Onyx Műhely",
+        "note": "헝가리 유일급 파인다이닝(특별한 마무리)",
+        "price": "€€€",
+        "cuisine": "헝가리/파인다이닝"
+      }
+    ],
+    "highlights": [
+      "국회의사당 야경",
+      "세체니 온천",
+      "도나우 강 유람",
+      "부다 성",
+      "어부의 요새",
+      "영웅 광장",
+      "성 이슈트반 대성당",
+      "중앙시장",
+      "자유의 다리",
+      "겔레르트 언덕",
+      "마차시 성당",
+      "바이다후냐드 성"
+    ]
+  }
+};
+
+/* ===== 지도 ===== */
+const map = L.map('map',{zoomControl:true}).setView([46.8,11.5],6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19, attribution:'© OpenStreetMap'
+}).addTo(map);
+
+const latlngs = ROUTE.stops.map(s=>[s.lat,s.lng]);
+/* 전체 노선 맞춤: 모바일에서는 상단 제목이 노선을 가리지 않도록 위쪽 여백을 크게 준다 */
+function fitAll(){
+  const mobile = window.matchMedia('(max-width:767px)').matches;
+  map.fitBounds(L.latLngBounds(latlngs), {
+    paddingTopLeft: mobile ? [20, 120] : [40, 40],
+    paddingBottomRight: [20, 20]
+  });
+}
+fitAll();
+
+/* 실제 도로 경로: OSRM 공개 라우팅으로 구간별 도로 형상을 받아 그린다.
+   실패 시 직선(점선)으로 폴백한다. */
+function stop(id){return ROUTE.stops.find(s=>s.id===id);}
+function fetchWithTimeout(url, ms){
+  if(typeof AbortController==='undefined') return fetch(url);
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(), ms);
+  return fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(t));
+}
+async function drawRoads(){
+  // 각 구간을 병렬로 처리: 먼저 직선(점선)을 즉시 그려 노선을 바로 보여주고,
+  // OSRM 실제 도로 경로가 도착하면 그 위에 실선으로 교체한다(공개 서버가 느려도 6초 후 점선 유지).
+  await Promise.all(ROUTE.legs.map(async lg=>{
+    const a=stop(lg.from), b=stop(lg.to);
+    const placeholder=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'#c0392b',weight:3,opacity:.45,dashArray:'6,7'}).addTo(map);
+    try{
+      const url=`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
+      const r=await fetchWithTimeout(url, 6000); const j=await r.json();
+      if(j.routes && j.routes[0]){
+        const coords=j.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+        L.polyline(coords,{color:'#c0392b',weight:4,opacity:.85}).addTo(map);
+        map.removeLayer(placeholder);
+      }
+    }catch(e){ /* 실패/타임아웃 시 점선 유지 */ }
+  }));
+}
+drawRoads();
+
+/* 숙박 번호를 '박 수' 기준으로 계산 — 2박 이상이면 범위(예: 5-6)로 표시 */
+const NIGHT_LABEL = {};
+(function(){ let cum=0;
+  ROUTE.stops.forEach(s=>{
+    if(s.type==='stay'){
+      const start=cum+1, end=cum+(s.nights||1);
+      NIGHT_LABEL[s.id] = (s.nights>1) ? `${start}-${end}` : `${start}`;
+      cum=end;
+    }
+  });
+})();
+
+const markers = {};
+ROUTE.stops.forEach(s=>{
+  const isStay = s.type==='stay';
+  const label = isStay? NIGHT_LABEL[s.id] : '';
+  const multi = isStay && s.nights>1;
+  const w = isStay ? (multi?40:28) : 14;
+  const h = isStay?28:14;
+  const icon = L.divIcon({ className:'',
+    html:`<div class="${isStay?'mk-num':'mk-wp'}"
+      style="width:${w}px;height:${h}px;line-height:${h-4}px;font-size:13px">${label}</div>`,
+    iconSize:[w,h], iconAnchor:[w/2,h/2] });
+  const m = L.marker([s.lat,s.lng],{icon}).addTo(map);
+  // autoPan: 말풍선이 상단 제목에 가리지 않도록 지도를 살짝 이동해 제목 아래에 보이게 함
+  m.bindPopup(buildPopup(s,null),{autoPan:true,autoPanPaddingTopLeft:[30,118],autoPanPaddingBottomRight:[30,30],minWidth:160});
+  m.on('click',()=>selectStop(s.id));
+  markers[s.id]=m;
+});
+
+/* 예약 확정 숙소 마커: POI hotels 중 confirmed + 좌표 보유 시 실제 위치에 녹색 🏨 핀 표시 */
+ROUTE.stops.forEach(s=>{
+  const hs = (POI[s.id] && POI[s.id].hotels) || [];
+  hs.filter(h=>h.confirmed && h.lat && h.lng).forEach(h=>{
+    const icon = L.divIcon({ className:'',
+      html:`<div style="background:#059669;color:#fff;border:2px solid #fff;border-radius:50% 50% 50% 0;width:26px;height:26px;transform:rotate(-45deg);box-shadow:0 1px 5px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:13px">🏨</span></div>`,
+      iconSize:[26,26], iconAnchor:[13,26] });
+    const m = L.marker([h.lat,h.lng],{icon,zIndexOffset:1200}).addTo(map);
+    m.bindPopup(`<div style="font-weight:800;color:#047857;font-size:11.5px">✅ 예약 확정 숙소</div>`
+      +`<div style="font-weight:700;margin-top:2px;font-size:13px">${h.name}</div>`
+      +`<div style="color:#555;font-size:11px;margin-top:2px">${s.name} · ${fmtDay(s.day)}~${fmtDay(addDays(s.day,s.nights||1))}</div>`
+      +`<a href="${gmaps(h.name, s.name, s.country)}" target="_blank" rel="noopener" style="color:#059669;font-size:11px;display:inline-block;margin-top:3px">구글 지도에서 보기 →</a>`,
+      {minWidth:185});
+  });
+});
+
+/* 말풍선 HTML (사진 + 도시·날짜 + 직전 구간 요약) */
+function buildPopup(s, photoUrl){
+  const pleg = ROUTE.legs.find(l=>l.to===s.id);
+  const legLine = pleg
+    ? `<br><small>🚗 ${stop(pleg.from).name.replace(/\s*\(.*\)/,'')}→ 거리 ${pleg.km}km · ${fmtHours(pleg.hours)}</small>`
+    : '';
+  const img = photoUrl
+    ? `<img src="${photoUrl}" alt="" style="width:100%;height:62px;object-fit:cover;border-radius:6px;margin-bottom:5px;display:block">`
+    : '';
+  return `${img}<b>${s.name}</b><br><small>${s.country} · ${fmtDay(s.day)}</small>${legLine}`;
+}
+
+/* 헤더 */
+document.getElementById('t-title').textContent = ROUTE.trip.title;
+document.getElementById('t-sub').textContent = ROUTE.trip.subtitle;
+document.getElementById('t-meta').textContent =
+  `🚗 ${ROUTE.trip.car} · 📅 ${ROUTE.trip.start} ~ ${ROUTE.trip.end} · 총 ${sumKm()}km`;
+
+/* 중간 열: 여정 리스트 */
+const dl = document.getElementById('daylist');
+ROUTE.stops.forEach(s=>{
+  const isStay = s.type==='stay';
+  const num = isStay? NIGHT_LABEL[s.id] : '';
+  const leg = legTo(s.id);
+  const el = document.createElement('div');
+  el.className='dl-item flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl cursor-pointer mb-1 hover:bg-white hover:shadow-sm transition';
+  el.dataset.id=s.id;
+  const numCls = isStay
+    ? `${(s.nights>1)?'min-w-[34px] px-1':'w-[25px]'} h-[25px] text-[11px] bg-accent`
+    : 'w-[19px] h-[19px] text-[0px] bg-slate-400';
+  el.innerHTML = `<div class="shrink-0 rounded-full text-white font-bold flex items-center justify-center ${numCls}">${num}</div>
+    <div class="min-w-0 text-[11.5px] md:text-[13px]"><b class="block text-[12px] md:text-[13.5px] truncate">${s.name}</b>
+    <small class="text-slate-500 text-[10px] md:text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?`<br><span class="text-accent2">🚗 ${leg.km}km · ${fmtHours(leg.hours)}</span>`:''}</small></div>`;
+  el.onclick=()=>selectStop(s.id);
+  dl.appendChild(el);
+});
+
+/* 도시별 자가용 여행 팁 (선택 시 표시). 없으면 전체 팁으로 폴백 */
+const CITY_TIPS = {
+  budapest: ["출발 전 헝가리 e-마트리카(전자 통행권)를 차량 번호로 등록하세요.", "도심 주차는 유료 구역(색상 라인)이 많아 호텔 주차장 예약을 권장."],
+  hallstatt: ["마을 진입 차량은 통제됩니다. 입구의 P1·P2 주차장에 세우고 도보로 이동.", "성수기 오전엔 주차가 빨리 차니 일찍 도착하는 게 좋아요."],
+  salzburg: ["구시가는 보행자 구역. 묀히스베르크(Mönchsberg) 차고나 P&R 이용.", "오스트리아 비네트(전자)가 차량에 등록됐는지 출발 전 확인."],
+  feldkirch: ["스위스 국경이 가까워요. 비네트 미구매 시 여기서 미리 준비.", "리히텐슈타인·스위스 당일치기 거점으로 좋습니다."],
+  lucerne: ["스위스 연간 비네트(약 40 CHF)를 국경 통과 전에 부착.", "구시가는 차량 진입 제한 — 역 인근 주차 후 도보."],
+  jungfraujoch: ["정상은 차량 진입 불가. 인터라켄/그린델발트에서 산악열차 이용.", "한여름에도 정상은 영하권 — 방한복과 선글라스 필수."],
+  interlaken: ["융프라우 철도 티켓은 성수기 온라인 사전 예약 권장.", "호텔 주차장 여부 확인 — 시내 주차가 제한적입니다.", "DAY 2 융프라우요흐 · DAY 3 고르너그라트(체르마트·마터호른) 두 정상권 — 날씨 보고 맑은 쪽을 먼저 가도록 두 날을 교체 가능.", "고르너그라트는 인터라켄에서 편도 약 2시간(칸더슈테그 카-트레인). 체르마트는 차 진입 불가 → 테쉬 주차+셔틀열차, 등산열차는 스위스 트래블 패스 50% 할인."],
+  zermatt: ["체르마트는 휘발유차 진입 금지. 테쉬(Täsch) 주차장+셔틀열차 이용.", "마터호른 조망은 고르너그라트 등산열차가 가장 좋아요."],
+  milan: ["도심 ZTL(Area C) 진입 제한 — 카메라 자동 과태료 주의.", "ZTL 밖 호텔이나 외곽 주차+지하철 조합을 추천."],
+  bled: ["슬로베니아 비네트(전자) 필요. 국경 전 온라인 구매 가능.", "블레드 섬은 플레트나 전통 보트로만 진입합니다."],
+  budapest_end: ["반납·귀국 일정이면 도심 ZTL/주차 규정 다시 확인.", "마지막 날 중앙시장에서 기념품·먹거리 쇼핑 추천."]
+};
+
+/* ===== 선택 동작 ===== */
+function selectStop(id){
+  const s = ROUTE.stops.find(x=>x.id===id);
+  const p = POI[id] || {};
+  currentStopId = id;
+  // 지도는 전체 보기를 그대로 유지하고, 말풍선만 열어 색상으로 강조
+  markers[id].openPopup();
+  const popEl = markers[id].getPopup().getElement();
+  if(popEl){
+    document.querySelectorAll('.leaflet-popup.popup-active').forEach(p=>p.classList.remove('popup-active'));
+    popEl.classList.add('popup-active');
+  }
+
+  document.getElementById('p-chip').textContent =
+    (s.type==='start'?'출발':s.type==='end'?'도착':s.type==='waypoint'?'경유·관광':`숙박 ${s.nights}박`) + ' · ' + fmtDay(s.day);
+  const city = s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,'');
+  document.getElementById('p-name').innerHTML =
+    `<a href="${wikiUrl(city)}" target="_blank" rel="noopener" title="${city} 소개 보기"
+       class="hover:text-accent2 hover:underline decoration-2 underline-offset-2 transition">${s.name} <span class="text-[14px] align-middle text-accent2">↗</span></a>`;
+  document.getElementById('p-sub').textContent = s.country;
+  loadPhoto(id);
+
+  let html='';
+
+  // 운전 정보 + 자가용 여행 팁 (접이식 카드). 운전 구간이 없는 도시는 팁만 표시
+  const leg = legTo(id);
+  const tips = CITY_TIPS[id] || [];
+  if(leg || tips.length){
+    let body='';
+    if(leg){
+      const from = stop(leg.from);
+      const fuelL = leg.km * (ROUTE.fuel.consumption/100);
+      const fuelCost = fuelL * ROUTE.fuel.priceEur;
+      body += `<div class="grid grid-cols-2 gap-2 text-[13px]">
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">소요 시간</div><div class="font-bold">${fmtHours(leg.hours)}</div></div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">거리</div><div class="font-bold">${leg.km} km</div></div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 휘발유</div><div class="font-bold">${fuelL.toFixed(0)} L <span class="text-slate-400 font-normal">≈ €${fuelCost.toFixed(0)}</span></div></div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2"><div class="text-[10.5px] text-slate-400">예상 톨비</div><div class="font-bold">€${leg.toll}</div></div>
+        </div>
+        ${leg.tollNote?`<div class="text-[11px] text-slate-400 mt-2">ℹ ${leg.tollNote}</div>`:''}
+        <div class="text-[11px] text-emerald-800 bg-emerald-50 rounded-lg px-3 py-2 mt-2">🔄 <b>교대 운전 권장</b> — 운전자끼리 번갈아 약 <b>${fmtHours(leg.hours/2)}씩</b> 맡으면 부담이 절반. 1~2시간마다 휴게소에서 교대하고, 쉬는 사람은 내비·주차·통행권을 챙기면 효율적이에요.</div>
+        <div class="text-[10.5px] text-slate-400 mt-1">* ${ROUTE.fuel.note} · 톨/연료는 추정치</div>`;
+    }
+    if(tips.length){
+      body += `<div class="${leg?'mt-3 pt-3 border-t border-slate-200':''}">
+        <div class="text-[11.5px] font-bold text-amber-700 mb-1.5">🚘 ${city} 자가용 여행 팁</div>
+        <ul class="list-disc ml-4">${tips.map(t=>`<li class="text-[11.5px] leading-snug mb-1 text-amber-900/80">${t}</li>`).join('')}</ul></div>`;
+    }
+    const from = leg ? stop(leg.from).name.replace(/\s*\(.*\)/,'') : '';
+    const header = leg ? `🚗 ${from} → ${city} · 운전 정보 & 팁` : `🚘 ${city} 자가용 여행 팁`;
+    html += `<div class="mt-4 rounded-xl border border-slate-200 overflow-hidden">
+      <button type="button" onclick="toggleDrive(this)"
+        class="w-full flex items-center justify-between gap-2 bg-slate-50 hover:bg-slate-100 px-4 py-3 text-left transition">
+        <span class="text-[12.5px] font-semibold text-slate-700">${header}</span>
+        <span class="drive-chev text-slate-400 text-[11px]">▼ 펼치기</span>
+      </button>
+      <div class="drive-body hidden px-4 py-3 border-t border-slate-200">${body}</div>
+    </div>`;
+  }
+
+  if(p.hotels && p.hotels.length){
+    const hci = s.day, hco = addDays(s.day, s.nights||1);
+    const cards = p.hotels.map(h=>card(h.name,h.price,h.note,[h.confirmed?'✅ 예약 확정':'', h.parking?`🅿 ${h.parking}`:''].filter(Boolean), gmaps(h.name, city, s.country), h.confirmed?'hotel-confirmed':'hotel', bookingBtn(h.name, city, s.country, hci, hco)));
+    html += sec(`🏨 추천 숙소 · 호텔 (${fmtDay(hci)}~${fmtDay(hco)})`, p.hotels.length, expandable(cards, id+'-h'), 'text-sky-700');
+  }
+  if(p.airbnb && p.airbnb.length){
+    const ci = s.day, co = addDays(s.day, s.nights||1);
+    const aurl = airbnbUrl(city, s.country, ci, co);
+    const cards = airbnbCards(city, s.country, p.airbnb, ci, co);
+    html += sec(`🏠 에어비앤비 · 4인 (${fmtDay(ci)}~${fmtDay(co)})`, cards.length,
+      wishlistGuide(city, id)
+      + `<div>${expandableList(cards, id+'-a', 3, 3)}</div>`
+      + `<a href="${aurl}" target="_blank" rel="noopener" class="block text-center text-[11.5px] font-semibold text-rose-600 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1 hover:bg-rose-100 transition">에어비앤비에서 4인 숙소 더 찾기 →</a>`,
+      'text-rose-700');
+  }
+  {
+    const curated = (p.restaurants||[]).map(r=>card(r.name,r.price,r.note,[r.cuisine||''], gmaps(r.name, city, s.country), 'food', undefined,
+      { name:r.name, food:true, price:r.price||'', cuisineRaw:r.cuisine||'', chips:[r.cuisine, r.price].filter(Boolean), note:r.note||'', query:`${r.name} ${city} ${s.country}`, mapurl:gmaps(r.name, city, s.country), kind:'추천 식당' }));
+    html += sec('🍽 추천 식당', `<span id="cnt-r-${id}">${(p.restaurants||[]).length}</span>`,
+      `<div id="list-r-${id}">${expandableList(curated, id+'-r', 2, 4)}</div>`
+      + `<div id="load-r-${id}" class="text-[11.5px] text-stone/70 py-1.5 flex items-center gap-1.5"><span class="inline-block w-3 h-3 border-2 border-stone/40 border-t-transparent rounded-full animate-spin"></span> 주변 식당 100곳 실시간 검색 중…</div>`,
+      'text-amber-700');
+  }
+  {
+    const pills = (p.highlights||[]).map(h=>pillHL(h, city, s.country));
+    html += `<div class="mt-5"><h3 class="text-[12.5px] uppercase tracking-wide text-emerald-700 font-bold mb-2.5">📍 가볼 만한 곳 <span class="text-stone/70 font-normal text-[11px]"><span id="cnt-hl-${id}">${(p.highlights||[]).length}</span>곳</span></h3>
+      <div id="list-hl-${id}" class="flex flex-wrap gap-1.5">${expandableList(pills, id+'-hl', 10, 10)}</div>
+      <div id="load-hl-${id}" class="text-[11.5px] text-stone/70 py-1.5 flex items-center gap-1.5"><span class="inline-block w-3 h-3 border-2 border-stone/40 border-t-transparent rounded-full animate-spin"></span> 주변 명소 100곳 실시간 검색 중…</div></div>`;
+  }
+  document.getElementById('p-body').innerHTML = html ||
+    '<div class="mt-5 text-slate-500 text-[13px]">이 지점은 이동 경유지입니다.</div>';
+
+  resetDetail();  // 도시 변경 시 상세 열 초기화(다른 도시 정보 잔류 방지)
+  loadLive('restaurant', id, city, s.country);  // 주변 실제 식당 100곳 실시간 검색
+  loadLive('attraction', id, city, s.country);  // 주변 실제 명소 100곳 실시간 검색
+
+  document.querySelectorAll('.dl-item').forEach(e=>{
+    const on = e.dataset.id===id;
+    e.classList.toggle('bg-red-50', on);
+    e.classList.toggle('shadow-[inset_3px_0_0_#c0392b]', on);
+  });
+}
+function sec(t,cnt,inner,hc){
+  return `<div class="mt-5"><h3 class="text-[12.5px] uppercase tracking-wide ${hc||'text-accent2'} font-bold mb-2.5 flex items-center gap-2">${t}<span class="text-stone/70 font-normal text-[11px]">${cnt}곳</span></h3>${inner}</div>`;
+}
+/* 카드 유형별 색상(좌측 보더+호버) */
+const CARD_THEME = {
+  hotel:  'border-l-sky-400 bg-sky-50/40 hover:bg-sky-50',
+  'hotel-confirmed': 'border-l-emerald-500 bg-emerald-50/60 hover:bg-emerald-50 ring-1 ring-emerald-200',
+  food:   'border-l-amber-400 bg-amber-50/40 hover:bg-amber-50',
+  airbnb: 'border-l-rose-400 bg-rose-50/40 hover:bg-rose-50'
+};
+function addDays(d,n){
+  const [y,m,dd]=d.split('-').map(Number);
+  const dt=new Date(y,m-1,dd);           // 로컬 자정(시간대 변환 없음)
+  dt.setDate(dt.getDate()+n);
+  const mm=String(dt.getMonth()+1).padStart(2,'0');
+  const da=String(dt.getDate()).padStart(2,'0');
+  return `${dt.getFullYear()}-${mm}-${da}`;
+}
+function airbnbUrlQ(query,checkin,checkout){
+  let u='https://www.airbnb.com/s/'+encodeURIComponent(query)+'/homes?adults=4';
+  if(checkin&&checkout) u+=`&checkin=${checkin}&checkout=${checkout}`;
+  return u;
+}
+function airbnbUrl(city,country,checkin,checkout){
+  return airbnbUrlQ(`${city} ${country}`,checkin,checkout);
+}
+/* 도시별 에어비앤비 위시리스트 ID(숙박지 stop id → Airbnb wishlist id).
+   각 리스트에 해당 도시·숙박일 기준 4인 숙소 20곳을 미리 저장해 둠. */
+const AB_WISHLIST = {
+  salzburg:   '2096235451',
+  feldkirch:  '2096236961',
+  lucerne:    '2096237346',
+  interlaken: '2096237730',
+  milan:      '2096238086',
+  bled:       '2096238451',
+  piran:      '2097543475'
+};
+/* 도시별 숙소 비교·리뷰 분석 보고서(개별 숙소 가격·평점·리뷰·정렬). 값이 있으면 보고서 버튼 노출 */
+const AB_REPORT = {
+  interlaken: 'interlaken-report.html',
+  milan:      'milan-report.html',
+  piran:      'piran-report.html'
+};
+/* 도시별 숙소 '단점 리뷰' 보고서(숙소별 단점 10줄·썸네일). 값이 있으면 비교 보고서 옆에 버튼 노출 */
+const AB_DEFECT_REPORT = {
+  milan: '밀라노_숙소_단점_리뷰.html',
+  piran: '피란_숙소_단점_리뷰.html'
+};
+/* 도시별 전용 상세 가이드 사이트(있으면 카드에 별도 버튼 노출). 인터라켄=융프라우 자동차 여행 가이드 */
+const AB_GUIDE = {
+  interlaken: { href: 'jungfrau/index.html', label: '🚠 융프라우 자동차 여행 가이드 (코스·패스·주차·맛집) →' },
+  milan: { href: 'milan/index.html', label: '🏛️ 밀라노 시티 가이드 (명소·ZTL 운전·주차·맛집) →' }
+};
+/* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
+   해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
+const AB_WISHLIST_SHARE = {
+  salzburg:   'https://www.airbnb.co.kr/wishlists/invite/f3024878-7a15-4724-8ff0-7394bd752ff7?s=67&unique_share_id=82cae9ee-bb96-4190-ad94-2eff9fca3b26',
+  feldkirch:  'https://www.airbnb.co.kr/wishlists/invite/f732eb10-6fe1-45dd-889f-afa8a368b5ba?s=67&unique_share_id=df0ffb50-d53b-447a-8c24-f672f46d87e0',
+  lucerne:    'https://www.airbnb.co.kr/wishlists/invite/489b8185-7b65-4121-bbac-fc5f93e61751?s=67&unique_share_id=5f0ceb7b-6919-4d87-b197-9b77ff58fd06',
+  interlaken: 'https://www.airbnb.co.kr/wishlists/invite/94768887-5db7-4940-b3e3-314bc96d85e8?s=67&unique_share_id=bd4aca03-8ed4-4302-8f4e-85c848598f75',
+  milan:      'https://www.airbnb.co.kr/wishlists/invite/1ac76185-0d6e-475a-8b3a-74483ac6a451?s=67&unique_share_id=da6a3a51-a9e9-40f0-be59-b6a333515681',
+  bled:       'https://www.airbnb.co.kr/wishlists/invite/45ecd7a9-62b3-428a-9f26-47ebe0d8fa57?s=67&unique_share_id=8d6c0741-7509-4d57-8524-f5d8f61eddfb',
+  piran:      'https://www.airbnb.co.kr/wishlists/invite/1136838c-efc5-413e-bf23-2fe954ea2bd5?s=67&unique_share_id=3c2fa6e8-b6b2-4f6c-8bf1-5c841105a1d6'
+};
+
+/* 도시별 숙소 선택 주의 메모(있으면 위시리스트 안내에 노란 박스로 노출).
+   밀라노: 자가용 여행 핵심 — ZTL(Area C) 진입 시 카메라 자동 과태료. ZTL 밖+주차 숙소 우선. */
+const AB_NOTE = {
+  milan: {
+    title: '🚗 ZTL(Area C) 주의 — 자가용은 ZTL 밖 숙소 우선',
+    body: '밀라노 도심 ZTL(Area C)은 카메라 자동 단속(위반 시 ~€80+). 차고가 있어도 진입로가 ZTL 안이면 단속 대상입니다. 위시리스트 20곳을 ZTL 위치로 재점검한 결과 <b>ZTL 밖 15곳·안/경계 4곳</b>. <b>ZTL 밖 + 전용주차/차고 숙소</b>를 권장합니다.',
+    picks: [
+      'Maggiolina · [2min Metro] 차고(폭215cm)·AC·4 beds — 종합 1순위',
+      'Vimodrone · Terrace Apt with garage — 가성비 1순위',
+      'Assago · Park Avenue 3-room(4 beds, 평점 4.99)',
+      'Lotto/Fiera · Private parking, terrace(4 beds)'
+    ],
+    avoid: 'Brera·Porta Venezia(Casa Melzo)·Central pied-à-terre·Obeliscus는 ZTL 안/경계 — 호스트 임시통행권(permesso) 등록 확인 전 비추천.'
+  }
+};
+/* 도시별 위시리스트 안내/링크:
+   1) 공동 편집 초대 링크가 있으면 → '함께 편집하기'(누구나 참여해 숙소 추가 가능)
+   2) 없으면 미리 만들어둔 위시리스트 직링크(본인 열람용)
+   3) 둘 다 없으면 직접 만들도록 안내(폴백) */
+function reportBtn(city, id){
+  const rep = AB_REPORT[id];
+  const def = AB_DEFECT_REPORT[id];
+  const gd = AB_GUIDE[id];
+  const gdBtn = gd ? `<a href="${gd.href}" target="_blank" rel="noopener"
+     class="block text-center text-[11.5px] font-semibold text-sky-700 border border-sky-200 bg-sky-50 rounded-lg py-1.5 mt-1.5 hover:bg-sky-100 transition">${gd.label}</a>` : '';
+  if(!rep && !def && !gd) return '';
+  const repBtn = rep ? `<a href="${rep}" target="_blank" rel="noopener"
+     class="block text-center text-[11.5px] font-semibold text-teal-700 border border-teal-200 bg-teal-50 rounded-lg py-1.5 mt-1.5 hover:bg-teal-100 transition">📊 ${city} 숙소 비교·리뷰 분석 보고서 (가격·평점·정렬) →</a>` : '';
+  const defBtn = def ? `<a href="${encodeURI(def)}" target="_blank" rel="noopener"
+     class="block text-center text-[11.5px] font-semibold text-rose-700 border border-rose-200 bg-rose-50 rounded-lg py-1.5 mt-1.5 hover:bg-rose-100 transition">⚠️ ${city} 숙소별 단점 리뷰 보고서 (단점 10줄·썸네일) →</a>` : '';
+  return gdBtn + repBtn + defBtn;
+}
+function noteBox(id){
+  const n = AB_NOTE[id];
+  if(!n) return '';
+  const picks = (n.picks||[]).map(p=>`<li>${p}</li>`).join('');
+  return `<div class="mb-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2">
+    <div class="text-[11.5px] font-bold text-amber-800">${n.title}</div>
+    <div class="text-[10.8px] text-amber-800/90 mt-1 leading-snug">${n.body}</div>
+    ${picks ? `<ul class="text-[10.6px] text-amber-900/90 mt-1.5 ml-3 list-disc leading-snug">${picks}</ul>` : ''}
+    ${n.avoid ? `<div class="text-[10.6px] text-rose-700 mt-1.5 leading-snug">⚠ ${n.avoid}</div>` : ''}
+  </div>`;
+}
+function wishlistGuide(city, id){
+  const share = AB_WISHLIST_SHARE[id];
+  const wid = AB_WISHLIST[id];
+  if(share){
+    return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[11.5px] font-bold text-rose-700">🤝 ${city} 공동 위시리스트 · 20곳</span>
+        <a href="${share}" target="_blank" rel="noopener"
+           class="text-[11px] font-semibold text-white bg-rose-500 px-2.5 py-1 rounded hover:bg-rose-600 transition">함께 편집하기 →</a>
+      </div>
+      <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
+        ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 <b>공동 편집</b> 위시리스트입니다. 위 버튼을 누르면 각자 에어비앤비에 로그인해 참여하고, 함께 숙소를 추가·삭제할 수 있어요.</div>
+      ${noteBox(id)}
+      ${reportBtn(city, id)}
+    </div>`;
+  }
+  if(wid){
+    const wl=`https://www.airbnb.com/wishlists/${wid}`;
+    return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[11.5px] font-bold text-rose-700">🤍 ${city} 위시리스트 · 20곳</span>
+        <a href="${wl}" target="_blank" rel="noopener"
+           class="text-[11px] font-semibold text-white bg-rose-500 px-2.5 py-1 rounded hover:bg-rose-600 transition">위시리스트 열기 →</a>
+      </div>
+      <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
+        ${city} 숙박일 기준 4인 숙소 20곳을 미리 담아둔 위시리스트입니다. 위 버튼으로 에어비앤비에서 바로 확인·예약하세요.</div>
+      ${noteBox(id)}
+    </div>`;
+  }
+  const wl='https://www.airbnb.com/wishlists';
+  return `<div class="mb-2 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11.5px] font-bold text-rose-700">🤍 ${city} 위시리스트</span>
+      <a href="${wl}" target="_blank" rel="noopener"
+         class="text-[11px] font-semibold text-rose-600 border border-rose-300 bg-white px-2 py-0.5 rounded hover:bg-rose-100 transition">위시리스트 열기 →</a>
+    </div>
+    <div class="text-[10.8px] text-rose-700/80 mt-1 leading-snug">
+      아래 숙소 이름(🏠)을 눌러 에어비앤비에서 연 뒤 ♡를 누르고 <b>새 위시리스트 "${city}"</b>를 만들어 저장하세요. 이후 같은 도시 숙소는 그 리스트에 모입니다.</div>
+  </div>`;
+}
+/* 에어비앤비 20곳+ 카드 생성: 큐레이션 우선 + 지역×유형 조합으로 확장(각 카드는 지역 스코프 검색 링크) */
+const AB_TYPES=[['스튜디오','€'],['1베드룸 아파트','€'],['2베드룸 아파트','€€'],['3베드룸 하우스','€€€'],['로프트','€€'],['펜트하우스','€€€'],['타운하우스','€€'],['게스트 스위트','€'],['패밀리 아파트','€€'],['듀플렉스','€€€']];
+const AB_AREAS=['구시가','중앙역 인근','강변','신시가','대성당 인근','공원 인근'];
+const AB_PERKS=['주방·세탁기','무료 주차','발코니','엘리베이터','전용 입구','4인 침대 구성','자연 전망','도심 도보권'];
+function airbnbCards(city,country,curated,ci,co){
+  const out=(curated||[]).map(a=>card(a.name,a.price,a.note,['👥 4인',a.area].filter(Boolean),
+    airbnbUrlQ(`${city} ${country} ${a.area||''}`.trim(),ci,co),'airbnb'));
+  const areas=[...new Set([...(curated||[]).map(a=>a.area).filter(Boolean),...AB_AREAS])];
+  let i=0;
+  while(out.length<24){
+    const t=AB_TYPES[i%AB_TYPES.length], area=areas[i%areas.length], perk=AB_PERKS[i%AB_PERKS.length];
+    out.push(card(`${area} ${t[0]}`,t[1],`${perk} · 4인, ${area}`,['👥 4인',area],
+      airbnbUrlQ(`${city} ${country} ${area}`,ci,co),'airbnb'));
+    i++;
+  }
+  return out;
+}
+function priceColor(p){
+  if(p==='€') return 'text-emerald-600';
+  if(p==='€€') return 'text-amber-600';
+  if(p==='€€€') return 'text-rose-600';
+  return 'text-slate-500';
+}
+const SHOWN = 2; // 기본 노출 개수, 나머지는 '더보기'로 펼침
+function expandable(cards, key){
+  if(cards.length <= SHOWN) return cards.join('');
+  const head = cards.slice(0, SHOWN).join('');
+  const rest = cards.slice(SHOWN).join('');
+  const n = cards.length - SHOWN;
+  return `${head}<div id="more-${key}" class="hidden">${rest}</div>
+    <button type="button" onclick="toggleMore('${key}',this)"
+      class="w-full mt-1 mb-1 text-[12.5px] font-semibold text-accent2 border border-slate-200 rounded-lg py-2 hover:bg-slate-50 transition">
+      더보기 <span class="text-slate-400">+${n}곳</span></button>`;
+}
+function toggleMore(key, btn){
+  const el = document.getElementById('more-'+key);
+  const hidden = el.classList.toggle('hidden');
+  btn.innerHTML = hidden
+    ? `더보기 <span class="text-slate-400">+${el.children.length}곳</span>`
+    : '접기 ▲';
+}
+/* 증분형 더보기 + 언제든 접기: '더보기'는 step개씩 노출, '접기'는 처음 상태로 되돌림(부분 노출 상태에서도 가능) */
+function expandableList(items, key, initial, step){
+  if(items.length <= initial) return items.join('');
+  const head = items.slice(0, initial).join('');
+  const rest = items.slice(initial)
+    .map(h=>`<span class="more-${key} dc is-hidden">${h}</span>`).join('');
+  const remaining = items.length - initial;
+  return `${head}${rest}
+    <div data-ctrl="${key}" class="flex gap-2 w-full mt-1.5 mb-1">
+      <button type="button" data-act="more" data-key="${key}" data-step="${step}" onclick="expMore(this)"
+        class="flex-1 text-[12.5px] font-semibold text-accent2 border border-slate-200 rounded-lg py-2 hover:bg-slate-50 transition">
+        더보기 <span class="text-slate-400">+${Math.min(step,remaining)}곳</span></button>
+      <button type="button" data-act="less" data-key="${key}" onclick="expLess(this)"
+        class="hidden shrink-0 px-3.5 text-[12.5px] font-semibold text-stone border border-slate-200 rounded-lg py-2 hover:bg-slate-50 transition">접기 ▲</button>
+    </div>`;
+}
+function expUpdate(key){
+  const ctrl=document.querySelector('[data-ctrl="'+key+'"]'); if(!ctrl) return;
+  const total=document.querySelectorAll('.more-'+key).length;
+  const hidden=document.querySelectorAll('.more-'+key+'.is-hidden').length;
+  const more=ctrl.querySelector('[data-act="more"]'), less=ctrl.querySelector('[data-act="less"]');
+  if(hidden>0){ more.classList.remove('hidden'); more.querySelector('span').textContent='+'+Math.min(+more.dataset.step,hidden)+'곳'; }
+  else more.classList.add('hidden');
+  less.classList.toggle('hidden', (total-hidden)<=0);   // 하나라도 펼쳐져 있으면 접기 노출
+}
+function expMore(btn){ const key=btn.dataset.key, step=+btn.dataset.step;
+  Array.from(document.querySelectorAll('.more-'+key+'.is-hidden')).slice(0,step).forEach(el=>el.classList.remove('is-hidden')); expUpdate(key); }
+function expLess(btn){ const key=btn.dataset.key;
+  document.querySelectorAll('.more-'+key).forEach(el=>el.classList.add('is-hidden')); expUpdate(key); }
+function gmaps(name,city,country){
+  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(`${name} ${city} ${country}`);
+}
+/* 도시 소개 페이지: 한국어 위키백과(정확 매칭 시 문서로, 아니면 검색 결과로 이동) */
+function wikiUrl(city){
+  return 'https://ko.wikipedia.org/w/index.php?title=Special:Search&go=Go&search='+encodeURIComponent(city);
+}
+/* 도시별 대표 사진: 위키백과 대표 이미지(영문 문서 lead image)를 런타임에 로드 */
+const PHOTO_TITLE = {
+  budapest:'Budapest', hallstatt:'Hallstatt', salzburg:'Salzburg', feldkirch:'Feldkirch,_Vorarlberg',
+  lucerne:'Lucerne', jungfraujoch:'Jungfraujoch', interlaken:'Interlaken', zermatt:'Zermatt',
+  milan:'Milan', bled:'Lake_Bled', budapest_end:'Budapest'
+};
+const photoCache = {};
+function fetchPhoto(id){
+  const t=PHOTO_TITLE[id];
+  if(!t) return Promise.resolve(null);
+  if(photoCache[id]!==undefined) return Promise.resolve(photoCache[id]);
+  return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t))
+    .then(r=>r.json())
+    .then(j=>{ const src=(j.thumbnail&&j.thumbnail.source)||(j.originalimage&&j.originalimage.source)||null;
+      photoCache[id]=src; return src; })
+    .catch(()=>{ photoCache[id]=null; return null; });
+}
+function loadPhoto(id){
+  const el=document.getElementById('p-photo');
+  el.classList.add('hidden'); el.style.backgroundImage='';
+  fetchPhoto(id).then(src=>{ if(src){ el.style.backgroundImage=`url("${src}")`; el.classList.remove('hidden'); } });
+}
+function card(nm,price,note,tags,mapUrl,type,extra,detailObj){
+  const theme = CARD_THEME[type] || 'border-l-slate-300';
+  const isAb = type==='airbnb';
+  const ico = isAb?'🏠':'📍';
+  const ttl = isAb?'에어비앤비에서 보기':'구글 지도에서 보기';
+  const detailAttr = detailObj ? ` data-detail="${encodeURIComponent(JSON.stringify(detailObj))}"` : '';
+  const nameHtml = mapUrl
+    ? `<a href="${mapUrl}" target="_blank" rel="noopener" title="${ttl}"${detailAttr}
+        class="font-bold text-[13.5px] text-slate-800 hover:text-accent2 hover:underline decoration-dotted underline-offset-2">${nm} <span class="text-[10px] align-middle opacity-60">${ico}</span></a>`
+    : `<span class="font-bold text-[13.5px]">${nm}</span>`;
+  const tagHtml = (tags||[]).filter(Boolean)
+    .map(t=>`<span class="inline-block bg-white/70 text-slate-500 text-[10.5px] px-1.5 py-0.5 rounded mr-1">${t}</span>`).join('');
+  return `<div class="rec-card border border-slate-200/80 border-l-[4px] ${theme} rounded-xl px-3.5 py-2.5 mb-2 hover:shadow-sm transition">
+    <div class="flex justify-between items-baseline gap-2">
+      ${nameHtml}${price?`<span class="text-[11.5px] font-extrabold ${priceColor(price)} whitespace-nowrap">${price}</span>`:''}</div>${
+    note?`<div class="text-stone text-[11.8px] mt-0.5 leading-snug">${note}</div>`:''}${
+    tagHtml?`<div class="mt-1">${tagHtml}</div>`:''}${extra||''}</div>`;
+}
+/* 호텔 예약 검색 링크(부킹닷컴, 정확한 숙박 날짜·4인 반영) */
+function bookingUrl(name,city,country,ci,co){
+  let u='https://www.booking.com/searchresults.html?ss='+encodeURIComponent(`${name} ${city} ${country}`)+'&group_adults=4&no_rooms=2&group_children=0';
+  if(ci&&co) u+=`&checkin=${ci}&checkout=${co}`;
+  return u;
+}
+function bookingBtn(name,city,country,ci,co){
+  return `<a href="${bookingUrl(name,city,country,ci,co)}" target="_blank" rel="noopener"
+    class="inline-block mt-1.5 text-[11px] font-semibold text-sky-700 border border-sky-200 bg-sky-50 px-2 py-0.5 rounded hover:bg-sky-100 transition">📅 ${fmtDay(ci)}~${fmtDay(co)} · 4인 예약검색</a>`;
+}
+/* '여정 선택' 버튼: 전체 노선이 보이도록 지도 맞춤 + 선택 강조 해제 */
+function showFullRoute(){
+  map.closePopup();
+  document.querySelectorAll('.leaflet-popup.popup-active').forEach(p=>p.classList.remove('popup-active'));
+  document.querySelectorAll('.dl-item').forEach(e=>{
+    e.classList.remove('bg-red-50');
+    e.classList.remove('shadow-[inset_3px_0_0_#c0392b]');
+  });
+  fitAll();
+}
+function fmtDay(d){
+  const p=d.split('-'); const mm=+p[1]; const dd=+p[2];
+  const wd=['일','월','화','수','목','금','토'][new Date(d+'T00:00:00').getDay()];
+  return `${mm}/${dd}(${wd})`;
+}
+function fmtHours(h){const H=Math.floor(h);const M=Math.round((h-H)*60);return M?`${H}시간 ${M}분`:`${H}시간`;}
+function toggleTitle(){
+  const d=document.getElementById('t-detail');
+  const hidden=d.classList.toggle('hidden');
+  document.getElementById('t-caret').textContent = hidden ? '▾' : '▴';
+}
+function toggleDrive(btn){
+  const body = btn.parentElement.querySelector('.drive-body');
+  const hidden = body.classList.toggle('hidden');
+  btn.querySelector('.drive-chev').textContent = hidden ? '▼ 펼치기' : '▲ 접기';
+}
+
+/* ===== 여행 준비물 체크리스트 (4인 개별 체크 + 항목 CRUD) ===== */
+/* 인원 정의 */
+const CL_PEOPLE = [
+  { id:'p1', name:'이동진', short:'동진' },
+  { id:'p2', name:'김숙경', short:'숙경' },
+  { id:'p3', name:'김백현', short:'백현' },
+  { id:'p4', name:'김숙희', short:'숙희' }
+];
+/* 시드(기본) 체크리스트 — 사용자 편집 전 초기값으로만 사용 */
+const CHECKLIST_SEED = [
+  { cat: '여권 · 서류', icon: '🛂', items: [
+    '여권 (유효기간 6개월 이상)', '여권 사본 (분리 보관)', '여권용 증명사진 (분실 대비)',
+    '국제운전면허증', '국내운전면허증 (국제면허증과 함께 지참 필수)',
+    '항공권 e-티켓 (출력본)', '렌터카 예약확인서', '숙소 예약확인서 (전체 일정)',
+    '여행자보험증서', '신용/체크카드 2매 이상 (분산 보관)', '유로 현금 (소액권 위주)' ]
+  },
+  { cat: '자동차 · 운전', icon: '🚗', items: [
+    '오스트리아 비네트 (Vignette) 구매 확인', '슬로베니아 비네트 구매 확인', '체코 통행료/비네트 확인',
+    '차량 등록증 · 그린카드(보험증) 차내 비치', '반사 안전조끼 (운전석·조수석 의무)', '경고 삼각대',
+    '운전자 전원 국제운전면허증(IDP)+면허 원본 (교대 운전 대비)', '운전 교대 순번·구간 사전 합의 (장거리 분담)',
+    '구급상자 (차량 비치 의무)', '주차 디스크 (Parking disc)', '휴대폰 차량 거치대', '차량용 USB 충전기',
+    '구글맵 오프라인 지도 다운로드', '비상 연락처 (렌터카사 · 보험사 · 영사관)' ]
+  },
+  { cat: '전자기기', icon: '🔌', items: [
+    '유럽 변환 어댑터 (C/F 타입)', '멀티탭 (어댑터 1개로 여러 기기)', '보조배터리 (2만mAh 내외)',
+    '충전 케이블 (라이트닝/C타입)', '카메라 · 메모리카드 · 충전기', '이어폰/블루투스 헤드폰' ]
+  },
+  { cat: '의류 · 생활', icon: '👕', items: [
+    '계절 의류 (산악지대 일교차 대비 긴팔)', '편한 운전화 · 운동화', '우산 / 경량 우비',
+    '선글라스', '세면도구 (칫솔·치약·면도기)', '자외선 차단제 (고산지대 필수)', '수영복 (블레드 호수 등)' ]
+  },
+  { cat: '상비약 · 건강', icon: '💊', items: [
+    '개인 처방약 (처방전 사본 동반)', '진통제 · 소화제 · 지사제', '멀미약 (산악도로 대비)',
+    '밴드 · 연고 · 소독약', '마스크', '종합비타민 / 영양제' ]
+  },
+  { cat: '여행 · 편의', icon: '🧳', items: [
+    '목베개 (장거리 운전·이동)', '차내 간식 · 생수 · 텀블러', '지퍼백 · 물티슈',
+    '장보기용 에코백 (마트 봉투 유료)', '비상금 분산 보관', '한국 비상식량 (컵라면·즉석밥 등)' ]
+  }
+];
+
+const CL_ITEMS_KEY = 'eurotrip-checklist-items'; /* 리스트 구조 */
+const CL_CHECKS_KEY = 'eurotrip-checks-v2';      /* 사람별 체크 상태 */
+let CL_EDIT = false;                              /* 편집 모드 */
+let _clItems = null;                              /* 메모리 캐시 (구조) */
+let _clIdSeq = 0;                                 /* 항목 id 카운터 */
+
+/* ===== Supabase 실시간 동기화 (선택) ===== */
+/* Supabase 실시간 동기화 — 콘솔에서 발급한 값으로 채우면 자동 활성. 비우면 이 기기 localStorage만 사용 */
+const CL_SUPABASE_URL = "https://ehwhvritnhffujvyfcod.supabase.co";        // 예: https://xxxx.supabase.co
+const CL_SUPABASE_ANON_KEY = "sb_publishable_Jx-Hll2OSd4iii5fO5Ca5g_OR4OJH0D";   // anon public key
+const CL_SYNC_ID = 'eurotrip2026'; // shared_state row id
+
+const clCloud = {
+  on: false,          /* 클라우드 활성(초기화 성공) 여부 */
+  sb: null,           /* Supabase 클라이언트 인스턴스 */
+  channel: null,      /* (미사용) 실시간 채널 — 안전 정리용 보관 */
+  writing: false,     /* 저장 중(자기 쓰기) 플래그 */
+  dirty: false        /* 미저장 로컬 변경 존재 여부 */
+};
+
+/* config 유효성: URL 과 ANON_KEY 둘 다 채워져 있어야 활성 */
+function clCloudEnabled(){
+  return !!(CL_SUPABASE_URL && CL_SUPABASE_ANON_KEY);
+}
+
+/* 초기화 — 실패/미설정 시 조용히 로컬 폴백 */
+function clCloudInit(){
+  if(clCloud.on) return true;
+  if(!clCloudEnabled()) return false;
+  if(typeof window === 'undefined' || !window.supabase || !window.supabase.createClient) return false;
+  try {
+    clCloud.sb = window.supabase.createClient(CL_SUPABASE_URL, CL_SUPABASE_ANON_KEY);
+    clCloud.on = true;
+    return true;
+  } catch(e){
+    clCloud.on = false;
+    return false;
+  }
+}
+
+/* 활성 input(편집 중 항목명/추가칸)에 포커스가 있으면 리렌더 보류 */
+function clIsEditingFocused(){
+  const a = document.activeElement;
+  return !!(a && a.tagName === 'INPUT' && a.type === 'text' && a.closest && a.closest('#cl-list'));
+}
+
+/* 원격에서 받은 items 적용 (로컬 캐시·스토리지 갱신 + 조건부 리렌더) */
+function clApplyRemoteItems(val){
+  if(!Array.isArray(val) || !val.length) return;
+  const next = JSON.stringify(val);
+  if(next === JSON.stringify(_clItems)) return; /* 동일 값이면 스킵 */
+  _clItems = val;
+  try { localStorage.setItem(CL_ITEMS_KEY, next); } catch(e){}
+  if(clModalOpen() && !clIsEditingFocused()) renderChecklist();
+}
+/* 원격에서 받은 checks 적용 */
+function clApplyRemoteChecks(val){
+  const obj = val || {};
+  const next = JSON.stringify(obj);
+  let cur = '{}';
+  try { cur = localStorage.getItem(CL_CHECKS_KEY) || '{}'; } catch(e){}
+  if(next === cur) return;               /* 동일 값이면 스킵 */
+  try { localStorage.setItem(CL_CHECKS_KEY, next); } catch(e){}
+  if(clModalOpen() && !clIsEditingFocused()) renderChecklist();
+}
+
+/* 모달 열릴 때 클라우드 최신본을 1회 불러오기 (자동 실시간 구독은 없음).
+   미저장 로컬 변경(dirty)이 있으면 덮어쓰지 않도록 불러오기 스킵 */
+function clSubscribe(){
+  if(!clCloud.on || !clCloud.sb) return;
+  if(clCloud.dirty) return;        /* 미저장 변경 보호: 불러오기 스킵 */
+
+  try {
+    clCloud.sb.from('shared_state').select('items,checks').eq('id', CL_SYNC_ID).maybeSingle()
+      .then(res=>{
+        const data = res && res.data;
+        if(!data) return;          /* 원격이 비어 있으면 로컬 유지 */
+        if(clCloud.dirty) return;  /* 불러오는 사이 변경이 생겼으면 보호 */
+        if(data.items) clApplyRemoteItems(data.items);
+        if(data.checks) clApplyRemoteChecks(data.checks);
+        clCloud.dirty = false;     /* 불러온 직후는 깨끗한 상태 */
+        clSaveBtn();
+      }, ()=>{});
+  } catch(e){}
+}
+
+/* (호환용) 모달 닫을 때 호출 — 자동 구독이 없으므로 채널이 있으면 안전 정리만 */
+function clUnsubscribe(){
+  if(!clCloud.on || !clCloud.sb) return;
+  try {
+    if(clCloud.channel){
+      clCloud.sb.removeChannel(clCloud.channel);
+      clCloud.channel = null;
+    }
+  } catch(e){}
+}
+
+/* 동기화 상태 배지 갱신 (수동 저장 방식) */
+function clSyncBadge(){
+  const el = document.getElementById('cl-sync-badge');
+  if(!el) return;
+  if(!clCloud.on){
+    el.textContent = '이 기기에 저장';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  } else {
+    el.textContent = '☁︎ 클라우드 저장(수동)';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-accent2/25 ring-1 ring-accent2/40 text-white text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  }
+}
+
+/* ---- 수동 저장 ---- */
+/* 미저장 변경 표시 */
+function clSetDirty(){
+  if(!clCloud.on) return;   /* 클라우드 비활성이면 dirty 의미 없음 */
+  clCloud.dirty = true;
+  clSaveBtn();
+}
+/* 저장 버튼 상태 렌더 (state: 'idle' | 'saving' | 'saved' | 'error') */
+function clSaveBtn(state){
+  const btn = document.getElementById('cl-save-btn');
+  if(!btn) return;
+  if(!clCloud.on){ btn.classList.add('hidden'); return; }  /* 비활성이면 숨김 */
+  btn.classList.remove('hidden');
+  const base = 'shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold transition whitespace-nowrap ring-1 ';
+  if(state === 'saving'){
+    btn.disabled = true; btn.innerHTML = '저장 중…';
+    btn.className = base + 'bg-white/12 ring-white/20 text-white/70 cursor-wait';
+  } else if(state === 'saved'){
+    btn.disabled = false; btn.innerHTML = '저장됨 ✓';
+    btn.className = base + 'bg-emerald-500/25 ring-emerald-300/40 text-emerald-100';
+  } else if(state === 'error'){
+    btn.disabled = false; btn.innerHTML = '저장 실패';
+    btn.className = base + 'bg-amber-500/25 ring-amber-300/50 text-amber-100';
+  } else if(clCloud.dirty){
+    btn.disabled = false; btn.innerHTML = '● 저장';
+    btn.className = base + 'bg-accent ring-accent/50 text-white hover:bg-red-700';
+  } else {
+    btn.disabled = false; btn.innerHTML = '저장됨';
+    btn.className = base + 'bg-white/8 ring-white/15 text-white/55';
+  }
+}
+let _clSavedTimer = null;
+/* "저장" 버튼 클릭: 현재 items+checks 를 클라우드에 한 번에 upsert */
+function clManualSave(){
+  if(!clCloud.on || !clCloud.sb) return;
+  clSaveBtn('saving');
+  let checks = {};
+  try { checks = JSON.parse(localStorage.getItem(CL_CHECKS_KEY)) || {}; } catch(e){}
+  const row = { id: CL_SYNC_ID, items: _clItems, checks: checks, updated_at: new Date().toISOString() };
+  let p;
+  try {
+    clCloud.writing = true;
+    p = clCloud.sb.from('shared_state').upsert(row);
+  } catch(e){ clCloud.writing = false; clSaveBtn('error'); return; }
+  Promise.resolve(p).then(res=>{
+    clCloud.writing = false;
+    if(res && res.error){ clSaveBtn('error'); return; }
+    clCloud.dirty = false;
+    clSaveBtn('saved');
+    if(_clSavedTimer) clearTimeout(_clSavedTimer);
+    _clSavedTimer = setTimeout(()=>clSaveBtn(), 1500);
+  }, ()=>{ clCloud.writing = false; clSaveBtn('error'); });
+}
+
+/* 고유 id 생성 */
+function clNewId(){
+  if(window.crypto && crypto.randomUUID){ return 'it_' + crypto.randomUUID(); }
+  _clIdSeq++;
+  return 'it_' + Date.now().toString(36) + '_' + _clIdSeq + '_' + Math.floor(Math.random()*1e6).toString(36);
+}
+/* 시드 → 안정적 id를 가진 구조로 변환 */
+function clSeedToItems(){
+  return CHECKLIST_SEED.map(c=>({
+    cat: c.cat, icon: c.icon,
+    items: c.items.map(t=>({ id: clNewId(), text: t }))
+  }));
+}
+/* 구조 로드 (없으면 시드 복사) */
+function clLoadItems(){
+  if(_clItems) return _clItems;
+  try {
+    const raw = localStorage.getItem(CL_ITEMS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length){ _clItems = parsed; return _clItems; }
+    }
+  } catch(e){}
+  _clItems = clSeedToItems();
+  _clSeeding = true;          /* 시드 초기화는 사용자 변경이 아니므로 dirty 처리 안 함 */
+  clSaveItems();
+  _clSeeding = false;
+  return _clItems;
+}
+let _clSeeding = false;
+function clSaveItems(){ try { localStorage.setItem(CL_ITEMS_KEY, JSON.stringify(_clItems)); } catch(e){} if(!_clSeeding) clSetDirty(); }
+
+/* 체크 상태: { "itemId|personId": true } */
+function clLoadChecks(){ try { return JSON.parse(localStorage.getItem(CL_CHECKS_KEY)) || {}; } catch(e){ return {}; } }
+function clSaveChecks(s){ try { localStorage.setItem(CL_CHECKS_KEY, JSON.stringify(s)); } catch(e){} clSetDirty(); }
+function clCheckKey(itemId, personId){ return itemId + '|' + personId; }
+
+/* 전체 항목 수 */
+function clTotalItems(){ return clLoadItems().reduce((a,c)=>a+c.items.length, 0); }
+/* 특정 사람의 완료 수 */
+function clDoneFor(personId, checks){
+  let n = 0;
+  clLoadItems().forEach(c=>c.items.forEach(it=>{ if(checks[clCheckKey(it.id, personId)]) n++; }));
+  return n;
+}
+
+function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* 사람별 진행률 칩 + 메인 렌더 */
+function clUpdatePeople(){
+  const checks = clLoadChecks();
+  const total = clTotalItems();
+  const wrap = document.getElementById('cl-people');
+  if(!wrap) return;
+  wrap.innerHTML = CL_PEOPLE.map(p=>{
+    const done = clDoneFor(p.id, checks);
+    const pct = total ? Math.round(done/total*100) : 0;
+    return `<div class="bg-white/10 rounded-lg px-2 py-1.5" title="${_esc(p.name)}">
+      <div class="flex items-center justify-between gap-1 text-[11px] font-semibold text-white/90">
+        <span>${_esc(p.short)}</span>
+        <span class="tabular-nums text-white/70 text-[10.5px]">${done}/${total}</span>
+      </div>
+      <div class="mt-1 h-1.5 rounded-full bg-white/15 overflow-hidden">
+        <div class="h-full bg-accent transition-all duration-300" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderChecklist(){
+  const items = clLoadItems();
+  const checks = clLoadChecks();
+  const list = document.getElementById('cl-list');
+  const headLabels = `<span class="w-7 text-center text-[9px] font-extrabold text-accent2 leading-none" title="전원 일괄 체크">공동</span>`
+    + `<span class="w-px mx-0.5"></span>`
+    + CL_PEOPLE.map(p=>`<span class="w-7 text-center text-[9px] font-bold text-stone/80 leading-none" title="${_esc(p.name)}">${_esc(p.short)}</span>`).join('');
+  list.innerHTML = items.map((c, ci)=>`
+    <div class="mb-4">
+      <div class="flex items-end justify-between mb-2 px-0.5">
+        <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone">${_esc(c.icon)} ${_esc(c.cat)}</div>
+        <div class="flex gap-1" style="margin-right:${CL_EDIT?'30px':'6px'}">${headLabels}</div>
+      </div>
+      <div class="bg-white rounded-xl ring-1 ring-sand overflow-hidden">
+        ${c.items.map(it=>{
+          const doneCount = CL_PEOPLE.filter(p=>checks[clCheckKey(it.id, p.id)]).length;
+          const allDone = doneCount === CL_PEOPLE.length;
+          const someDone = doneCount > 0 && !allDone;
+          const master = `<input type="checkbox" ${allDone?'checked':''} aria-label="공동 (전원)" title="공동 (전원 일괄 체크)"
+              data-master="${it.id}" onchange="clToggleAll('${it.id}',this.checked)"
+              class="w-7 h-4 shrink-0 accent-accent2 cursor-pointer"${someDone?' data-indet="1"':''}>`;
+          const nameCell = CL_EDIT
+            ? `<input type="text" value="${_esc(it.text)}" onchange="clEditItemText('${it.id}',this.value)"
+                 class="flex-1 min-w-0 text-[13px] leading-snug bg-sand/30 rounded-md px-2 py-1 ring-1 ring-sand focus:ring-accent outline-none text-ink">`
+            : `<span class="flex-1 min-w-0 text-[13px] leading-snug text-ink break-words">${_esc(it.text)}</span>`;
+          const delBtn = CL_EDIT
+            ? `<button type="button" onclick="clDeleteItem('${it.id}')" title="삭제"
+                 class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-accent hover:bg-accent/10 text-[16px] leading-none transition">×</button>`
+            : '';
+          return `<div class="flex items-center gap-2.5 px-3.5 py-2 border-b border-sand/60 last:border-0 hover:bg-sand/20 transition">
+            ${nameCell}
+            <div class="flex items-center gap-1 shrink-0">${master}<span class="w-px h-4 bg-sand mx-0.5"></span>${CL_PEOPLE.map(p=>{
+              const done = !!checks[clCheckKey(it.id, p.id)];
+              return `<input type="checkbox" ${done?'checked':''} aria-label="${_esc(p.name)}" title="${_esc(p.name)}"
+                data-item="${it.id}" data-person="${p.id}"
+                onchange="toggleChecklistItem('${it.id}','${p.id}',this.checked)"
+                class="w-7 h-4 shrink-0 accent-accent cursor-pointer">`;
+            }).join('')}</div>
+            ${delBtn}
+          </div>`;
+        }).join('')}
+        ${CL_EDIT ? `<div class="flex items-center gap-2 px-3.5 py-2 bg-sand/20 border-t border-sand/60">
+          <input type="text" placeholder="+ 항목 추가" data-cat="${ci}"
+            onkeydown="if(event.key==='Enter'){clAddItem(${ci},this.value);this.value='';}"
+            class="flex-1 min-w-0 text-[12.5px] bg-white rounded-md px-2 py-1 ring-1 ring-sand focus:ring-accent outline-none text-ink">
+          <button type="button" onclick="var i=this.previousElementSibling;clAddItem(${ci},i.value);i.value='';i.focus();"
+            class="shrink-0 text-[11.5px] font-bold text-white bg-accent rounded-md px-2.5 py-1 hover:bg-red-700 transition">추가</button>
+        </div>` : ''}
+      </div>
+    </div>`).join('');
+  /* 공동(마스터) 체크박스의 indeterminate 표시는 JS로만 설정 가능 */
+  list.querySelectorAll('input[data-master]').forEach(m=>{ m.indeterminate = m.dataset.indet === '1'; });
+  clUpdatePeople();
+}
+
+/* 같은 행의 공동(마스터) 체크박스 표시 상태를 4명 기준으로 갱신 (저장 키 없음, 파생) */
+function clSyncMaster(itemId){
+  const checks = clLoadChecks();
+  const done = CL_PEOPLE.filter(p=>checks[clCheckKey(itemId, p.id)]).length;
+  const master = document.querySelector('input[data-master="' + itemId + '"]');
+  if(!master) return;
+  master.checked = done === CL_PEOPLE.length;
+  master.indeterminate = done > 0 && done < CL_PEOPLE.length;
+}
+
+function toggleChecklistItem(itemId, personId, checked){
+  const checks = clLoadChecks();
+  const k = clCheckKey(itemId, personId);
+  if(checked) checks[k] = true; else delete checks[k];
+  clSaveChecks(checks);
+  clSyncMaster(itemId);
+  clUpdatePeople();
+}
+
+/* 공동 체크: 그 항목의 4명 전원을 일괄 체크/해제 (별도 저장 키 없음) */
+function clToggleAll(itemId, checked){
+  const checks = clLoadChecks();
+  CL_PEOPLE.forEach(p=>{
+    const k = clCheckKey(itemId, p.id);
+    if(checked) checks[k] = true; else delete checks[k];
+  });
+  clSaveChecks(checks);
+  /* 같은 행의 개별 체크박스 표시 동기화 */
+  document.querySelectorAll('input[data-item="' + itemId + '"]').forEach(b=>{ b.checked = checked; });
+  const master = document.querySelector('input[data-master="' + itemId + '"]');
+  if(master) master.indeterminate = false;
+  clUpdatePeople();
+}
+
+/* ---- 편집(CRUD) ---- */
+function clToggleEdit(){
+  CL_EDIT = !CL_EDIT;
+  const btn = document.getElementById('cl-edit-btn');
+  if(btn) btn.innerHTML = CL_EDIT ? '✓ 완료' : '✏️ 편집';
+  renderChecklist();
+}
+function clEditItemText(itemId, val){
+  const items = clLoadItems();
+  const t = val.trim();
+  for(const c of items){
+    const it = c.items.find(x=>x.id===itemId);
+    if(it){ if(!t){ clDeleteItem(itemId); return; } it.text = t; break; }
+  }
+  clSaveItems();
+}
+function clAddItem(catIndex, val){
+  const t = (val||'').trim();
+  if(!t) return;
+  const items = clLoadItems();
+  if(!items[catIndex]) return;
+  items[catIndex].items.push({ id: clNewId(), text: t });
+  clSaveItems();
+  renderChecklist();
+}
+function clDeleteItem(itemId){
+  const items = clLoadItems();
+  for(const c of items){
+    const idx = c.items.findIndex(x=>x.id===itemId);
+    if(idx>=0){ c.items.splice(idx,1); break; }
+  }
+  clSaveItems();
+  /* 해당 항목의 체크 상태 정리 */
+  const checks = clLoadChecks();
+  CL_PEOPLE.forEach(p=>{ delete checks[clCheckKey(itemId, p.id)]; });
+  clSaveChecks(checks);
+  renderChecklist();
+}
+
+/* 전체 초기화: 모든 체크만 해제 (항목 보존) */
+function resetChecklist(){
+  clSaveChecks({});
+  renderChecklist();
+}
+/* 기본값 복원: 항목 구조를 시드로 되돌리고 체크도 초기화 */
+function clResetToSeed(){
+  if(!confirm('체크리스트 항목을 기본값으로 되돌립니다.\n추가·수정한 항목과 모든 체크가 초기화됩니다. 계속할까요?')) return;
+  _clItems = clSeedToItems();
+  clSaveItems();
+  clSaveChecks({});
+  renderChecklist();
+}
+
+function clModalOpen(){
+  const o = document.getElementById('cl-overlay');
+  return !!o && !o.classList.contains('hidden');
+}
+function openChecklist(e){
+  if(e){ e.stopPropagation(); }
+  clCloudInit();        /* 활성 가능하면 초기화 (실패 시 조용히 로컬 폴백) */
+  clSubscribe();        /* 클라우드 활성 + 미저장 변경 없을 때만 최신본 1회 로드 */
+  clSyncBadge();
+  clSaveBtn();          /* 저장 버튼 상태 갱신 (비활성이면 숨김) */
+  renderChecklist();
+  document.getElementById('cl-overlay').classList.remove('hidden');
+}
+function closeChecklist(){
+  document.getElementById('cl-overlay').classList.add('hidden');
+  clUnsubscribe();      /* 구독 해제 (비활성이면 no-op) */
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !document.getElementById('cl-overlay').classList.contains('hidden')) closeChecklist();
+});
+function legTo(id){return ROUTE.legs.find(l=>l.to===id)}
+function sumKm(){return ROUTE.legs.reduce((a,l)=>a+l.km,0)}
+
+/* ===== 데스크톱 전용 상세 열 ===== */
+function isWide(){return window.matchMedia('(min-width:1280px)').matches;}
+function resetDetail(){
+  const c=document.getElementById('d-content'), e=document.getElementById('d-empty');
+  if(c){c.classList.add('hidden'); c.innerHTML='';}
+  if(e) e.classList.remove('hidden');
+}
+/* 상세 내용 HTML 생성 (데스크톱 상세 열 / 모바일 인라인 공용) */
+function detailHTML(d){
+  const embed='https://www.google.com/maps?q='+encodeURIComponent(d.query)+'&output=embed';
+  const chips=(d.chips||[]).filter(Boolean)
+    .map(x=>`<span class="inline-block bg-sand text-stone text-[11px] font-semibold px-2 py-0.5 rounded-full">${x}</span>`).join(' ');
+  const rows=[];
+  if(d.address) rows.push(['📍','주소', d.address]);
+  if(d.hours)   rows.push(['🕒','영업시간', d.hours]);
+  if(d.phone)   rows.push(['📞','전화', `<a href="tel:${d.phone}" class="text-accent2 hover:underline">${d.phone}</a>`]);
+  if(d.website) rows.push(['🔗','웹사이트', `<a href="${d.website}" target="_blank" rel="noopener" class="text-accent2 hover:underline break-all">${d.website.replace(/^https?:\/\//,'').replace(/\/$/,'')}</a>`]);
+  const infoRows=rows.map(r=>`<div class="flex gap-2 text-[12.5px] py-1.5 border-b border-sand/70">
+      <span class="shrink-0">${r[0]}</span><span class="text-stone w-16 shrink-0">${r[1]}</span><span class="flex-1 text-slate-700 leading-snug">${r[2]}</span></div>`).join('');
+  const mk = d.food ? resolveMenuKey(d.cuisineRaw) : '';
+  const mi = mk ? MENU_INFO[mk] : null;
+  const menuBlock = (d.food && (mi || d.price)) ? `<div class="mx-5 mt-1 mb-1 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
+      ${mi?`<div class="text-[12.5px] leading-snug"><span class="font-bold text-amber-800">🍽 추천 메뉴</span> <span class="text-slate-700">${mi.dishes}</span></div>`:''}
+      <div class="text-[12.5px] leading-snug mt-1"><span class="font-bold text-amber-800">💶 대략 가격대</span> <span class="text-slate-700">${[mi?mi.price+' (1인)':'', d.price?priceKo(d.price):''].filter(Boolean).join(' · ')}</span></div>
+      ${mi?`<div class="text-[10px] text-stone/70 mt-1.5">※ 해당 요리 종류 기준 대표 메뉴·평균가 예시입니다(식당별 실제 메뉴와 다를 수 있음).</div>`:''}
+    </div>` : '';
+  const hasInfo = chips || d.note || infoRows || menuBlock;
+  return `
+    <div class="px-5 pt-5 pb-3">
+      <div class="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone mb-1.5">${d.kind||''}</div>
+      <h3 class="text-[20px] font-bold tracking-tight leading-tight">${d.name}</h3>
+      ${d.sub?`<div class="text-stone text-[12.5px] mt-1">${d.sub}</div>`:''}
+      ${chips?`<div class="flex flex-wrap gap-1.5 mt-2.5">${chips}</div>`:''}
+      ${d.note?`<div class="mt-3">${d.food?`<div class="text-[11px] font-bold text-amber-700 mb-1">✨ 특징</div>`:''}<div class="text-slate-600 text-[12.5px] leading-relaxed">${d.note}</div></div>`:''}
+      ${!hasInfo?`<div class="text-stone/70 text-[12px] mt-2">아래 지도와 링크에서 더 자세한 정보를 확인하세요.</div>`:''}
+    </div>
+    ${menuBlock}
+    <div class="relative w-full bg-sand" style="aspect-ratio:4/3">
+      <iframe title="${d.name} 지도" src="${embed}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        class="absolute inset-0 w-full h-full border-0"></iframe>
+    </div>
+    ${infoRows?`<div class="px-5 pt-3">${infoRows}</div>`:''}
+    <div class="px-5 py-4 grid grid-cols-2 gap-2">
+      <a href="${d.mapurl}" target="_blank" rel="noopener"
+        class="text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">지도에서 보기 ↗</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(d.query)}" target="_blank" rel="noopener"
+        class="text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">길찾기 →</a>
+      <a href="https://www.google.com/search?q=${encodeURIComponent(d.name+' '+(d.sub||''))}" target="_blank" rel="noopener"
+        class="col-span-2 text-center text-[12px] font-semibold text-accent2 border border-slate-200 bg-white rounded-lg py-2 hover:bg-slate-50 transition">웹에서 검색 🔎</a>
+    </div>`;
+}
+/* 데스크톱: 우측 상세 열에 표시 */
+function showDetail(d){
+  const c=document.getElementById('d-content'), e=document.getElementById('d-empty');
+  if(!c) return;
+  c.innerHTML=detailHTML(d);
+  e&&e.classList.add('hidden');
+  c.classList.remove('hidden');
+  c.parentElement.scrollTop=0;
+}
+/* 모바일: 클릭한 카드 바로 아래에 상세 펼침 + 닫기 버튼 (다시 누르면 닫힘) */
+function toggleInlineDetail(cardEl, d){
+  const nxt = cardEl.nextElementSibling;
+  if(nxt && nxt.classList.contains('inline-detail')){ nxt.remove(); return; }  // 토글로 닫기
+  document.querySelectorAll('.inline-detail').forEach(el=>el.remove());        // 다른 패널은 닫기
+  const panel=document.createElement('div');
+  panel.className='inline-detail w-full basis-full mt-1 mb-2 rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm';
+  panel.innerHTML=`<div class="flex justify-end px-3 py-1.5 bg-slate-50 border-b border-slate-200">
+      <button type="button" onclick="this.closest('.inline-detail').remove()"
+        class="text-[12px] font-semibold text-stone hover:text-accent px-2 py-0.5">✕ 닫기</button>
+    </div>${detailHTML(d)}`;
+  cardEl.after(panel);
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+/* 식당·명소 클릭: 넓은 화면이면 상세 열, 모바일이면 식당 카드 아래 인라인, 그 외(명소 등)는 새 탭 */
+document.addEventListener('click',function(ev){
+  const a=ev.target.closest('[data-detail]');
+  if(!a) return;
+  let d; try{ d=JSON.parse(decodeURIComponent(a.getAttribute('data-detail'))); }catch(e){ return; }
+  if(isWide()){ ev.preventDefault(); showDetail(d); return; }
+  ev.preventDefault();                                 // 모바일: 식당 카드·명소 pill 모두 인라인 표시
+  const ref = a.closest('.rec-card') || a.closest('.dc') || a;   // 식당=카드, 명소=pill(또는 펼침 래퍼) 바로 아래
+  toggleInlineDetail(ref, d);
+});
+
+/* ===== 주변 실제 장소 실시간 검색 (OpenStreetMap Overpass, 무료·키 불필요) ===== */
+var currentStopId = null;
+function pillHL(h, city, country, info, queryName){
+  info = info || {};
+  const qn = queryName || h;   // 표시는 h(한국어), 지도 검색은 원문 qn 사용
+  const d = { name:h, sub:city, note:'', query:`${qn} ${city} ${country}`, mapurl:gmaps(qn, city, country), kind:'가볼 만한 곳',
+    chips:[info.cuisine].filter(Boolean), address:info.address||'', hours:info.hours||'', phone:info.phone||'', website:info.website||'' };
+  return `<a href="${gmaps(qn, city, country)}" target="_blank" rel="noopener"
+    data-detail="${encodeURIComponent(JSON.stringify(d))}"
+    class="bg-emerald-50 text-emerald-800 border border-emerald-100 hover:bg-emerald-100 hover:border-emerald-200 rounded-full px-3 py-1 text-[12px] transition">${h}</a>`;
+}
+const liveCache = {};
+const OSM_Q = {
+  restaurant: s=>`[out:json][timeout:25];(node["amenity"~"^(restaurant|cafe)$"](around:3500,${s.lat},${s.lng});way["amenity"~"^(restaurant|cafe)$"](around:3500,${s.lat},${s.lng}););out tags center 100;`,
+  attraction: s=>`[out:json][timeout:25];(node["tourism"~"^(attraction|viewpoint|museum|gallery|artwork|theme_park|zoo|aquarium)$"](around:6000,${s.lat},${s.lng});way["tourism"~"^(attraction|viewpoint|museum|gallery|artwork|theme_park|zoo|aquarium)$"](around:6000,${s.lat},${s.lng});node["historic"]["name"](around:6000,${s.lat},${s.lng}););out tags center 100;`
+};
+/* CORS 허용 미러를 우선 사용(overpass-api.de는 브라우저 CORS 헤더 미제공으로 차단됨). 실패 시 순차 폴백 */
+const OVERPASS_EPS = [
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter'
+];
+function overpassFetch(query, i){
+  i = i || 0;
+  if(i >= OVERPASS_EPS.length) return Promise.reject(new Error('all overpass endpoints failed'));
+  return fetch(OVERPASS_EPS[i], { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data='+encodeURIComponent(query) })
+    .then(r=>{ if(!r.ok) throw new Error('status '+r.status); return r.json(); })
+    .catch(()=>overpassFetch(query, i+1));
+}
+/* 현지어 장소명을 한국어로 번역 (무료 Google gtx, CORS 허용). 결과 캐시, 실패 시 원문 유지 */
+const trCache = {};
+function translateKo(names){
+  const todo = names.filter(n=>n && trCache[n]===undefined);
+  if(!todo.length) return Promise.resolve(trCache);
+  const chunks=[]; for(let i=0;i<todo.length;i+=40) chunks.push(todo.slice(i,i+40));
+  return Promise.all(chunks.map(chunk=>
+    fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q='+encodeURIComponent(chunk.join('\n')))
+      .then(r=>r.json())
+      .then(j=>{
+        const lines=((j[0]||[]).map(s=>s[0]).join('')).split('\n');
+        chunk.forEach((orig,idx)=>{ trCache[orig]=((lines[idx]||orig).trim())||orig; });
+      })
+      .catch(()=>{ chunk.forEach(orig=>{ trCache[orig]=orig; }); })
+  )).then(()=>trCache);
+}
+/* OSM cuisine 값을 한글로 변환(빈출값 사전, 없으면 원문 유지) */
+const CUISINE_KO = {
+  italian:'이탈리아 요리', pizza:'피자', pasta:'파스타', regional:'현지 요리', local:'현지 요리',
+  french:'프랑스 요리', chinese:'중식', japanese:'일식', sushi:'스시', korean:'한식',
+  indian:'인도 요리', thai:'타이 요리', vietnamese:'베트남 요리', mexican:'멕시코 요리',
+  american:'아메리칸', burger:'버거', steak_house:'스테이크', barbecue:'바비큐', grill:'그릴',
+  seafood:'해산물', fish:'생선 요리', kebab:'케밥', turkish:'터키 요리', greek:'그리스 요리',
+  spanish:'스페인 요리', mediterranean:'지중해 요리', vegetarian:'채식', vegan:'비건',
+  coffee_shop:'카페', cafe:'카페', ice_cream:'아이스크림', bakery:'베이커리', dessert:'디저트',
+  asian:'아시아 요리', international:'다국적 요리', austrian:'오스트리아 요리', german:'독일 요리',
+  swiss:'스위스 요리', hungarian:'헝가리 요리', slovenian:'슬로베니아 요리', sandwich:'샌드위치',
+  breakfast:'브런치', tapas:'타파스', wine:'와인 바', pub:'펍', bar:'바', fine_dining:'파인다이닝'
+};
+function cuisineKo(c){ if(!c) return ''; return CUISINE_KO[String(c).toLowerCase()] || c; }
+function priceKo(p){ return p==='€'?'저렴한 편 (€)':p==='€€'?'보통 (€€)':p==='€€€'?'고급 (€€€)':''; }
+/* 요리 종류별 대표 메뉴·평균 가격대(1인 기준, 예시). 특정 식당 실제 메뉴판이 아니라 요리 종류 기준 참고치 */
+const MENU_INFO = {
+  italian:{dishes:'파스타 · 리소토 · 피자 · 티라미수', price:'€12~25'},
+  pizza:{dishes:'마르게리타 · 콰트로 포르마지 · 칼조네', price:'€8~16'},
+  pasta:{dishes:'까르보나라 · 볼로네제 · 뇨끼', price:'€10~20'},
+  french:{dishes:'코코뱅 · 푸아그라 · 크렘 브륄레', price:'€20~40'},
+  austrian:{dishes:'비너슈니첼 · 굴라쉬 · 자허토르테', price:'€12~25'},
+  german:{dishes:'슈니첼 · 학센 · 소시지 플레이트', price:'€10~22'},
+  swiss:{dishes:'치즈 퐁뒤 · 라클렛 · 뢰스티', price:'€20~38'},
+  hungarian:{dishes:'굴라쉬 · 랑고스 · 도보스 토르타', price:'€8~18'},
+  slovenian:{dishes:'요타 · 크렘슈니타 · 송어 요리', price:'€10~20'},
+  mediterranean:{dishes:'그릴 생선 · 메제 · 올리브 플레이트', price:'€15~30'},
+  seafood:{dishes:'그릴 생선 · 해산물 모둠 · 새우 요리', price:'€18~35'},
+  fish:{dishes:'송어구이 · 농어 · 생선 수프', price:'€15~28'},
+  indian:{dishes:'커리 · 탄두리 · 난', price:'€10~20'},
+  thai:{dishes:'팟타이 · 똠얌꿍 · 그린커리', price:'€10~18'},
+  cafe:{dishes:'커피 · 케이크 · 브런치', price:'€5~12'},
+  bakery:{dishes:'페이스트리 · 샌드위치 · 빵', price:'€3~9'},
+  dessert:{dishes:'케이크 · 젤라또 · 타르트', price:'€4~10'},
+  burger:{dishes:'수제버거 · 감자튀김 · 밀크셰이크', price:'€9~16'},
+  steak_house:{dishes:'스테이크 · 그릴 미트 · 와인', price:'€25~50'},
+  barbecue:{dishes:'바비큐 플래터 · 립 · 그릴', price:'€15~30'},
+  pub:{dishes:'맥주 · 안주 플래터 · 소시지', price:'€8~18'},
+  bar:{dishes:'칵테일 · 와인 · 안주', price:'€8~20'},
+  fine_dining:{dishes:'셰프 코스 · 와인 페어링', price:'€60~120'},
+  vegetarian:{dishes:'채식 플레이트 · 샐러드 · 수프', price:'€10~18'},
+  kebab:{dishes:'케밥 · 팔라펠 · 랩', price:'€6~12'},
+  turkish:{dishes:'케밥 · 메제 · 바클라바', price:'€8~18'}
+};
+const CUISINE_KO_KEY = {'이탈리아':'italian','피자':'pizza','파스타':'pasta','프랑스':'french','오스트리아':'austrian','독일':'german','스위스':'swiss','헝가리':'hungarian','슬로베니아':'slovenian','지중해':'mediterranean','해산물':'seafood','생선':'fish','인도':'indian','타이':'thai','카페':'cafe','베이커리':'bakery','디저트':'dessert','버거':'burger','스테이크':'steak_house','바비큐':'barbecue','펍':'pub','맥주':'pub','바':'bar','파인다이닝':'fine_dining','채식':'vegetarian','케밥':'kebab','중동':'mediterranean'};
+function resolveMenuKey(raw){
+  if(!raw) return '';
+  const s=String(raw).toLowerCase().split('/')[0].trim();
+  if(MENU_INFO[s]) return s;
+  for(const k in CUISINE_KO_KEY){ if(String(raw).indexOf(k)>-1) return CUISINE_KO_KEY[k]; }
+  return '';
+}
+function liveRestoCard(n, city, country){
+  const ck = cuisineKo(n.cuisine);
+  return card(n.name,'','',[ck||'식당','주변'].filter(Boolean), gmaps(n.name,city,country), 'food', undefined,
+    { name:n.name, food:true, cuisineRaw:n.cuisine||'', sub:'주변 검색 결과', note:'', query:`${n.name} ${city} ${country}`, mapurl:gmaps(n.name,city,country), kind:'추천 식당 · 주변',
+      chips:[ck].filter(Boolean), address:n.address||'', hours:n.hours||'', phone:n.phone||'', website:n.website||'' });
+}
+function loadLive(kind, id, city, country){
+  const s = stop(id);
+  const ckey = id+'-'+kind;
+  const loaderId = (kind==='restaurant'?'load-r-':'load-hl-')+id;
+  function apply(items){
+    if(currentStopId!==id) return;                 // 도시가 바뀌었으면 무시
+    const loader=document.getElementById(loaderId); if(loader) loader.remove();
+    if(!items || !items.length) return;
+    if(kind==='restaurant'){
+      const seen=new Set((POI[id]&&POI[id].restaurants||[]).map(r=>r.name.toLowerCase()));
+      const fresh=items.filter(n=>!seen.has(n.name.toLowerCase()));
+      const curated=(POI[id]&&POI[id].restaurants||[]).map(r=>card(r.name,r.price,r.note,[r.cuisine||''], gmaps(r.name,city,country),'food',undefined,
+        { name:r.name, food:true, price:r.price||'', cuisineRaw:r.cuisine||'', chips:[r.cuisine,r.price].filter(Boolean), note:r.note||'', query:`${r.name} ${city} ${country}`, mapurl:gmaps(r.name,city,country), kind:'추천 식당' }));
+      const merged=curated.concat(fresh.map(n=>liveRestoCard(n,city,country)));
+      const list=document.getElementById('list-r-'+id); if(list) list.innerHTML=expandableList(merged, id+'-r', 2, 4);
+      const cnt=document.getElementById('cnt-r-'+id); if(cnt) cnt.textContent=merged.length;
+    }else{
+      const seen=new Set((POI[id]&&POI[id].highlights||[]).map(x=>x.toLowerCase()));
+      const fresh=items.filter(n=>!seen.has(n.name.toLowerCase()));
+      const curated=(POI[id]&&POI[id].highlights||[]).map(h=>pillHL(h,city,country));
+      function renderHL(tmap){
+        const livePills=fresh.map(n=>pillHL((tmap&&tmap[n.name])||n.name, city, country, n, n.name));  // 표시는 한국어, 검색은 원문
+        const merged=curated.concat(livePills);
+        const list=document.getElementById('list-hl-'+id); if(list) list.innerHTML=expandableList(merged, id+'-hl', 10, 10);
+        const cnt=document.getElementById('cnt-hl-'+id); if(cnt) cnt.textContent=merged.length;
+      }
+      renderHL(null);                                                                          // 우선 원문으로 즉시 표시
+      if(fresh.length) translateKo(fresh.map(n=>n.name)).then(tmap=>{ if(currentStopId===id) renderHL(tmap); });  // 번역되면 한국어로 교체
+    }
+  }
+  if(liveCache[ckey]){ apply(liveCache[ckey]); return; }
+  overpassFetch(OSM_Q[kind](s))
+    .then(j=>{
+      const seen=new Set(), out=[];
+      (j.elements||[]).forEach(e=>{
+        const t=e.tags||{}; const nm=t['name:ko']||t.name||t['name:en'];
+        if(!nm) return; const k=nm.toLowerCase(); if(seen.has(k)) return; seen.add(k);
+        const street=[t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' ');
+        const address=[street, t['addr:city']].filter(Boolean).join(', ');
+        out.push({ name:nm, cuisine:(t.cuisine||'').split(';')[0].replace(/_/g,' '),
+          address:address, hours:t.opening_hours||'', phone:t.phone||t['contact:phone']||'',
+          website:t.website||t['contact:website']||'' });
+      });
+      liveCache[ckey]=out; apply(out);
+    })
+    .catch(()=>{ if(currentStopId===id){ const l=document.getElementById(loaderId); if(l){ l.innerHTML='주변 실시간 검색을 불러오지 못했어요. <button onclick="retryLive(\''+kind+'\',\''+id+'\')" class="underline text-accent2">다시 시도</button>'; } } });
+}
+function retryLive(kind,id){ delete liveCache[id+'-'+kind]; const s=stop(id); const city=s.name.replace(/\s*\(.*\)/,'').replace(/\s*\(.*$/,''); const l=document.getElementById((kind==='restaurant'?'load-r-':'load-hl-')+id); if(l) l.textContent='다시 검색 중…'; loadLive(kind,id,city,s.country); }
+
+selectStop(ROUTE.stops[0].id);
+
+/* 각 도시 말풍선에 대표 사진을 채워 넣는다(로드되는 대로 갱신) */
+ROUTE.stops.forEach(s=>{
+  fetchPhoto(s.id).then(url=>{ if(url && markers[s.id]) markers[s.id].setPopupContent(buildPopup(s,url)); });
+});
+</script>
+</body>
+</html>
