@@ -35,6 +35,13 @@
   /* 증분형 더보기: 래퍼가 레이아웃에 영향 주지 않도록 contents 처리 */
   .dc{display:contents}
   .is-hidden{display:none!important}
+  /* 모바일: 헤더 라벨이 보이도록 제목이 여러 줄이 되는 대신, 나머지 본문 줄간격을 촘촘히 */
+  @media (max-width:767px){
+    #daylist, #daylist p, #daylist div,
+    #p-body, #p-body p, #p-body li, #p-body div,
+    #detail-col, #d-content, #d-content p, #d-content li,
+    #t-detail, #t-sub, #t-meta{line-height:1.32}
+  }
 </style>
 </head>
 <body class="min-h-screen md:h-screen md:overflow-hidden font-sans text-ink bg-paper">
@@ -45,23 +52,23 @@
     <div id="map"></div>
     <div onclick="toggleTitle()" title="클릭하여 자세히 보기"
       class="absolute z-[1000] top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[580px] bg-ink/75 backdrop-blur-md text-white px-4 py-2.5 md:px-6 md:py-4 rounded-2xl text-center cursor-pointer select-none hover:bg-ink/85 transition shadow-xl ring-1 ring-white/10">
-      <h1 class="text-[14px] md:text-[18px] font-semibold tracking-tight flex items-center justify-center gap-1.5">
+      <h1 class="text-[14px] md:text-[18px] font-semibold tracking-tight flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 leading-snug">
         <span id="t-title"></span><span id="t-caret" class="text-[10px] opacity-70 font-normal">▾</span>
         <button type="button" onclick="openChecklist(event)" title="여행 준비물 체크리스트"
-          class="ml-1 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0">
-          🎒 <span class="hidden sm:inline">준비물</span>
+          class="ml-1 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0">
+          🎒 <span>준비물</span>
         </button>
         <a href="travel-guide-report.html" onclick="event.stopPropagation()" title="여행 가이드 보고서"
-          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
-          📋 <span class="hidden sm:inline">여행 보고서</span>
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          📋 <span>여행 보고서</span>
         </a>
         <a href="jungfrau/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="융프라우 자동차 여행 가이드"
-          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
-          🚠 <span class="hidden sm:inline">융프라우 가이드</span>
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🚠 <span>융프라우 가이드</span>
         </a>
         <a href="milan/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="밀라노 시티 가이드"
-          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[10.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
-          🏛️ <span class="hidden sm:inline">밀라노 가이드</span>
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🏛️ <span>밀라노 가이드</span>
         </a>
       </h1>
       <div id="t-detail" class="hidden">
