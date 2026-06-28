@@ -89,18 +89,18 @@ section.block { padding: 52px 0; }
 .section-head p { color: var(--ink-soft); margin-top: 8px; max-width: 680px; }
 
 /* ===== Cards ===== */
-.grid { display: grid; gap: 20px; }
+.grid { display: grid; gap: 14px; }
 .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
 .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 24px; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease;
+  padding: 17px; box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease;
 }
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 .card .ico { font-size: 30px; }
-.card h3 { margin: 12px 0 8px; font-size: 19px; }
+.card h3 { margin: 8px 0 6px; font-size: 19px; }
 .card p { color: var(--ink-soft); font-size: 15px; }
-.card .more { display: inline-block; margin-top: 12px; font-weight: 700; font-size: 14px; }
+.card .more { display: inline-block; margin-top: 8px; font-weight: 700; font-size: 14px; }
 
 /* ===== Google Maps ===== */
 .map-container {
@@ -135,7 +135,7 @@ th { background: var(--snow); font-weight: 800; color: var(--alp-blue-d); }
 tr:last-child td { border-bottom: 0; }
 
 /* ===== Callout ===== */
-.note { border-left: 4px solid var(--sun); background: #fdf3e6; padding: 16px 18px; border-radius: 10px; margin: 18px 0; }
+.note { border-left: 4px solid var(--sun); background: #fdf3e6; padding: 13px 15px; border-radius: 10px; margin: 14px 0; }
 .note.tip { border-color: var(--pine); background: #eef8f1; }
 .note.warn { border-color: var(--rose); background: #fdeef2; }
 .note b { display: block; margin-bottom: 3px; }
