@@ -4,6 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>문경자매부부 유럽중부 여행 · 여행 가이드</title>
+<!-- 초기 로딩 가속: 외부 호스트 연결 미리 준비 -->
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://a.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://b.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://c.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://router.project-osrm.org">
+<link rel="dns-prefetch" href="https://ko.wikipedia.org">
+<link rel="dns-prefetch" href="https://en.wikipedia.org">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://cdn.tailwindcss.com"></script>
@@ -152,8 +162,8 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<!-- Supabase (실시간 체크리스트 동기화 — config 비면 미사용, 로컬 폴백) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase (실시간 체크리스트 동기화 — config 비면 미사용, 로컬 폴백) · defer로 첫 페인트 비차단 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script>
 /* ===== 임베드 데이터 (Phase1·2 산출물) ===== */
 const ROUTE = {
@@ -987,23 +997,28 @@ fitAll();
 /* 실제 도로 경로: OSRM 공개 라우팅으로 구간별 도로 형상을 받아 그린다.
    실패 시 직선(점선)으로 폴백한다. */
 function stop(id){return ROUTE.stops.find(s=>s.id===id);}
+function fetchWithTimeout(url, ms){
+  if(typeof AbortController==='undefined') return fetch(url);
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(), ms);
+  return fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(t));
+}
 async function drawRoads(){
-  for(const lg of ROUTE.legs){
+  // 각 구간을 병렬로 처리: 먼저 직선(점선)을 즉시 그려 노선을 바로 보여주고,
+  // OSRM 실제 도로 경로가 도착하면 그 위에 실선으로 교체한다(공개 서버가 느려도 6초 후 점선 유지).
+  await Promise.all(ROUTE.legs.map(async lg=>{
     const a=stop(lg.from), b=stop(lg.to);
-    let drawn=false;
+    const placeholder=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'#c0392b',weight:3,opacity:.45,dashArray:'6,7'}).addTo(map);
     try{
       const url=`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
-      const r=await fetch(url); const j=await r.json();
+      const r=await fetchWithTimeout(url, 6000); const j=await r.json();
       if(j.routes && j.routes[0]){
         const coords=j.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
         L.polyline(coords,{color:'#c0392b',weight:4,opacity:.85}).addTo(map);
-        drawn=true;
+        map.removeLayer(placeholder);
       }
-    }catch(e){}
-    if(!drawn){
-      L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'#c0392b',weight:3,opacity:.5,dashArray:'6,7'}).addTo(map);
-    }
-  }
+    }catch(e){ /* 실패/타임아웃 시 점선 유지 */ }
+  }));
 }
 drawRoads();
 
