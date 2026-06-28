@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>볼거리·명소 · 잘츠부르크 시티 가이드</title>
+<meta name="description" content="미라벨 궁전, 호엔잘츠부르크 성, 잘츠부르크 대성당, 게트라이데 거리 등 잘츠부르크 명소 — 사진·상세 소개 팝업 + 요금·소요시간·꿀팁 총정리">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* ===== 명소 카드 그리드 ===== */
+  .spot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;}
+  .spot-card{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow);cursor:pointer;text-align:left;padding:0;transition:transform .18s ease,box-shadow .18s ease;}
+  .spot-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+  .spot-card__img{height:148px;background-size:cover;background-position:center;background-color:#dfeee6;background-image:linear-gradient(135deg,#cfe6da,#e9f4ee);position:relative;}
+  .spot-card__img::after{content:attr(data-emoji);position:absolute;inset:0;display:grid;place-items:center;font-size:42px;opacity:.5;}
+  .spot-card__img.loaded::after{display:none;}
+  .spot-card__meta{position:absolute;top:10px;left:10px;background:rgba(42,35,32,.62);color:#fff;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+  .spot-card__star{position:absolute;top:10px;right:10px;background:var(--glacier);color:#fff;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:999px;}
+  .spot-card__body{padding:11px 13px 12px;}
+  .spot-card__body h3{margin:0 0 5px;font-size:15.5px;color:var(--ink);}
+  .spot-card__body p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.55;}
+  .spot-card__more{margin-top:10px;font-size:12.5px;font-weight:700;color:var(--alp-blue);}
+
+  /* ===== 팝업(모달) ===== */
+  .spot-overlay{position:fixed;inset:0;background:rgba(42,35,32,.55);z-index:99;opacity:0;pointer-events:none;transition:opacity .25s ease;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+  .spot-overlay.active{opacity:1;pointer-events:auto;}
+  .spot-modal{position:fixed;z-index:100;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;width:min(640px,94vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;background:var(--surface);border-radius:20px;box-shadow:0 24px 70px rgba(0,0,0,.4);transition:opacity .26s ease,transform .26s cubic-bezier(.22,.61,.36,1);}
+  .spot-modal.active{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+  .spot-modal__hero{position:relative;height:230px;background-size:cover;background-position:center;background-color:#cfe6da;flex:none;}
+  .spot-modal__hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,35,32,0) 40%,rgba(42,35,32,.72));}
+  .spot-modal__title{position:absolute;left:22px;bottom:16px;right:22px;z-index:2;color:#fff;}
+  .spot-modal__title h3{margin:0;font-size:24px;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+  .spot-modal__title .sub{font-size:13px;font-weight:600;opacity:.95;margin-top:4px;text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  .spot-modal__close{position:absolute;top:14px;right:14px;z-index:3;width:40px;height:40px;border:none;border-radius:50%;background:rgba(42,35,32,.5);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;transition:background .2s ease;}
+  .spot-modal__close:hover{background:rgba(42,35,32,.82);}
+  .spot-modal__body{padding:20px 22px 24px;overflow-y:auto;}
+  .spot-modal__body h4{margin:18px 0 9px;font-size:13px;font-weight:700;color:var(--alp-blue);text-transform:uppercase;letter-spacing:.08em;}
+  .spot-modal__body h4:first-child{margin-top:0;}
+  .spot-modal__body p{margin:0 0 11px;font-size:14px;line-height:1.55;color:var(--ink-soft);}
+  .spot-modal__body b{color:var(--ink);font-weight:600;}
+  .spot-modal__body ul{margin:0 0 12px;padding-left:18px;}
+  .spot-modal__body li{font-size:14px;line-height:1.55;color:var(--ink-soft);margin-bottom:4px;}
+  .spot-pills{margin:0 0 4px;}
+  .spot-wiki{background:var(--snow);border-left:3px solid var(--alp-blue);padding:12px 14px;border-radius:6px;font-size:13.5px;line-height:1.55;color:var(--ink-soft);margin:0 0 14px;}
+  .spot-wiki .ld{font-size:11px;font-weight:700;color:var(--alp-blue-d);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;}
+  .spot-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+  .spot-links a{font-size:13px;font-weight:700;padding:9px 14px;border-radius:999px;text-decoration:none;}
+  .spot-links a.gmap{background:var(--alp-blue);color:#fff;}
+  .spot-links a.wiki{background:var(--snow);color:var(--alp-blue-d);border:1px solid var(--line);}
+  body.modal-open{overflow:hidden;}
+  @media (max-width:560px){
+    .spot-modal__hero{height:180px;}
+    .spot-modal__title h3{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">🏰 잘츠부르크 <span>시티 가이드</span></a>
+    <button class="nav-toggle" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-back">← 유럽 가이드</a>
+      <a href="index.html">홈</a>
+      <a href="attractions.html" class="active">볼거리·명소</a>
+      <a href="driving.html">🚗 운전·주차</a>
+      <a href="food.html">맛집·카페</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">홈</a> › 볼거리·명소</p>
+    <h1>🏰 볼거리 · 명소</h1>
+    <p>잘츠부르크 핵심 명소를 <b>사진·상세 소개 팝업</b>과 함께 정리했어요. ⭐ 표시는 1박이라면 놓치지 말 곳. 요금·운영시간은 방문 전 공식 사이트에서 확인하세요.</p>
+  </div>
+</header>
+
+<main>
+  <section class="block">
+    <div class="wrap">
+      <div class="note tip">
+        <b>🖼️ 사진을 누르면 상세 소개가 열려요</b>
+        아래 명소 카드의 <b>사진이나 카드</b>를 누르면 큰 사진과 함께 위키백과 요약·하이라이트·요금·꿀팁·지도 링크가 팝업으로 펼쳐집니다. 사진은 위키백과에서 자동으로 불러와요(네트워크 상황에 따라 잠시 걸릴 수 있어요).
+      </div>
+
+      <div class="note">
+        <b>🚶 구시가는 도보로 충분해요</b>
+        미라벨 정원에서 잘차흐 강을 건너 게트라이데 거리·대성당·호엔잘츠부르크 성까지 모두 <b>도보권</b>입니다. 1박이라면 강 양안을 다리로 오가며 핵심 명소만 알차게 도세요.
+      </div>
+
+      <!-- 핵심 명소 -->
+      <div class="section-head" style="margin-top:34px">
+        <span class="kicker">Must-See</span>
+        <h2>핵심 명소</h2>
+        <p>1박이라면 우선 도는 네 곳. ⭐ 표시.</p>
+      </div>
+      <div class="spot-grid" id="grid-top"></div>
+
+      <!-- 더 둘러보기 -->
+      <div class="section-head" style="margin-top:40px">
+        <span class="kicker">More to Explore</span>
+        <h2>더 둘러보기</h2>
+        <p>시간과 취향에 따라 더해 가는 궁전·수도원·전망대.</p>
+      </div>
+      <div class="spot-grid" id="grid-more"></div>
+
+      <!-- 근교 -->
+      <div class="section-head" style="margin-top:40px">
+        <span class="kicker">Day Trip</span>
+        <h2>시간이 남으면 — 근교</h2>
+        <p>차로 10~20분. 트릭분수 정원과 케이블카 전망.</p>
+      </div>
+      <div class="spot-grid" id="grid-nearby"></div>
+
+      <div class="map-container" style="margin-top:28px;">
+        <div style="padding:16px 16px 0;"><h4 style="font-size:16px;font-weight:600;">📍 명소 위치 지도</h4></div>
+        <iframe src="https://maps.google.com/maps?q=Salzburg%20Altstadt&z=14&hl=ko&output=embed" width="100%" height="320" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+
+      <div class="note warn" style="margin-top:24px">
+        <b>⚠️ 성수기 혼잡 · 소지품 주의</b>
+        여름 잘츠부르크 구시가와 게트라이데 거리는 관광객이 많아 붐빕니다. 인파 속에서는 가방을 앞으로 메고 소지품에 유의하세요.
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 명소 상세 팝업 -->
+<div class="spot-overlay" id="spotOverlay"></div>
+<div class="spot-modal" id="spotModal" role="dialog" aria-modal="true" aria-labelledby="spotModalTitle">
+  <div class="spot-modal__hero" id="spotModalHero">
+    <button class="spot-modal__close" id="spotModalClose" aria-label="닫기">✕</button>
+    <div class="spot-modal__title">
+      <h3 id="spotModalTitle">명소</h3>
+      <div class="sub" id="spotModalSub"></div>
+    </div>
+  </div>
+  <div class="spot-modal__body" id="spotModalBody"></div>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><strong>잘츠부르크 시티 가이드</strong><br>2026.7.6–7.7 · 자매 부부 2쌍 자가용 여행</div>
+    <div>사진·요약 출처: 위키백과 · 요금·운영시간은 2026년 여름 기준이며 변동될 수 있어요.<br>방문 전 각 명소 공식 사이트에서 예약·운영 확인 권장.</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+/* ====== 명소 데이터 ====== */
+var SPOTS = {
+  top: [
+    { id:'mirabell', emoji:'🌷', star:true, name:'미라벨 궁전 · 정원', sub:'Schloss Mirabell · 바로크 정원',
+      wiki:'미라벨 궁전', wikiEn:'Mirabell Palace', map:'Mirabell Palace Salzburg',
+      blurb:"'사운드 오브 뮤직' 도레미 송 촬영지. 페가수스 분수와 기하학적 화단의 바로크 정원은 무료 입장, 성에서 호엔잘츠부르크 성을 배경으로 한 전망이 일품.",
+      ko:"미라벨 궁전은 1606년 대주교 볼프 디트리히가 지은 바로크 궁전으로, 현재는 시청사로 쓰이며 화려한 대리석 홀은 결혼식·콘서트 장소로 유명합니다. 무엇보다 무료로 개방된 미라벨 정원이 백미로, 페가수스 분수와 기하학적 화단, 난쟁이 정원이 어우러지고 호엔잘츠부르크 성을 배경으로 한 전망이 아름답습니다. 영화 '사운드 오브 뮤직'의 '도레미 송' 장면을 촬영한 곳으로도 잘 알려져 있습니다.",
+      facts:['정원 무료','관람 30~60분','도레미 송 촬영지','강 북안(신시가)'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>페가수스 분수와 기하학 화단의 바로크 정원</li><li>정원에서 호엔잘츠부르크 성을 담은 전망</li><li>대리석 홀(미라벨잘) · 난쟁이 정원</li></ul>'},
+        {h:'꿀팁', html:'<p>정원은 <b>무료</b>이고 이른 아침이나 해질녘이 한산해요. 도레미 송의 계단·분수 동선을 따라 걸어 보세요. 강 건너 구시가와 도보 10분 거리.</p>'}
+      ]},
+    { id:'hohensalzburg', emoji:'🏰', star:true, name:'호엔잘츠부르크 성', sub:'Festung Hohensalzburg · 산정 성채',
+      wiki:'호엔잘츠부르크 성', wikiEn:'Hohensalzburg Fortress', map:'Hohensalzburg Fortress',
+      blurb:'도시를 굽어보는 언덕 위 유럽 최대급 보존 성채. 푸니쿨라로 올라 성내 박물관·황금 홀과 도시·알프스 전망을 즐길 수 있는 잘츠부르크의 상징.',
+      ko:"호엔잘츠부르크 성은 1077년 축조를 시작한 중부 유럽 최대 규모의 보존된 중세 성채로, 묀히스베르크 언덕 위에서 도시를 굽어봅니다. 한 번도 함락되지 않은 견고한 요새로, 화려한 '황금 홀(Goldene Stube)'과 성내 박물관, 인형 마리오네트 전시 등을 갖추고 있습니다. 가파른 언덕은 푸니쿨라(케이블 철도)로 오를 수 있으며, 정상에서 잘츠부르크 시가지와 알프스 연봉의 파노라마가 펼쳐집니다.",
+      facts:['통합권 €13~17(푸니쿨라 포함)','관람 1.5~2시간','푸니쿨라 또는 도보','도시·알프스 전망'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>화려한 황금 홀과 영주 거처</li><li>성벽에서 보는 도시·알프스 파노라마</li><li>성내 박물관·마리오네트·라이너 연대 박물관</li></ul>'},
+        {h:'요금·이동', html:'<p>푸니쿨라 왕복이 포함된 <b>통합권</b>을 추천해요. 체력에 자신 있으면 걸어 올라가는 길도 있지만 가팔라요. 온라인 예약 시 줄을 줄일 수 있습니다.</p>'},
+        {h:'꿀팁', html:'<p>오전 이른 시간이 덜 붐비고 사진도 예뻐요. 성에서 내려다보는 구시가·잘차흐 강 풍경을 놓치지 마세요.</p>'}
+      ]},
+    { id:'cathedral', emoji:'⛪', star:true, name:'잘츠부르크 대성당', sub:'Salzburger Dom · 바로크 대성당',
+      wiki:'잘츠부르크 대성당', wikiEn:'Salzburg Cathedral', map:'Salzburg Cathedral',
+      blurb:'모차르트가 세례를 받은 바로크 대성당. 거대한 돔과 청동 문, 모차르트가 연주하던 파이프 오르간으로 유명. 구시가 한복판에 무료 입장.',
+      ko:"잘츠부르크 대성당(돔)은 17세기에 완성된 초기 바로크 양식의 대성당으로, 거대한 돔과 두 개의 탑, 청동 문이 인상적입니다. 1756년 이곳에서 모차르트가 세례를 받았으며, 그가 연주하고 작곡한 파이프 오르간으로도 유명합니다. 구시가 중심 돔 광장에 면해 있고 무료로 입장할 수 있으며, 화려한 천장화와 세례반이 볼거리입니다.",
+      facts:['입장 무료(기부 권장)','관람 20~40분','모차르트 세례 성당','돔 광장 인접'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>웅장한 바로크 돔과 천장화</li><li>모차르트가 세례받은 세례반</li><li>모차르트가 연주하던 파이프 오르간</li></ul>'},
+        {h:'꿀팁', html:'<p>입장은 무료지만 어깨·무릎을 가리는 단정한 복장이 좋아요. 인접한 <b>돔 광장·레지덴츠 광장</b>과 묶어 둘러보세요.</p>'}
+      ]},
+    { id:'getreidegasse', emoji:'🛍️', star:true, name:'게트라이데 거리', sub:'Getreidegasse · 철제 간판 쇼핑가',
+      wiki:'게트라이데가세', wikiEn:'Getreidegasse', map:'Getreidegasse Salzburg',
+      blurb:'잘츠부르크 구시가의 대표 쇼핑 거리. 가게마다 내건 정교한 철제 길드 간판이 명물이며, 모차르트 생가도 이 거리에 있어요.',
+      ko:"게트라이데가세는 잘츠부르크 구시가의 가장 유명한 쇼핑 거리로, 좁고 긴 골목을 따라 상점·부티크·카페가 늘어서 있습니다. 가게마다 내건 정교한 연철(鍊鐵) 길드 간판이 거리의 명물로, 글을 모르는 사람도 알아볼 수 있도록 만든 옛 상징들이 줄지어 있습니다. 노란색 건물의 모차르트 생가(Mozarts Geburtshaus)도 바로 이 거리에 있어 늘 관광객으로 붐빕니다.",
+      facts:['상시 개방(상점 영업시간)','산책 30~60분','철제 길드 간판','모차르트 생가 위치'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>가게마다 다른 정교한 철제 간판</li><li>노란 건물 모차르트 생가</li><li>좁은 골목과 안뜰(Durchhäuser) 탐방</li></ul>'},
+        {h:'꿀팁', html:'<p>건물과 건물을 잇는 <b>통로형 안뜰</b>을 통해 옆 골목으로 빠질 수 있어요. 자허토르테·모차르트쿠겔 등 기념품·디저트는 <a href="food.html">맛집·카페 페이지</a> 참고.</p>'}
+      ]}
+  ],
+  more: [
+    { id:'mozart', emoji:'🎼', name:'모차르트 생가', sub:'Mozarts Geburtshaus · 박물관',
+      wiki:'모차르트 생가', wikiEn:"Mozart's birthplace", map:'Mozarts Geburtshaus',
+      blurb:'게트라이데 거리의 노란 건물. 모차르트가 태어나 자란 집을 박물관으로 꾸며 어린 시절 바이올린·악보·유품을 전시.',
+      ko:"모차르트 생가(모차르트 게부르츠하우스)는 1756년 볼프강 아마데우스 모차르트가 태어나 어린 시절을 보낸 게트라이데가세의 노란색 건물입니다. 현재는 박물관으로, 모차르트가 어릴 때 쓰던 바이올린과 클라비코드, 친필 악보·편지, 초상화 등을 전시해 그의 생애와 음악 세계를 보여 줍니다.",
+      facts:['€12 내외','관람 45~60분','게트라이데가세','모차르트 유품 전시'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>모차르트의 어린 시절 바이올린·클라비코드</li><li>친필 악보·편지·가족 초상</li><li>당시 생활상을 재현한 방</li></ul>'},
+        {h:'꿀팁', html:'<p>강 건너 신시가의 <b>모차르트 거주지(Wohnhaus)</b>와 묶는 콤보 티켓도 있어요. 음악 팬이라면 둘 다, 시간이 짧으면 생가만 둘러봐도 충분.</p>'}
+      ]},
+    { id:'residenz', emoji:'👑', name:'잘츠부르크 레지덴츠', sub:'Residenz · 대주교 궁전',
+      wiki:'잘츠부르크 레지덴츠', wikiEn:'Residenz, Salzburg', map:'Residenz Salzburg',
+      blurb:'대주교가 머물던 화려한 궁전. 호화로운 국가홀과 레지덴츠 갤러리(회화관)를 갖춘 구시가 중심의 권력의 상징.',
+      ko:"잘츠부르크 레지덴츠는 잘츠부르크를 다스리던 대주교들이 거처로 쓴 궁전으로, 구시가 레지덴츠 광장에 면해 있습니다. 화려하게 장식된 여러 국가홀(프룽크레우메)과 렘브란트·루벤스 등 유럽 거장의 회화를 소장한 레지덴츠 갤러리가 볼거리이며, 대주교의 권력과 바로크 잘츠부르크의 영화를 보여 줍니다.",
+      facts:['€13 내외','관람 1~1.5시간','국가홀·회화관','돔콰르티어 통합권'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>호화로운 바로크 국가홀</li><li>렘브란트·루벤스 등 회화 컬렉션</li><li>대성당과 연결된 돔콰르티어(DomQuartier) 순환 관람</li></ul>'}
+      ]},
+    { id:'stpeter', emoji:'⛲', name:'성 페터 수도원 · 묘지', sub:"St. Peter's Abbey · 카타콤·묘지",
+      wiki:'성 베드로 대수도원 (잘츠부르크)', wikiEn:"St Peter's Abbey, Salzburg", map:'St Peter Abbey Salzburg',
+      blurb:'696년 세워진 알프스권 최고(最古) 수도원. 절벽에 파인 카타콤과 아름다운 묘지, 사운드 오브 뮤직 장면의 배경으로 유명.',
+      ko:"성 페터 수도원은 696년에 세워진 독일어권에서 가장 오래된 베네딕도회 수도원으로, 묀히스베르크 절벽 아래 구시가에 자리합니다. 화려한 로코코 양식의 수도원 성당과, 절벽을 파 만든 초기 기독교 카타콤, 그리고 철제 십자가와 꽃으로 가득한 아름다운 묘지(성 페터 묘지)로 유명합니다. 영화 '사운드 오브 뮤직'에서 가족이 숨는 묘지 장면의 모티프가 된 곳이기도 합니다.",
+      facts:['수도원·묘지 무료','카타콤 €2~3','관람 30~45분','구시가 묀히스베르크 아래'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>절벽에 파인 초기 기독교 카타콤</li><li>철제 십자가가 늘어선 성 페터 묘지</li><li>로코코 수도원 성당 · 옛 양조장(맥주홀)</li></ul>'},
+        {h:'꿀팁', html:'<p>수도원 옆 <b>St. Peter Stiftskulinarium</b>은 유럽에서 가장 오래된 식당이에요(<a href="food.html">맛집 페이지</a>). 묘지는 조용히 둘러보세요.</p>'}
+      ]},
+    { id:'moenchsberg', emoji:'🖼️', name:'묀히스베르크 전망대', sub:'Mönchsberg · 현대미술관·전망',
+      wiki:'묀히스베르크', wikiEn:'Mönchsberg', map:'Mönchsberg Salzburg',
+      blurb:'구시가를 감싼 절벽 언덕. 엘리베이터로 올라 잘츠부르크 현대미술관(MdM)과 도시·성을 한눈에 담는 테라스 전망을 즐길 수 있어요.',
+      ko:"묀히스베르크는 잘츠부르크 구시가를 감싼 길고 좁은 절벽 언덕으로, 정상에 잘츠부르크 현대미술관(Museum der Moderne)과 산책로가 있습니다. 시내에서 묀히스베르크 엘리베이터를 타고 손쉽게 올라갈 수 있으며, 미술관 테라스와 전망 지점에서 구시가의 돔과 호엔잘츠부르크 성, 알프스를 한눈에 담을 수 있습니다.",
+      facts:['엘리베이터 왕복 €4~5','미술관 별도 요금','관람 30~60분','테라스 전망'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>현대미술관(MdM) 테라스에서 보는 도시 전경</li><li>호엔잘츠부르크 성과 마주 보는 전망</li><li>한적한 언덕 산책로</li></ul>'},
+        {h:'꿀팁', html:'<p>전망만 본다면 미술관 입장 없이 <b>테라스 카페·전망 지점</b>만으로도 충분해요. 호엔잘츠부르크 성과는 반대편 언덕이라 도시를 다른 각도에서 볼 수 있어요.</p>'}
+      ]}
+  ],
+  nearby: [
+    { id:'hellbrunn', emoji:'⛲', name:'헬브룬 궁전 · 장난분수', sub:'Schloss Hellbrunn · 트릭분수·도레미 정자',
+      wiki:'헬브룬 궁전', wikiEn:'Hellbrunn Palace', map:'Schloss Hellbrunn',
+      blurb:'대주교의 여름 별궁. 곳곳에서 물이 솟는 장난분수(트릭 분수)와 사운드 오브 뮤직 도레미 정자로 유명한 근교 명소.',
+      ko:"헬브룬 궁전은 17세기 대주교 마르쿠스 시티쿠스가 여름 별궁으로 지은 르네상스·바로크 궁전으로, 시내에서 남쪽으로 차로 약 15분 거리에 있습니다. 가장 유명한 것은 손님을 골탕 먹이려 곳곳에 숨겨 둔 장난분수(트릭 분수)로, 가이드 투어 중 예고 없이 물이 솟아 즐거움을 줍니다. 정원에는 영화 '사운드 오브 뮤직'의 '열여섯 살이 되어요(Sixteen Going on Seventeen)' 장면을 촬영한 유리 정자가 옮겨져 전시되어 있습니다.",
+      facts:['트릭분수 €13~15','관람 1.5~2시간','시내에서 차 15분','도레미 정자(영화 정자)'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>예고 없이 솟는 장난분수(트릭 분수) 투어</li><li>사운드 오브 뮤직 유리 정자</li><li>넓은 정원·연못, 가족 나들이 좋음</li></ul>'},
+        {h:'꿀팁', html:'<p>트릭분수 투어 중 <b>옷이 젖을 수 있어요</b> — 여름엔 오히려 시원해서 인기. 시내버스로도 갈 수 있어요.</p>'}
+      ]},
+    { id:'untersberg', emoji:'🚠', name:'운터스베르크', sub:'Untersberg · 케이블카 전망',
+      wiki:'운터스베르크', wikiEn:'Untersberg', map:'Untersbergbahn Salzburg',
+      blurb:'잘츠부르크 남쪽의 1,800m급 산. 케이블카로 정상 부근까지 올라 도시와 알프스를 굽어보는 파노라마 전망을 즐길 수 있는 근교 명소.',
+      ko:"운터스베르크는 잘츠부르크 남쪽 경계에 솟은 약 1,800m 높이의 산으로, 오스트리아와 독일 국경에 걸쳐 있습니다. 산기슭에서 운터스베르크 케이블카(Untersbergbahn)를 타면 몇 분 만에 정상 부근(약 1,776m)에 닿아, 잘츠부르크 시가지와 알프스 연봉, 베르히테스가덴 일대를 한눈에 굽어보는 파노라마 전망이 펼쳐집니다. 시간이 남을 때 들르기 좋은 근교 전망 명소입니다.",
+      facts:['케이블카 왕복 €28 내외','시내에서 차 20분','정상 약 1,776m','정상부 짧은 산책'],
+      sections:[
+        {h:'하이라이트', html:'<ul><li>케이블카로 오르는 알프스 파노라마</li><li>정상부 전망 테라스와 짧은 트레일</li><li>맑은 날 잘츠부르크·베르히테스가덴 조망</li></ul>'},
+        {h:'꿀팁', html:'<p>정상은 시내보다 <b>훨씬 서늘하니 겉옷</b>을 챙기세요. 날씨가 흐리면 전망이 가려지니 맑은 날 권장. 1박 일정상 시간이 남을 때만 추천.</p>'}
+      ]}
+  ]
+};
+
+/* ====== 위키백과 사진/요약 로더 ====== */
+var _wikiCache = {};
+function fetchWiki(lang, title){
+  var key = lang+':'+title;
+  if(_wikiCache[key]!==undefined) return Promise.resolve(_wikiCache[key]);
+  return fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ _wikiCache[key]=j; return j; })
+    .catch(function(){ _wikiCache[key]=null; return null; });
+}
+// 이미지는 ko→en 보완, 요약은 한국어만(ko 위키 또는 s.ko 폴백)
+function loadSpotMedia(s){
+  return fetchWiki('ko', s.wiki).then(function(jk){
+    var okKo = jk && jk.type !== 'disambiguation';
+    var thumb = okKo && jk.thumbnail && jk.thumbnail.source;
+    var full  = okKo && jk.originalimage && jk.originalimage.source;
+    var koExtract = okKo ? jk.extract : null;
+    if(thumb){
+      return { thumb:thumb, full:full||thumb, extract: koExtract || s.ko || null };
+    }
+    return fetchWiki('en', s.wikiEn || s.wiki).then(function(je){
+      var et = je && je.thumbnail && je.thumbnail.source;
+      var ef = je && je.originalimage && je.originalimage.source;
+      return {
+        thumb: thumb || et || null,
+        full: full || ef || et || thumb || null,
+        extract: koExtract || s.ko || null
+      };
+    });
+  });
+}
+
+/* ====== 카드 렌더 ====== */
+var SPOT_INDEX = {};
+function gmapUrl(q){ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q); }
+function wikiUrl(s){ return 'https://ko.wikipedia.org/wiki/'+encodeURIComponent(s.wiki); }
+
+function renderGrid(groupId, list){
+  var grid = document.getElementById(groupId);
+  if(!grid) return;
+  list.forEach(function(s){
+    SPOT_INDEX[s.id] = s;
+    var btn = document.createElement('button');
+    btn.className = 'spot-card';
+    btn.type = 'button';
+    btn.id = s.id;
+    btn.innerHTML =
+      '<div class="spot-card__img" data-emoji="'+s.emoji+'"><span class="spot-card__meta">'+s.emoji+' '+s.sub+'</span>'+
+      (s.star?'<span class="spot-card__star">⭐ 필수</span>':'')+'</div>'+
+      '<div class="spot-card__body"><h3>'+s.name+'</h3><p>'+s.blurb+'</p>'+
+      '<div class="spot-card__more">사진·상세 보기 →</div></div>';
+    btn.addEventListener('click', function(){ openSpot(s); });
+    grid.appendChild(btn);
+    var imgEl = btn.querySelector('.spot-card__img');
+    s._media = loadSpotMedia(s);
+    s._media.then(function(m){
+      if(m && m.thumb){ imgEl.style.backgroundImage = 'url("'+m.thumb+'")'; imgEl.classList.add('loaded'); }
+    });
+  });
+}
+
+/* ====== 팝업 ====== */
+var overlay = document.getElementById('spotOverlay');
+var modal = document.getElementById('spotModal');
+function openSpot(s){
+  document.getElementById('spotModalTitle').textContent = s.name;
+  document.getElementById('spotModalSub').textContent = s.emoji+'  '+s.sub;
+  var hero = document.getElementById('spotModalHero');
+  hero.style.backgroundImage = '';
+  var body = document.getElementById('spotModalBody');
+  var html = '';
+  html += '<p>'+s.blurb+'</p>';
+  if(s.facts && s.facts.length){
+    html += '<div class="spot-pills">';
+    s.facts.forEach(function(f){ html += '<span class="pill">'+f+'</span>'; });
+    html += '</div>';
+  }
+  html += '<div class="spot-wiki" id="spotWikiBox"><span class="ld">위키백과 요약</span><span id="spotWikiText">불러오는 중…</span></div>';
+  (s.sections||[]).forEach(function(sec){ html += '<h4>'+sec.h+'</h4>'+sec.html; });
+  html += '<div class="spot-links">'+
+    '<a class="gmap" href="'+gmapUrl(s.map)+'" target="_blank" rel="noopener">🗺️ 구글 지도</a>'+
+    '<a class="wiki" href="'+wikiUrl(s)+'" target="_blank" rel="noopener">📖 위키백과</a>'+
+    '</div>';
+  body.innerHTML = html;
+  body.scrollTop = 0;
+  (s._media || loadSpotMedia(s)).then(function(m){
+    if(m && m.full){ hero.style.backgroundImage = 'url("'+m.full+'")'; }
+    var t = document.getElementById('spotWikiText');
+    if(t){ t.textContent = (m && m.extract) ? m.extract : '위키백과 요약을 불러오지 못했어요. 아래 링크에서 확인해 주세요.'; }
+  });
+  overlay.classList.add('active');
+  modal.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeSpot(){
+  overlay.classList.remove('active');
+  modal.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+overlay.addEventListener('click', closeSpot);
+document.getElementById('spotModalClose').addEventListener('click', closeSpot);
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSpot(); });
+
+/* ====== 초기화 ====== */
+renderGrid('grid-top', SPOTS.top);
+renderGrid('grid-more', SPOTS.more);
+renderGrid('grid-nearby', SPOTS.nearby);
+
+/* ====== 해시 딥링크 (#hohensalzburg 등) — 스크롤 + 팝업 자동 열기 ====== */
+function handleHash(){
+  var id = (location.hash || '').replace('#','');
+  if(id && SPOT_INDEX[id]){
+    var card = document.getElementById(id);
+    if(card){ card.scrollIntoView({behavior:'smooth', block:'center'}); }
+    openSpot(SPOT_INDEX[id]);
+  }
+}
+handleHash();
+window.addEventListener('hashchange', handleHash);
+</script>
+</body>
+</html>

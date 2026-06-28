@@ -72,6 +72,10 @@
           class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
           📋 <span>여행 보고서</span>
         </a>
+        <a href="salzburg/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="잘츠부르크 시티 가이드"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🏰 <span>잘츠부르크 가이드</span>
+        </a>
         <a href="jungfrau/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="융프라우 자동차 여행 가이드"
           class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
           🚠 <span>융프라우 가이드</span>
@@ -79,6 +83,10 @@
         <a href="milan/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="밀라노 시티 가이드"
           class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
           🏛️ <span>밀라노 가이드</span>
+        </a>
+        <a href="piran/index.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="피란 시티 가이드"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
+          🌅 <span>피란 가이드</span>
         </a>
       </h1>
       <div id="t-detail" class="hidden">
@@ -1272,8 +1280,10 @@ const AB_DEFECT_REPORT = {
 };
 /* 도시별 전용 상세 가이드 사이트(있으면 카드에 별도 버튼 노출). 인터라켄=융프라우 자동차 여행 가이드 */
 const AB_GUIDE = {
+  salzburg: { href: 'salzburg/index.html', label: '🏰 잘츠부르크 시티 가이드 (명소·운전·주차·맛집) →' },
   interlaken: { href: 'jungfrau/index.html', label: '🚠 융프라우 자동차 여행 가이드 (코스·패스·주차·맛집) →' },
-  milan: { href: 'milan/index.html', label: '🏛️ 밀라노 시티 가이드 (명소·ZTL 운전·주차·맛집) →' }
+  milan: { href: 'milan/index.html', label: '🏛️ 밀라노 시티 가이드 (명소·ZTL 운전·주차·맛집) →' },
+  piran: { href: 'piran/index.html', label: '🌅 피란 시티 가이드 (명소·해산물 맛집·구시가 주차) →' }
 };
 /* 도시별 '공동 편집' 초대 링크(Airbnb Share wishlist). 이 링크를 연 사람은 각자 로그인 후
    해당 위시리스트에 참여해 숙소를 함께 추가·편집할 수 있다. (값이 채워지면 자동으로 공동편집 버튼 노출) */
