@@ -68,6 +68,10 @@
           class="ml-1 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0">
           🎒 <span>준비물</span>
         </button>
+        <button type="button" onclick="openReserve(event)" title="사전 예약 체크리스트"
+          class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0">
+          🎫 <span>예약</span>
+        </button>
         <a href="travel-guide-report.html" onclick="event.stopPropagation()" title="여행 가이드 보고서"
           class="inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 ring-1 ring-white/20 rounded-full px-2.5 py-1 text-[11.5px] md:text-[11.5px] font-semibold transition shrink-0 no-underline text-white">
           📋 <span>여행 보고서</span>
@@ -2217,5 +2221,122 @@ ROUTE.stops.forEach(s=>{
   fetchPhoto(s.id).then(url=>{ if(url && markers[s.id]) markers[s.id].setPopupContent(buildPopup(s,url)); });
 });
 </script>
+
+<!-- 예약 체크리스트 모달 -->
+<div id="rsv-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-3 md:p-5">
+  <div onclick="closeReserve()" class="absolute inset-0 bg-ink/60 backdrop-blur-sm"></div>
+  <div class="relative w-full max-w-[560px] max-h-[88vh] md:max-h-[86vh] bg-paper rounded-2xl shadow-2xl ring-1 ring-sand flex flex-col overflow-hidden">
+    <div class="shrink-0 bg-ink text-white px-5 pt-4 pb-3.5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-[17px] md:text-[19px] font-bold tracking-tight flex items-center gap-2">🎫 사전 예약 체크리스트</h2>
+          <p class="text-white/60 text-[11.5px] mt-0.5">2026.7.6–7.13 · 부다페스트 → 잘츠부르크 → 인터라켄 → 밀라노 → 피란</p>
+          <span class="inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5">📱 이 기기에 저장</span>
+        </div>
+        <button type="button" onclick="closeReserve()" title="닫기"
+          class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[20px] leading-none transition">×</button>
+      </div>
+      <div class="mt-3">
+        <div class="flex items-center justify-between text-[11.5px] text-white/70 mb-1">
+          <span>진행률</span><span id="rsv-progress-label">0 / 0</span>
+        </div>
+        <div class="h-2 rounded-full bg-white/15 overflow-hidden"><div id="rsv-progress-bar" class="h-full bg-accent transition-[width] duration-300" style="width:0%"></div></div>
+      </div>
+      <div class="mt-2.5 flex justify-end">
+        <button type="button" onclick="rsvReset()"
+          class="text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition">전체 초기화</button>
+      </div>
+    </div>
+    <div id="rsv-body" class="overflow-y-auto px-5 py-4 nice-scroll"></div>
+  </div>
+</div>
+
+<script>
+/* ===== 예약 체크리스트 (공유 단일 체크박스 · localStorage 저장) ===== */
+const RSV_GROUPS = [
+  { title: '🔴 반드시 사전 예약 · 준비 (필수)', tone: 'accent', items: [
+    { id:'stay',         t:'숙소 전체 확정',                 d:'잘츠부르크 Leonardo Hotel(확정) · 인터라켄 3박 · 밀라노 2박 · 피란 1박 (성수기 조기 확정)' },
+    { id:'lastsupper',   t:'최후의 만찬 예약 (밀라노)',       d:'cenacolovinciano 공식 — 수 주 전 예약, 매진 매우 빠름 · 매진 시 입장 포함 가이드 투어' },
+    { id:'jungfraujoch', t:'융프라우요흐 좌석 예약',          d:'5/1~10/31 좌석 예약 의무(CHF 10/인) · jungfrau.ch에서 미리' },
+    { id:'vignette',     t:'통행권(비넷) 4종 구매',           d:'헝가리 e-마트리카 · 오스트리아 디지털 · 스위스(CHF 40) · 슬로베니아 e-vinjeta — 번호판 연동, 출발 전 온라인' },
+    { id:'idp',          t:'국제운전면허증(IDP) 발급',        d:'교대 운전자 전원 발급 + 한국 면허 원본 + 여권 상시 휴대' },
+  ]},
+  { title: '🟡 강력 권장 (줄·매진 대비)', tone: 'amber', items: [
+    { id:'duomo',        t:'두오모 통합권 온라인 (밀라노)',    d:'내부 + 옥상 테라스 통합권 — 줄 대폭 단축' },
+    { id:'hohensalzburg',t:'호엔잘츠부르크 성 온라인 (잘츠부르크)', d:'성수기 줄 단축' },
+    { id:'gornergrat',   t:'고르너그라트 등산열차 (체르마트)', d:'성수기 온라인 권장 · 스위스 트래블 패스 50% (융프라우 패스 미적용)' },
+    { id:'dining',       t:'인기 식당 저녁 예약',             d:'St. Peter(잘츠부르크) · 밀라노 인기 레스토랑 · Pri Mari(피란) 등' },
+    { id:'paragliding',  t:'패러글라이딩 (인터라켄·선택)',    d:'날씨 맞춰 사전 예약' },
+  ]},
+];
+const RSV_KEY = 'rsv-checks-v1';
+let rsvState = {};
+try { rsvState = JSON.parse(localStorage.getItem(RSV_KEY) || '{}') || {}; } catch(e) { rsvState = {}; }
+function rsvSave(){ try { localStorage.setItem(RSV_KEY, JSON.stringify(rsvState)); } catch(e){} }
+function rsvTotalDone(){
+  let total=0, done=0;
+  RSV_GROUPS.forEach(g=>g.items.forEach(it=>{ total++; if(rsvState[it.id]) done++; }));
+  return { total, done };
+}
+function rsvUpdateProgress(){
+  const { total, done } = rsvTotalDone();
+  const pct = total ? Math.round(done/total*100) : 0;
+  const lab = document.getElementById('rsv-progress-label');
+  const bar = document.getElementById('rsv-progress-bar');
+  if(lab) lab.textContent = done + ' / ' + total + (done===total && total ? '  ✅' : '');
+  if(bar) bar.style.width = pct + '%';
+}
+function rsvToggle(id){
+  rsvState[id] = !rsvState[id];
+  rsvSave();
+  const row = document.getElementById('rsv-row-' + id);
+  if(row) row.classList.toggle('rsv-done', !!rsvState[id]);
+  rsvUpdateProgress();
+}
+function rsvReset(){
+  if(!confirm('예약 체크를 모두 해제할까요?')) return;
+  rsvState = {}; rsvSave(); rsvRender();
+}
+function rsvRender(){
+  const body = document.getElementById('rsv-body');
+  if(!body) return;
+  let html = '';
+  RSV_GROUPS.forEach(g=>{
+    const tone = g.tone==='accent' ? 'text-accent' : 'text-amber-600';
+    html += '<div class="mb-4">';
+    html += '<h3 class="text-[12.5px] font-extrabold '+tone+' mb-2 tracking-tight">'+g.title+'</h3>';
+    html += '<div class="space-y-2">';
+    g.items.forEach(it=>{
+      const on = !!rsvState[it.id];
+      html += '<label id="rsv-row-'+it.id+'" class="rsv-item'+(on?' rsv-done':'')+' flex items-start gap-3 bg-white border border-sand rounded-xl px-3.5 py-2.5 cursor-pointer hover:border-stone/40 transition">'
+        + '<input type="checkbox" '+(on?'checked':'')+' onchange="rsvToggle(\''+it.id+'\')" class="mt-0.5 w-[18px] h-[18px] accent-accent shrink-0 cursor-pointer">'
+        + '<span class="min-w-0">'
+        +   '<span class="rsv-t block text-[14px] font-bold text-ink leading-snug">'+it.t+'</span>'
+        +   '<span class="rsv-d block text-[12px] text-stone leading-snug mt-0.5">'+it.d+'</span>'
+        + '</span></label>';
+    });
+    html += '</div></div>';
+  });
+  html += '<p class="text-[11px] text-stone/70 leading-relaxed mt-1">⏱️ 우선순위: ① 최후의 만찬(매진 빠름) → ② 숙소 → ③ 융프라우요흐 좌석 → ④ 비넷·국제운전면허증(출발 직전 일괄). 요금·규정은 변동될 수 있어요.</p>';
+  body.innerHTML = html;
+  rsvUpdateProgress();
+}
+function openReserve(ev){
+  if(ev && ev.stopPropagation) ev.stopPropagation();
+  rsvRender();
+  document.getElementById('rsv-overlay').classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+}
+function closeReserve(){
+  document.getElementById('rsv-overlay').classList.add('hidden');
+  document.body.classList.remove('overflow-hidden');
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReserve(); });
+</script>
+<style>
+  .rsv-done{background:#f0f7f1;border-color:#cfe6d4;}
+  .rsv-done .rsv-t{text-decoration:line-through;color:#9aa39a;}
+  .rsv-done .rsv-d{color:#aeb4ae;}
+</style>
 </body>
 </html>
