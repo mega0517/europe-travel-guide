@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>2박3일 상세 일정 · 밀라노 시티 가이드</title>
-<meta name="description" content="융프라우에서 알프스를 넘어 도착–밀라노 2박3일–피란으로 출발, 날짜별 동선과 플랜B">
+<title>상세 일정 스케줄러 · 잘츠부르크 시티 가이드</title>
+<meta name="description" content="잘츠부르크 도착일(7/6)과 인터라켄으로 떠나는 날(7/7)의 편집 가능한 상세 일정 스케줄러 — 시간 조정·항목 추가·삭제·완료 체크">
 <link rel="stylesheet" href="css/style.css">
 <!-- [A] CSS BLOCK — place inside <head> after the stylesheet link -->
 <style id="SCH_CSS">
@@ -60,39 +60,31 @@
 <body>
 <nav class="nav">
   <div class="wrap">
-    <a href="index.html" class="brand">🏛️ 밀라노 <span>시티 가이드</span></a>
+    <a href="index.html" class="brand">🏰 잘츠부르크 <span>시티 가이드</span></a>
     <button class="nav-toggle" aria-label="메뉴">☰</button>
     <div class="nav-links">
       <a href="../index.html" class="nav-back">← 유럽 가이드</a>
       <a href="index.html">홈</a>
-      <a href="itinerary.html">2박3일 일정</a>
+      <a href="itinerary.html" class="active">📅 상세 일정</a>
       <a href="attractions.html">볼거리·명소</a>
-      <a href="driving.html">🚗 운전·ZTL·주차</a>
-      <a href="food.html">맛집·쇼핑</a>
+      <a href="driving.html">🚗 운전·주차</a>
+      <a href="food.html">맛집·카페</a>
     </div>
   </div>
 </nav>
 
 <header class="page-hero">
   <div class="wrap">
-    <p class="breadcrumb"><a href="index.html">홈</a> › 2박3일 일정</p>
-    <h1>🗓️ 2박3일 상세 일정</h1>
-    <p>융프라우에서 알프스를 넘어 들어와 슬로베니아 피란으로 빠지는 도시 체류. 도착일 동선·핵심 1일·출발일을 시간표와 플랜B로 정리했어요.</p>
+    <p class="breadcrumb"><a href="index.html">홈</a> › 상세 일정</p>
+    <h1>🗓️ 상세 일정 스케줄러</h1>
+    <p>잘츠부르크 도착일(7/6)과 인터라켄으로 떠나는 날(7/7)의 시간표예요. 시간을 조정하고 항목을 추가·삭제하거나, 다녀온 항목을 눌러 체크할 수 있어요.</p>
   </div>
 </header>
 
 <main>
   <section class="block">
     <div class="wrap">
-      <div class="note">
-        <b>🚗 큰 그림 — 알프스 넘어 밀라노, 그리고 아드리아로</b>
-        <b style="font-weight:400;display:inline">융프라우 지역(스위스)</b> → <b style="font-weight:400;display:inline">밀라노(이탈리아, 2박)</b> → <b style="font-weight:400;display:inline">피란(슬로베니아)</b>. 밀라노 도착·출발 모두 국경을 넘고, 도심은 <b style="font-weight:400;display:inline">ZTL(Area C) 진입 제한</b>이 있어요. 통행권·주차·ZTL은 <a href="driving.html">운전·ZTL·주차</a> 페이지를 먼저 보세요.
-      </div>
-
-      <div class="note tip">
-        <b>👫 부부 두 쌍을 위한 페이스 가이드</b>
-        무리한 강행군보다 <b style="font-weight:400;display:inline">하루 2~3개 핵심 명소 + 충분한 휴식</b>이 원칙이에요. 한낮 더위가 심한 7월엔 정오~오후를 실내·카페·아페리티보로 쉬어 가고, 도심 이동은 <b style="font-weight:400;display:inline">지하철·트램</b>을 적극 활용해 다리 부담을 줄이세요. 두오모 옥상은 엘리베이터, 명소 간 거리는 대부분 도보 15~25분이라 천천히 다녀도 충분합니다.
-      </div>
+      <div class="note tip" style="margin-bottom:22px"><b>👫 여유로운 페이스</b> 1박 기착지라 도착 후 도보로 구시가만 알차게 도는 걸 추천해요. 시간은 대략의 기준이니 현장 상황에 맞게 <b>편집</b>에서 자유롭게 조정하세요.</div>
 
       <!-- [B] BODY MARKUP — place where the schedule should render -->
       <div class="sch-wrap">
@@ -108,55 +100,48 @@
         </div>
         <div id="sch-body"></div>
       </div>
-
-      <!-- PLAN B -->
-      <div class="section-head" style="margin-top:36px">
-        <span class="kicker">Plan B</span>
-        <h2>🌤️ 상황별 플랜B</h2>
-        <p>예약 매진·더위·휴무에 대비해 유연하게 바꾸면 만족도가 올라가요.</p>
-      </div>
-      <div class="grid cols-2">
-        <div class="card"><h3>최후의 만찬 매진이면</h3><p>공식 티켓이 매진이면 <b>가이드 투어(입장 포함) 상품</b>으로 우회하거나, 대안으로 <b>브레라 미술관·암브로시아나 회화관</b>에서 거장 회화를 감상하세요.</p></div>
-        <div class="card"><h3>한낮이 너무 더우면</h3><p>정오~오후는 실내 위주로 — 두오모 내부·미술관·갤러리아 아케이드. 야외(옥상 테라스·공원)는 오전이나 해질녘으로 옮기기.</p></div>
-        <div class="card"><h3>일요일 휴무·단축 대비</h3><p>일부 상점·식당이 일요일 단축 영업. Day 3 쇼핑은 기대를 낮추고, 문 여는 카페·젤라토 위주로 가볍게.</p></div>
-        <div class="card"><h3>시간이 남으면 근교로</h3><p>여유가 생기면 기차로 <b>코모 호수</b>(약 1시간)나 <b>베르가모</b> 구시가 당일치기. 단, 출발일 운전 부담을 고려해 Day 2에만.</p></div>
-      </div>
     </div>
   </section>
 </main>
 
 <footer class="foot">
   <div class="wrap">
-    <div><strong>밀라노 시티 가이드</strong><br>2026.7.10–7.12 · 융프라우 → 밀라노 → 피란</div>
-    <div>요금·운영시간은 2026년 여름 기준이며 변동될 수 있어요.<br>방문 전 <a href="https://www.turismo.milano.it/" target="_blank" rel="noopener">turismo.milano.it</a> 확인 권장.</div>
+    <div>
+      <strong>잘츠부르크 시티 가이드</strong><br>
+      2026.7.6–7.7 · 자가용 여행
+    </div>
+    <div>
+      요금·운영시간은 2026년 여름 기준이며 변동될 수 있어요.<br>
+      방문 전 <a href="https://www.salzburg.info/" target="_blank" rel="noopener">salzburg.info</a> 공식 관광 사이트에서 최종 확인을 권장합니다.
+    </div>
   </div>
 </footer>
 <script src="js/main.js"></script>
-<!-- [C] SCRIPT BLOCK — editable schedule scheduler (namespace: milan) -->
+<!-- [C] SCRIPT BLOCK — scheduler (namespace + seed already substituted) -->
 <script>
 /* ===== 편집 가능한 일정 스케줄러 (시간 조정·소요시간·순서이동·추가/삭제·완료체크·localStorage) ===== */
-const SCH_NS='milan';
+const SCH_NS='salzburg';
 const SCH_SEED=[
- {key:"d1",date:"7/10 (금)",title:"알프스 넘어 밀라노 도착 & 첫 저녁",note:"",items:[
-   {id:"m1a",time:"정오",t:"라우터브룬넨 출발 (밀라노까지 약 250km·3.5~4시간, 심플론/고타르 터널, 국경 통행권 확인)"},
-   {id:"m1b",time:"중간",t:"(선택) 도모도솔라 / 마조레 호수 점심·휴식"},
-   {id:"m1c",time:"19:00~20:00",t:"밀라노 숙소 체크인 (ZTL 밖 주차 가능 숙소 확인, 차는 차고·주차장에)"},
-   {id:"m1d",time:"저녁",t:"나빌리 운하 아페리티보 (장거리 뒤라 가볍게)"},
-   {id:"m1e",time:"밤",t:"(선택) 두오모 야경 산책 (소매치기 주의)"}
+ {key:"d1",date:"7/6 (월)",title:"부다페스트 → 할슈타트 → 잘츠부르크",note:"사전 준비 — 오스트리아·스위스·슬로베니아 비넷, 이탈리아는 현금 필요",items:[
+   {id:"s1a",time:"07:00",t:"출발"},
+   {id:"s1b",time:"07:00~13:30",t:"이동 (집 → 할슈타트) · 휴게소에서 아침식사 및 휴식"},
+   {id:"s1c",time:"13:30~15:30",t:"할슈타트 관광 · 주차 P1/P2 (만석 시 P3)"},
+   {id:"s1d",time:"15:30~16:10",t:"이동 (할슈타트 → 볼프강 호수)"},
+   {id:"s1e",time:"16:10~17:00",t:"볼프강 호숫가 휴식 및 간식 · 호숫가 주차 가능"},
+   {id:"s1f",time:"17:00~17:40",t:"이동 (볼프강 호수 → 잘츠 레오나르도 호텔)"},
+   {id:"s1g",time:"17:40~18:30",t:"호텔 Check-in 및 짐 정리 · 호텔 주차장 주차"},
+   {id:"s1h",time:"18:30~20:30",t:"잘츠부르크 관광 (잘츠성·상가거리·미라벨 정원 등)"},
+   {id:"s1i",time:"20:30~22:30",t:"저녁 식사 겸 맥주 (잘츠 수도원 양조장)"},
+   {id:"s1j",time:"22:30~23:00",t:"호텔로 이동 (산책 겸 도보)"}
  ]},
- {key:"d2",date:"7/11 (토)",title:"밀라노 핵심 1일 — 두오모부터 최후의 만찬까지",note:"최후의 만찬 예약 시간을 먼저 확정하고 그 시간 기준으로 앞뒤 배치",items:[
-   {id:"m2a",time:"09:30",t:"두오모 대성당 + 옥상 테라스 (통합권, 어깨·무릎 가리는 복장)"},
-   {id:"m2b",time:"11:30",t:"갤러리아 비토리오 에마누엘레 2세 (옆 스칼라 극장도)"},
-   {id:"m2c",time:"점심",t:"밀라노식 점심 (리소토 알라 밀라네제·코톨레타)"},
-   {id:"m2d",time:"14:00",t:"스포르체스코 성 & 셈피오네 공원"},
-   {id:"m2e",time:"16:00",t:"최후의 만찬 (예약 시간 엄수, 관람 약 15분)"},
-   {id:"m2f",time:"저녁",t:"브레라 지구 산책 & 저녁 (아페리티보)"}
- ]},
- {key:"d3",date:"7/12 (일)",title:"오전 마무리 → 피란으로 출발",note:"7월 일몰 ~21시라 9시 반~10시 출발해도 오후 4~5시 도착해 석양 여유",items:[
-   {id:"m3a",time:"09:30~10:00",t:"체크아웃 후 느긋하게 출발 (피란까지 약 500km·5~5.5시간, ZTL 밖 경로로)"},
-   {id:"m3b",time:"오전",t:"밀라노 → 피란 이동 시작 (이탈리아·슬로베니아 비넷 확인, 운전 약 2.5시간씩 교대)"},
-   {id:"m3c",time:"중간",t:"베로나/트리에스테 점심·휴식 (짧게 — 오래 머물면 석양 놓침)"},
-   {id:"m3d",time:"16:00~17:00",t:"피란 도착 + 석양 (외곽 주차 후 도보, 타르티니 광장·성벽·해안)"}
+ {key:"d2",date:"7/7 (화)",title:"잘츠부르크 → 인터라켄",note:"",items:[
+   {id:"s2a",time:"08:30",t:"출발 (아침식사는 출발 전 룸에서 간단히)"},
+   {id:"s2b",time:"08:30~18:00",t:"이동 (잘츠 호텔 → 인터라켄 숙소) · 휴게소에서 식사·휴식 — 뮌헨 외곽 아우토반으로 스위스 진입, 5대 패스 중 3개 경유(오베르알프 → 푸르카 → 그림젤)"},
+   {id:"s2c",time:"18:00~18:30",t:"숙소 Check-in 및 짐 정리 · 숙소 주차장 주차"},
+   {id:"s2d",time:"18:30~21:00",t:"[1안] 시내 이동(인터라켄 동역 주차장) 관광·식사 준비 후 숙소 복귀"},
+   {id:"s2e",time:"21:00~23:00",t:"[1안] 저녁식사"},
+   {id:"s2f",time:"18:30~19:30",t:"[2안] 숙소에서 간단히 저녁식사"},
+   {id:"s2g",time:"19:30~23:00",t:"[2안] 시내 이동(인터라켄 동역 주차장) 관광 후 숙소 복귀"}
  ]}
 ];
 const SCH_ITEMS_KEY='sch-'+SCH_NS+'-items-v1';
