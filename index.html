@@ -1103,6 +1103,13 @@ document.getElementById('t-meta').textContent =
   `🚗 ${ROUTE.trip.car} · 📅 ${ROUTE.trip.start} ~ ${ROUTE.trip.end} · 총 ${sumKm()}km`;
 
 /* 중간 열: 여정 리스트 */
+/* 여정의 각 도시 → 해당 시티 가이드(미니사이트) 매핑. 인터라켄 3박은 융프라우 로드트립 가이드가 담당 */
+const CITY_GUIDE = {
+  salzburg: 'salzburg/index.html',
+  interlaken: 'jungfrau/index.html',
+  milan: 'milan/index.html',
+  piran: 'piran/index.html'
+};
 const dl = document.getElementById('daylist');
 ROUTE.stops.forEach(s=>{
   const isStay = s.type==='stay';
@@ -1114,8 +1121,13 @@ ROUTE.stops.forEach(s=>{
   const numCls = isStay
     ? `${(s.nights>1)?'min-w-[34px] px-1':'w-[25px]'} h-[25px] text-[11px] bg-accent`
     : 'w-[19px] h-[19px] text-[0px] bg-slate-400';
+  const guide = CITY_GUIDE[s.id];
+  const nameHtml = guide
+    ? `<a href="${guide}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${s.name} 시티 가이드 열기"
+         class="block text-[12px] md:text-[13.5px] font-bold truncate text-ink hover:text-accent hover:underline decoration-2 underline-offset-2 transition">${s.name} <span class="text-[10px] align-middle text-accent font-normal">📖↗</span></a>`
+    : `<b class="block text-[12px] md:text-[13.5px] truncate">${s.name}</b>`;
   el.innerHTML = `<div class="shrink-0 rounded-full text-white font-bold flex items-center justify-center ${numCls}">${num}</div>
-    <div class="min-w-0 text-[11.5px] md:text-[13px]"><b class="block text-[12px] md:text-[13.5px] truncate">${s.name}</b>
+    <div class="min-w-0 text-[11.5px] md:text-[13px]">${nameHtml}
     <small class="text-slate-500 text-[10px] md:text-[11.5px]">${fmtDay(s.day)} · ${s.country}${s.nights?` · ${s.nights}박`:''}${leg?`<br><span class="text-accent2">🚗 ${leg.km}km · ${fmtHours(leg.hours)}</span>`:''}</small></div>`;
   el.onclick=()=>selectStop(s.id);
   dl.appendChild(el);
