@@ -2490,21 +2490,46 @@ function schToggle(id){
   const row=document.getElementById('sch-row-'+id); if(row) row.classList.toggle('sch-done', !!schDone[id]);
   schUpdateProgress();
 }
-function schEditTime(dkey,id,v){ const d=schDays.find(x=>x.key===dkey); if(!d) return; const it=d.items.find(i=>i.id===id); if(it){ it.time=String(v).trim(); schSaveItems(); } }
+/* 시간 문자열 파싱/조합 · 소요시간 계산 */
+function schSplit(time){ const p=String(time||'').split('~').map(s=>s.trim()); return [p[0]||'', p[1]||'']; }
+function schJoin(s,e){ s=(s||'').trim(); e=(e||'').trim(); return (s&&e)? s+'~'+e : (s||e||''); }
+function schMin(t){ const m=/^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim()); return m? (+m[1])*60+(+m[2]) : null; }
+function schDur(time){
+  const [s,e]=schSplit(time); const ms=schMin(s), me=schMin(e);
+  if(ms==null||me==null) return '';
+  let d=me-ms; if(d<0) d+=24*60; /* 자정 넘김 보정 */
+  if(d<=0) return '';
+  const h=Math.floor(d/60), m=d%60;
+  return (h?h+'시간':'') + (h&&m?' ':'') + (m?m+'분':'');
+}
+function schSetTime(dkey,id,which,v){
+  const d=schDays.find(x=>x.key===dkey); if(!d) return;
+  const it=d.items.find(i=>i.id===id); if(!it) return;
+  const [s,e]=schSplit(it.time);
+  it.time = which==='start' ? schJoin(v,e) : schJoin(s,v);
+  schSaveItems(); schRender();
+}
 function schEditText(dkey,id,v){ const d=schDays.find(x=>x.key===dkey); if(!d) return; const it=d.items.find(i=>i.id===id); if(it){ it.t=String(v).trim(); schSaveItems(); } }
+function schMove(dkey,id,dir){
+  const d=schDays.find(x=>x.key===dkey); if(!d) return;
+  const i=d.items.findIndex(it=>it.id===id); if(i<0) return;
+  const j=i+dir; if(j<0||j>=d.items.length) return;
+  const t=d.items[i]; d.items[i]=d.items[j]; d.items[j]=t;
+  schSaveItems(); schRender();
+}
 function schDel(dkey,id){
   const d=schDays.find(x=>x.key===dkey); if(!d) return;
   d.items=d.items.filter(it=>it.id!==id); delete schDone[id];
   schSaveItems(); schSaveDone(); schRender();
 }
 function schAdd(dkey){
-  const ti=document.getElementById('sch-add-time-'+dkey), ci=document.getElementById('sch-add-t-'+dkey);
-  const time=((ti&&ti.value)||'').trim(), t=((ci&&ci.value)||'').trim();
+  const si=document.getElementById('sch-add-s-'+dkey), ei=document.getElementById('sch-add-e-'+dkey), ci=document.getElementById('sch-add-t-'+dkey);
+  const time=schJoin(si&&si.value, ei&&ei.value), t=((ci&&ci.value)||'').trim();
   if(!t){ if(ci) ci.focus(); return; }
   const d=schDays.find(x=>x.key===dkey); if(!d) return;
   d.items.push({ id:'u'+Date.now().toString(36)+Math.floor(Math.random()*1000), time:time, t:t });
   schSaveItems(); schRender();
-  const ni=document.getElementById('sch-add-time-'+dkey); if(ni) ni.focus();
+  const ni=document.getElementById('sch-add-s-'+dkey); if(ni) ni.focus();
 }
 function schToggleEdit(){
   schEdit=!schEdit;
@@ -2528,34 +2553,50 @@ function schRender(){
       + '</div>';
     if(d.note) html += '<p class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200/70 rounded-lg px-2.5 py-1.5 mb-2.5 leading-snug">⚠️ '+schEsc(d.note)+'</p>';
     html += '<div class="space-y-1.5">';
-    d.items.forEach(it=>{
+    d.items.forEach((it,ii)=>{
       const on=!!schDone[it.id];
+      const [st,en]=schSplit(it.time); const dur=schDur(it.time);
       if(schEdit){
-        html += '<div class="flex items-start gap-2 bg-white border border-sand rounded-xl px-2.5 py-2">'
-          + '<input type="text" value="'+schEsc(it.time)+'" placeholder="시간" onchange="schEditTime(\''+d.key+'\',\''+it.id+'\',this.value)" class="shrink-0 w-[92px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-2 py-1.5 outline-none focus:border-stone/50">'
-          + '<input type="text" value="'+schEsc(it.t)+'" placeholder="내용" onchange="schEditText(\''+d.key+'\',\''+it.id+'\',this.value)" class="min-w-0 flex-1 text-[13px] text-ink bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
-          + '<button type="button" onclick="schDel(\''+d.key+'\',\''+it.id+'\')" title="삭제" class="shrink-0 w-6 h-6 mt-0.5 flex items-center justify-center rounded-full text-accent hover:bg-accent/10 text-[16px] leading-none transition">×</button>'
+        html += '<div class="bg-white border border-sand rounded-xl px-2.5 py-2 space-y-1.5">'
+          + '<div class="flex items-center gap-1.5">'
+          + '<input type="time" value="'+schEsc(st)+'" onchange="schSetTime(\''+d.key+'\',\''+it.id+'\',\'start\',this.value)" class="shrink-0 w-[88px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+          + '<span class="shrink-0 text-stone text-[12px]">~</span>'
+          + '<input type="time" value="'+schEsc(en)+'" onchange="schSetTime(\''+d.key+'\',\''+it.id+'\',\'end\',this.value)" class="shrink-0 w-[88px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+          + (dur?'<span class="shrink-0 text-[10.5px] font-semibold text-stone bg-sand/50 rounded px-1.5 py-0.5 whitespace-nowrap">'+dur+'</span>':'')
+          + '<span class="ml-auto shrink-0 flex items-center gap-0.5">'
+          + '<button type="button" onclick="schMove(\''+d.key+'\',\''+it.id+'\',-1)" title="위로" '+(ii===0?'disabled':'')+' class="w-6 h-6 flex items-center justify-center rounded text-stone hover:bg-sand/60 text-[12px] leading-none transition disabled:opacity-25 disabled:hover:bg-transparent">▲</button>'
+          + '<button type="button" onclick="schMove(\''+d.key+'\',\''+it.id+'\',1)" title="아래로" '+(ii===d.items.length-1?'disabled':'')+' class="w-6 h-6 flex items-center justify-center rounded text-stone hover:bg-sand/60 text-[12px] leading-none transition disabled:opacity-25 disabled:hover:bg-transparent">▼</button>'
+          + '<button type="button" onclick="schDel(\''+d.key+'\',\''+it.id+'\')" title="삭제" class="w-6 h-6 flex items-center justify-center rounded-full text-accent hover:bg-accent/10 text-[16px] leading-none transition">×</button>'
+          + '</span></div>'
+          + '<input type="text" value="'+schEsc(it.t)+'" placeholder="내용" onchange="schEditText(\''+d.key+'\',\''+it.id+'\',this.value)" class="w-full text-[13px] text-ink bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
           + '</div>';
       } else {
         html += '<div id="sch-row-'+it.id+'" class="sch-row'+(on?' sch-done':'')+' flex items-start gap-2.5 bg-white border border-sand rounded-xl px-3 py-2 cursor-pointer hover:border-stone/40 transition" onclick="schToggle(\''+it.id+'\')">'
-          + '<span class="sch-time shrink-0 inline-flex items-center justify-center min-w-[58px] text-[10.5px] font-extrabold text-accent bg-accent/8 rounded-md px-1.5 py-1 whitespace-nowrap leading-none mt-0.5">'+schEsc(it.time||'—')+'</span>'
+          + '<span class="shrink-0 flex flex-col items-center gap-0.5 mt-0.5">'
+          + '<span class="sch-time inline-flex items-center justify-center min-w-[58px] text-[10.5px] font-extrabold text-accent bg-accent/8 rounded-md px-1.5 py-1 whitespace-nowrap leading-none">'+schEsc(it.time||'—')+'</span>'
+          + (dur?'<span class="sch-dur text-[9.5px] font-semibold text-stone/70 leading-none">'+dur+'</span>':'')
+          + '</span>'
           + '<span class="sch-t min-w-0 flex-1 text-[13px] text-ink leading-snug">'+schEsc(it.t)+'</span>'
           + '<span class="sch-check shrink-0 text-[14px] text-emerald-500 leading-none mt-0.5">✓</span>'
           + '</div>';
       }
     });
     if(schEdit){
-      html += '<div class="flex items-start gap-2 bg-sand/40 border border-dashed border-stone/30 rounded-xl px-2.5 py-2">'
-        + '<input id="sch-add-time-'+d.key+'" type="text" placeholder="시간" class="shrink-0 w-[92px] text-[11px] bg-white border border-sand rounded-lg px-2 py-1.5 outline-none focus:border-stone/50">'
-        + '<input id="sch-add-t-'+d.key+'" type="text" placeholder="새 일정 내용" class="min-w-0 flex-1 text-[13px] bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
-        + '<button type="button" onclick="schAdd(\''+d.key+'\')" class="shrink-0 text-[12px] font-bold text-white bg-accent hover:bg-red-700 rounded-lg px-2.5 py-1.5 transition">+ 추가</button>'
+      html += '<div class="bg-sand/40 border border-dashed border-stone/30 rounded-xl px-2.5 py-2 space-y-1.5">'
+        + '<div class="flex items-center gap-1.5">'
+        + '<input id="sch-add-s-'+d.key+'" type="time" class="shrink-0 w-[88px] text-[11px] bg-white border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+        + '<span class="shrink-0 text-stone text-[12px]">~</span>'
+        + '<input id="sch-add-e-'+d.key+'" type="time" class="shrink-0 w-[88px] text-[11px] bg-white border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+        + '<button type="button" onclick="schAdd(\''+d.key+'\')" class="ml-auto shrink-0 text-[12px] font-bold text-white bg-accent hover:bg-red-700 rounded-lg px-2.5 py-1.5 transition">+ 추가</button>'
+        + '</div>'
+        + '<input id="sch-add-t-'+d.key+'" type="text" placeholder="새 일정 내용" class="w-full text-[13px] bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
         + '</div>';
     }
     html += '</div></div>';
   });
   html += '<p class="text-[11px] text-stone/70 leading-relaxed mt-1">'
     + (schEdit
-        ? '✏️ 편집 모드: 시간·내용을 직접 수정하고, 항목을 추가·삭제할 수 있어요. 끝나면 ✓ 완료를 누르세요.'
+        ? '✏️ 편집 모드: 시작~종료 시간을 조정하면 소요시간이 자동 계산돼요. ▲▼로 순서 이동, ×로 삭제, 아래 칸으로 추가. 끝나면 ✓ 완료를 누르세요.'
         : '👆 항목을 누르면 완료 표시(취소선)됩니다. 7/8–7/11(인터라켄 활동일·밀라노)은 각 도시 가이드를 참고하고, 필요하면 편집에서 직접 추가하세요.')
     + '</p>';
   body.innerHTML=html;
