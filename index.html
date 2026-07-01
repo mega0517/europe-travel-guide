@@ -2406,7 +2406,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReserve(); }
         <div>
           <h2 class="text-[17px] md:text-[19px] font-bold tracking-tight flex items-center gap-2">📅 상세 일정 스케줄러</h2>
           <p class="text-white/60 text-[11.5px] mt-0.5">2026.7.6–7.13 · 시간 조정 · 항목 추가/삭제 가능</p>
-          <span class="inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5">📱 이 기기에 저장</span>
+          <span id="sch-sync-badge" class="inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5">📱 이 기기에 저장</span>
         </div>
         <button type="button" onclick="closeSchedule()" title="닫기"
           class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[20px] leading-none transition">×</button>
@@ -2417,13 +2417,16 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReserve(); }
         </div>
         <div class="h-2 rounded-full bg-white/15 overflow-hidden"><div id="sch-progress-bar" class="h-full bg-accent transition-[width] duration-300" style="width:0%"></div></div>
       </div>
-      <div class="mt-2.5 flex items-center justify-end gap-3">
-        <button type="button" id="sch-edit-btn" onclick="schToggleEdit()"
-          class="inline-flex items-center gap-1 bg-white/12 hover:bg-white/22 ring-1 ring-white/20 rounded-full px-3 py-1 text-[11px] font-semibold transition">✏️ 편집</button>
-        <button type="button" onclick="schRestore()"
-          class="text-[11px] font-semibold text-white/60 hover:text-white underline decoration-white/25 hover:decoration-white transition">기본값 복원</button>
-        <button type="button" onclick="schReset()"
-          class="text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition">완료 초기화</button>
+      <div class="mt-2.5 flex items-center justify-between gap-3">
+        <button type="button" id="sch-save-btn" onclick="schManualSave()" class="hidden">저장</button>
+        <div class="flex items-center gap-3">
+          <button type="button" id="sch-edit-btn" onclick="schToggleEdit()"
+            class="inline-flex items-center gap-1 bg-white/12 hover:bg-white/22 ring-1 ring-white/20 rounded-full px-3 py-1 text-[11px] font-semibold transition">✏️ 편집</button>
+          <button type="button" onclick="schRestore()"
+            class="text-[11px] font-semibold text-white/60 hover:text-white underline decoration-white/25 hover:decoration-white transition">기본값 복원</button>
+          <button type="button" onclick="schReset()"
+            class="text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition">완료 초기화</button>
+        </div>
       </div>
     </div>
     <div id="sch-body" class="overflow-y-auto px-4 md:px-5 py-4 nice-scroll"></div>
@@ -2523,8 +2526,69 @@ function schLoad(){
   try { schDone = JSON.parse(localStorage.getItem(SCH_DONE_KEY) || 'null'); } catch(e){ schDone = null; }
   if(!schDone || typeof schDone!=='object') schDone = {};
 }
-function schSaveItems(){ try{ localStorage.setItem(SCH_ITEMS_KEY, JSON.stringify(schDays)); }catch(e){} }
-function schSaveDone(){ try{ localStorage.setItem(SCH_DONE_KEY, JSON.stringify(schDone)); }catch(e){} }
+function schSaveItems(){ try{ localStorage.setItem(SCH_ITEMS_KEY, JSON.stringify(schDays)); }catch(e){} schSetDirty(); }
+function schSaveDone(){ try{ localStorage.setItem(SCH_DONE_KEY, JSON.stringify(schDone)); }catch(e){} schSetDirty(); }
+
+/* ===== 클라우드 동기화(선택) — 예약/체크리스트와 동일한 Supabase shared_state 재사용(다른 row id).
+   config(CL_SUPABASE_URL/ANON_KEY)가 채워져 있으면 자동 활성, 비면 로컬 저장만. 수동 '저장' 버튼 방식 ===== */
+const SCH_SYNC_ID = 'eurotrip2026-schedule';
+const schCloud = { on:false, sb:null, dirty:false };
+function schCloudEnabled(){ return typeof CL_SUPABASE_URL!=='undefined' && !!(CL_SUPABASE_URL && CL_SUPABASE_ANON_KEY); }
+function schCloudInit(){
+  if(schCloud.on) return true;
+  if(!schCloudEnabled()) return false;
+  if(typeof clCloud!=='undefined' && clCloud.sb){ schCloud.sb = clCloud.sb; schCloud.on = true; return true; } /* 체크리스트 클라이언트 재사용 */
+  if(typeof window==='undefined' || !window.supabase || !window.supabase.createClient) return false;
+  try{ schCloud.sb = window.supabase.createClient(CL_SUPABASE_URL, CL_SUPABASE_ANON_KEY); schCloud.on = true; return true; }
+  catch(e){ schCloud.on = false; return false; }
+}
+function schSetDirty(){ if(!schCloud.on) return; schCloud.dirty = true; schSaveBtn(); }
+function schSyncBadge(){
+  const el = document.getElementById('sch-sync-badge'); if(!el) return;
+  if(!schCloud.on){
+    el.textContent = '📱 이 기기에 저장';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-white/10 ring-1 ring-white/15 text-white/70 text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  } else {
+    el.textContent = '☁︎ 클라우드 저장(여러 기기 공유)';
+    el.className = 'inline-flex items-center gap-1 mt-1.5 bg-accent2/25 ring-1 ring-accent2/40 text-white text-[10.5px] font-semibold rounded-full px-2 py-0.5';
+  }
+}
+function schSaveBtn(state){
+  const btn = document.getElementById('sch-save-btn'); if(!btn) return;
+  if(!schCloud.on){ btn.classList.add('hidden'); return; }
+  btn.classList.remove('hidden');
+  const base = 'shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold transition whitespace-nowrap ring-1 ';
+  if(state==='saving'){ btn.disabled=true; btn.textContent='저장 중…'; btn.className=base+'bg-white/12 ring-white/20 text-white/70 cursor-wait'; }
+  else if(state==='saved'){ btn.disabled=false; btn.textContent='저장됨 ✓'; btn.className=base+'bg-emerald-500/25 ring-emerald-300/40 text-emerald-100'; }
+  else if(state==='error'){ btn.disabled=false; btn.textContent='저장 실패'; btn.className=base+'bg-amber-500/25 ring-amber-300/50 text-amber-100'; }
+  else if(schCloud.dirty){ btn.disabled=false; btn.textContent='● 저장'; btn.className=base+'bg-accent ring-accent/50 text-white hover:bg-red-700'; }
+  else { btn.disabled=false; btn.textContent='저장됨'; btn.className=base+'bg-white/8 ring-white/15 text-white/55'; }
+}
+let _schSavedTimer = null;
+function schManualSave(){
+  if(!schCloud.on || !schCloud.sb) return;
+  schSaveBtn('saving');
+  const row = { id:SCH_SYNC_ID, items:schDays, checks:schDone, updated_at:new Date().toISOString() };
+  let p; try{ p = schCloud.sb.from('shared_state').upsert(row); }catch(e){ schSaveBtn('error'); return; }
+  Promise.resolve(p).then(res=>{
+    if(res && res.error){ schSaveBtn('error'); return; }
+    schCloud.dirty=false; schSaveBtn('saved');
+    if(_schSavedTimer) clearTimeout(_schSavedTimer);
+    _schSavedTimer = setTimeout(()=>schSaveBtn(), 1500);
+  }, ()=>schSaveBtn('error'));
+}
+/* 모달 열 때 클라우드 최신본 1회 불러오기(미저장 변경 있으면 보호 위해 스킵) */
+function schCloudLoad(){
+  if(!schCloud.on || !schCloud.sb || schCloud.dirty) return;
+  try{
+    schCloud.sb.from('shared_state').select('items,checks').eq('id', SCH_SYNC_ID).maybeSingle().then(res=>{
+      const data = res && res.data; if(!data || schCloud.dirty) return;
+      if(Array.isArray(data.items) && data.items.length){ schDays = data.items; try{ localStorage.setItem(SCH_ITEMS_KEY, JSON.stringify(schDays)); }catch(e){} }
+      if(data.checks && typeof data.checks==='object'){ schDone = data.checks; try{ localStorage.setItem(SCH_DONE_KEY, JSON.stringify(schDone)); }catch(e){} }
+      schCloud.dirty=false; schRender(); schSaveBtn();
+    }, ()=>{});
+  }catch(e){}
+}
 function schEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function schCounts(){ let total=0,done=0; schDays.forEach(d=>d.items.forEach(it=>{ total++; if(schDone[it.id]) done++; })); return {total,done}; }
 function schUpdateProgress(){
@@ -2655,6 +2719,7 @@ function openSchedule(ev){
   if(ev && ev.stopPropagation) ev.stopPropagation();
   schEdit=false; const b=document.getElementById('sch-edit-btn'); if(b) b.textContent='✏️ 편집';
   schLoad(); schRender();
+  schCloudInit(); schSyncBadge(); schSaveBtn(); schCloudLoad();  /* 클라우드 활성 시 최신본 불러오기 */
   document.getElementById('sch-overlay').classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
 }
