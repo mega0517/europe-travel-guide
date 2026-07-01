@@ -2417,16 +2417,11 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReserve(); }
         </div>
         <div class="h-2 rounded-full bg-white/15 overflow-hidden"><div id="sch-progress-bar" class="h-full bg-accent transition-[width] duration-300" style="width:0%"></div></div>
       </div>
-      <div class="mt-2.5 flex items-center justify-between gap-3">
-        <button type="button" id="sch-save-btn" onclick="schManualSave()" class="hidden">저장</button>
-        <div class="flex items-center gap-3">
-          <button type="button" id="sch-edit-btn" onclick="schToggleEdit()"
-            class="inline-flex items-center gap-1 bg-white/12 hover:bg-white/22 ring-1 ring-white/20 rounded-full px-3 py-1 text-[11px] font-semibold transition">✏️ 편집</button>
-          <button type="button" onclick="schRestore()"
-            class="text-[11px] font-semibold text-white/60 hover:text-white underline decoration-white/25 hover:decoration-white transition">기본값 복원</button>
-          <button type="button" onclick="schReset()"
-            class="text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition">완료 초기화</button>
-        </div>
+      <div class="mt-2.5 flex items-center justify-end gap-3">
+        <button type="button" onclick="schRestore()"
+          class="text-[11px] font-semibold text-white/60 hover:text-white underline decoration-white/25 hover:decoration-white transition">기본값 복원</button>
+        <button type="button" onclick="schReset()"
+          class="text-[11px] font-semibold text-white/70 hover:text-white underline decoration-white/30 hover:decoration-white transition">완료 초기화</button>
       </div>
     </div>
     <div id="sch-body" class="overflow-y-auto px-4 md:px-5 py-4 nice-scroll"></div>
@@ -2519,7 +2514,7 @@ const SCH_SEED = [
 ];
 const SCH_ITEMS_KEY = 'sch-items-v2';
 const SCH_DONE_KEY  = 'sch-done-v2';
-let schDays, schDone, schEdit = false;
+let schDays, schDone, schEditId = null;
 function schLoad(){
   try { schDays = JSON.parse(localStorage.getItem(SCH_ITEMS_KEY)); } catch(e){ schDays = null; }
   if(!Array.isArray(schDays) || !schDays.length) schDays = JSON.parse(JSON.stringify(SCH_SEED));
@@ -2553,29 +2548,24 @@ function schSyncBadge(){
     el.className = 'inline-flex items-center gap-1 mt-1.5 bg-accent2/25 ring-1 ring-accent2/40 text-white text-[10.5px] font-semibold rounded-full px-2 py-0.5';
   }
 }
-function schSaveBtn(state){
-  const btn = document.getElementById('sch-save-btn'); if(!btn) return;
-  if(!schCloud.on){ btn.classList.add('hidden'); return; }
-  btn.classList.remove('hidden');
-  const base = 'shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold transition whitespace-nowrap ring-1 ';
-  if(state==='saving'){ btn.disabled=true; btn.textContent='저장 중…'; btn.className=base+'bg-white/12 ring-white/20 text-white/70 cursor-wait'; }
-  else if(state==='saved'){ btn.disabled=false; btn.textContent='저장됨 ✓'; btn.className=base+'bg-emerald-500/25 ring-emerald-300/40 text-emerald-100'; }
-  else if(state==='error'){ btn.disabled=false; btn.textContent='저장 실패'; btn.className=base+'bg-amber-500/25 ring-amber-300/50 text-amber-100'; }
-  else if(schCloud.dirty){ btn.disabled=false; btn.textContent='● 저장'; btn.className=base+'bg-accent ring-accent/50 text-white hover:bg-red-700'; }
-  else { btn.disabled=false; btn.textContent='저장됨'; btn.className=base+'bg-white/8 ring-white/15 text-white/55'; }
-}
+function schSaveBtn(){ /* (구 헤더 저장 버튼 제거됨 — 호환용 no-op) */ }
 let _schSavedTimer = null;
+/* 배지로 저장 상태 표시 */
+function schBadgeStatus(state){
+  const el = document.getElementById('sch-sync-badge'); if(!el || !schCloud.on) return;
+  if(state==='saving'){ el.textContent='☁︎ 저장 중…'; }
+  else if(state==='saved'){ el.textContent='☁︎ 저장됨'; if(_schSavedTimer) clearTimeout(_schSavedTimer); _schSavedTimer=setTimeout(schSyncBadge,1500); }
+  else if(state==='error'){ el.textContent='⚠︎ 저장 실패(다시 시도)'; if(_schSavedTimer) clearTimeout(_schSavedTimer); _schSavedTimer=setTimeout(schSyncBadge,2500); }
+}
 function schManualSave(){
   if(!schCloud.on || !schCloud.sb) return;
-  schSaveBtn('saving');
+  schBadgeStatus('saving');
   const row = { id:SCH_SYNC_ID, items:schDays, checks:schDone, updated_at:new Date().toISOString() };
-  let p; try{ p = schCloud.sb.from('shared_state').upsert(row); }catch(e){ schSaveBtn('error'); return; }
+  let p; try{ p = schCloud.sb.from('shared_state').upsert(row); }catch(e){ schBadgeStatus('error'); return; }
   Promise.resolve(p).then(res=>{
-    if(res && res.error){ schSaveBtn('error'); return; }
-    schCloud.dirty=false; schSaveBtn('saved');
-    if(_schSavedTimer) clearTimeout(_schSavedTimer);
-    _schSavedTimer = setTimeout(()=>schSaveBtn(), 1500);
-  }, ()=>schSaveBtn('error'));
+    if(res && res.error){ schBadgeStatus('error'); return; }
+    schCloud.dirty=false; schBadgeStatus('saved');
+  }, ()=>schBadgeStatus('error'));
 }
 /* 모달 열 때 클라우드 최신본 1회 불러오기(미저장 변경 있으면 보호 위해 스킵) */
 function schCloudLoad(){
@@ -2598,11 +2588,12 @@ function schUpdateProgress(){
   if(bar) bar.style.width = pct+'%';
 }
 function schToggle(id){
-  if(schEdit) return;
   schDone[id]=!schDone[id]; schSaveDone();
   const row=document.getElementById('sch-row-'+id); if(row) row.classList.toggle('sch-done', !!schDone[id]);
-  schUpdateProgress();
+  schUpdateProgress(); schCloudPush();
 }
+/* 클라우드 즉시 반영(설정 시) */
+function schCloudPush(){ if(schCloud.on) schManualSave(); }
 /* 시간 문자열 파싱/조합 · 소요시간 계산 */
 function schSplit(time){ const p=String(time||'').split('~').map(s=>s.trim()); return [p[0]||'', p[1]||'']; }
 function schJoin(s,e){ s=(s||'').trim(); e=(e||'').trim(); return (s&&e)? s+'~'+e : (s||e||''); }
@@ -2615,25 +2606,42 @@ function schDur(time){
   const h=Math.floor(d/60), m=d%60;
   return (h?h+'시간':'') + (h&&m?' ':'') + (m?m+'분':'');
 }
-function schSetTime(dkey,id,which,v){
-  const d=schDays.find(x=>x.key===dkey); if(!d) return;
-  const it=d.items.find(i=>i.id===id); if(!it) return;
-  const [s,e]=schSplit(it.time);
-  it.time = which==='start' ? schJoin(v,e) : schJoin(s,v);
-  schSaveItems(); schRender();
+/* ---- 항목 탭 → 인라인 편집 ---- */
+function schOpenEdit(id){ schEditId=id; schRender(); const el=document.getElementById('sch-e-t'); if(el){ el.focus(); } }
+function schCloseEdit(){ schEditId=null; schRender(); }
+function schCommitEditInputs(){
+  if(!schEditId) return;
+  for(const d of schDays){ const it=d.items.find(i=>i.id===schEditId); if(it){
+    const s=document.getElementById('sch-e-s'), e=document.getElementById('sch-e-e'), t=document.getElementById('sch-e-t');
+    if(s&&e) it.time=schJoin(s.value,e.value);
+    if(t) it.t=String(t.value).trim();
+    schSaveItems(); break;
+  }}
 }
-function schEditText(dkey,id,v){ const d=schDays.find(x=>x.key===dkey); if(!d) return; const it=d.items.find(i=>i.id===id); if(it){ it.t=String(v).trim(); schSaveItems(); } }
+function schSaveEdit(dkey,id){
+  const d=schDays.find(x=>x.key===dkey); const it=d&&d.items.find(i=>i.id===id);
+  if(it){
+    const s=document.getElementById('sch-e-s'), e=document.getElementById('sch-e-e'), t=document.getElementById('sch-e-t');
+    if(s&&e) it.time=schJoin(s.value,e.value);
+    if(t) it.t=String(t.value).trim();
+    schSaveItems();
+  }
+  schEditId=null; schRender(); schCloudPush();
+}
 function schMove(dkey,id,dir){
+  schCommitEditInputs();
   const d=schDays.find(x=>x.key===dkey); if(!d) return;
   const i=d.items.findIndex(it=>it.id===id); if(i<0) return;
   const j=i+dir; if(j<0||j>=d.items.length) return;
   const t=d.items[i]; d.items[i]=d.items[j]; d.items[j]=t;
-  schSaveItems(); schRender();
+  schSaveItems(); schRender(); schCloudPush();
 }
 function schDel(dkey,id){
+  if(!confirm('이 일정을 삭제할까요?')) return;
   const d=schDays.find(x=>x.key===dkey); if(!d) return;
   d.items=d.items.filter(it=>it.id!==id); delete schDone[id];
-  schSaveItems(); schSaveDone(); schRender();
+  if(schEditId===id) schEditId=null;
+  schSaveItems(); schSaveDone(); schRender(); schCloudPush();
 }
 function schAdd(dkey){
   const si=document.getElementById('sch-add-s-'+dkey), ei=document.getElementById('sch-add-e-'+dkey), ci=document.getElementById('sch-add-t-'+dkey);
@@ -2641,18 +2649,13 @@ function schAdd(dkey){
   if(!t){ if(ci) ci.focus(); return; }
   const d=schDays.find(x=>x.key===dkey); if(!d) return;
   d.items.push({ id:'u'+Date.now().toString(36)+Math.floor(Math.random()*1000), time:time, t:t });
-  schSaveItems(); schRender();
+  schSaveItems(); schRender(); schCloudPush();
   const ni=document.getElementById('sch-add-s-'+dkey); if(ni) ni.focus();
 }
-function schToggleEdit(){
-  schEdit=!schEdit;
-  const b=document.getElementById('sch-edit-btn'); if(b) b.textContent = schEdit?'✓ 완료':'✏️ 편집';
-  schRender();
-}
-function schReset(){ if(!confirm('완료 표시를 모두 해제할까요?')) return; schDone={}; schSaveDone(); schRender(); }
+function schReset(){ if(!confirm('완료 표시를 모두 해제할까요?')) return; schDone={}; schSaveDone(); schRender(); schCloudPush(); }
 function schRestore(){
   if(!confirm('일정을 기본값으로 되돌릴까요? (추가·삭제·시간 수정한 내용이 사라집니다)')) return;
-  schDays=JSON.parse(JSON.stringify(SCH_SEED)); schSaveItems(); schRender();
+  schDays=JSON.parse(JSON.stringify(SCH_SEED)); schEditId=null; schSaveItems(); schRender(); schCloudPush();
 }
 function schRender(){
   const body=document.getElementById('sch-body'); if(!body) return;
@@ -2669,57 +2672,58 @@ function schRender(){
     d.items.forEach((it,ii)=>{
       const on=!!schDone[it.id];
       const [st,en]=schSplit(it.time); const dur=schDur(it.time);
-      if(schEdit){
-        html += '<div class="bg-white border border-sand rounded-xl px-2.5 py-2 space-y-1.5">'
+      if(schEditId===it.id){
+        html += '<div class="bg-white border-2 border-accent/40 rounded-xl px-2.5 py-2 space-y-1.5 shadow-sm">'
           + '<div class="flex items-center gap-1.5">'
-          + '<input type="time" value="'+schEsc(st)+'" onchange="schSetTime(\''+d.key+'\',\''+it.id+'\',\'start\',this.value)" class="shrink-0 w-[88px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+          + '<input id="sch-e-s" type="time" value="'+schEsc(st)+'" class="shrink-0 w-[84px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
           + '<span class="shrink-0 text-stone text-[12px]">~</span>'
-          + '<input type="time" value="'+schEsc(en)+'" onchange="schSetTime(\''+d.key+'\',\''+it.id+'\',\'end\',this.value)" class="shrink-0 w-[88px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
-          + (dur?'<span class="shrink-0 text-[10.5px] font-semibold text-stone bg-sand/50 rounded px-1.5 py-0.5 whitespace-nowrap">'+dur+'</span>':'')
+          + '<input id="sch-e-e" type="time" value="'+schEsc(en)+'" class="shrink-0 w-[84px] text-[11px] font-bold text-ink bg-sand/30 border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
           + '<span class="ml-auto shrink-0 flex items-center gap-0.5">'
-          + '<button type="button" onclick="schMove(\''+d.key+'\',\''+it.id+'\',-1)" title="위로" '+(ii===0?'disabled':'')+' class="w-6 h-6 flex items-center justify-center rounded text-stone hover:bg-sand/60 text-[12px] leading-none transition disabled:opacity-25 disabled:hover:bg-transparent">▲</button>'
-          + '<button type="button" onclick="schMove(\''+d.key+'\',\''+it.id+'\',1)" title="아래로" '+(ii===d.items.length-1?'disabled':'')+' class="w-6 h-6 flex items-center justify-center rounded text-stone hover:bg-sand/60 text-[12px] leading-none transition disabled:opacity-25 disabled:hover:bg-transparent">▼</button>'
+          + '<button type="button" onclick="schMove(\''+d.key+'\',\''+it.id+'\',-1)" title="위로" '+(ii===0?'disabled':'')+' class="w-6 h-6 flex items-center justify-center rounded text-stone hover:bg-sand/60 text-[12px] leading-none transition disabled:opacity-25">▲</button>'
+          + '<button type="button" onclick="schMove(\''+d.key+'\',\''+it.id+'\',1)" title="아래로" '+(ii===d.items.length-1?'disabled':'')+' class="w-6 h-6 flex items-center justify-center rounded text-stone hover:bg-sand/60 text-[12px] leading-none transition disabled:opacity-25">▼</button>'
           + '<button type="button" onclick="schDel(\''+d.key+'\',\''+it.id+'\')" title="삭제" class="w-6 h-6 flex items-center justify-center rounded-full text-accent hover:bg-accent/10 text-[16px] leading-none transition">×</button>'
           + '</span></div>'
-          + '<input type="text" value="'+schEsc(it.t)+'" placeholder="내용" onchange="schEditText(\''+d.key+'\',\''+it.id+'\',this.value)" class="w-full text-[13px] text-ink bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
+          + '<input id="sch-e-t" type="text" value="'+schEsc(it.t)+'" placeholder="내용" class="w-full text-[13px] text-ink bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
+          + '<div class="flex items-center justify-end gap-2 pt-0.5">'
+          + '<button type="button" onclick="schCloseEdit()" class="text-[12px] font-semibold text-stone hover:text-ink px-2 py-1 transition">취소</button>'
+          + '<button type="button" onclick="schSaveEdit(\''+d.key+'\',\''+it.id+'\')" class="text-[12px] font-bold text-white bg-accent hover:bg-red-700 rounded-lg px-4 py-1.5 transition">저장</button>'
+          + '</div>'
           + '</div>';
       } else {
-        html += '<div id="sch-row-'+it.id+'" class="sch-row'+(on?' sch-done':'')+' flex items-start gap-2.5 bg-white border border-sand rounded-xl px-3 py-2 cursor-pointer hover:border-stone/40 transition" onclick="schToggle(\''+it.id+'\')">'
+        html += '<div id="sch-row-'+it.id+'" class="sch-row'+(on?' sch-done':'')+' flex items-start gap-2 bg-white border border-sand rounded-xl px-2.5 py-2 hover:border-stone/40 transition">'
+          + '<input type="checkbox" '+(on?'checked':'')+' onchange="schToggle(\''+it.id+'\')" class="mt-1 w-[17px] h-[17px] accent-emerald-500 shrink-0 cursor-pointer" title="완료 표시">'
+          + '<div class="flex items-start gap-2.5 min-w-0 flex-1 cursor-pointer" onclick="schOpenEdit(\''+it.id+'\')" title="탭하여 편집">'
           + '<span class="shrink-0 flex flex-col items-center gap-0.5 mt-0.5">'
           + '<span class="sch-time inline-flex items-center justify-center min-w-[58px] text-[10.5px] font-extrabold text-accent bg-accent/8 rounded-md px-1.5 py-1 whitespace-nowrap leading-none">'+schEsc(it.time||'—')+'</span>'
           + (dur?'<span class="sch-dur text-[9.5px] font-semibold text-stone/70 leading-none">'+dur+'</span>':'')
           + '</span>'
           + '<span class="sch-t min-w-0 flex-1 text-[13px] text-ink leading-snug">'+schEsc(it.t)+'</span>'
-          + '<span class="sch-check shrink-0 text-[14px] text-emerald-500 leading-none mt-0.5">✓</span>'
+          + '<span class="shrink-0 text-stone/35 text-[11px] mt-0.5">✏️</span>'
+          + '</div>'
           + '</div>';
       }
     });
-    if(schEdit){
-      html += '<div class="bg-sand/40 border border-dashed border-stone/30 rounded-xl px-2.5 py-2 space-y-1.5">'
-        + '<div class="flex items-center gap-1.5">'
-        + '<input id="sch-add-s-'+d.key+'" type="time" class="shrink-0 w-[88px] text-[11px] bg-white border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
-        + '<span class="shrink-0 text-stone text-[12px]">~</span>'
-        + '<input id="sch-add-e-'+d.key+'" type="time" class="shrink-0 w-[88px] text-[11px] bg-white border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
-        + '<button type="button" onclick="schAdd(\''+d.key+'\')" class="ml-auto shrink-0 text-[12px] font-bold text-white bg-accent hover:bg-red-700 rounded-lg px-2.5 py-1.5 transition">+ 추가</button>'
-        + '</div>'
-        + '<input id="sch-add-t-'+d.key+'" type="text" placeholder="새 일정 내용" class="w-full text-[13px] bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
-        + '</div>';
-    }
+    html += '<div class="bg-sand/40 border border-dashed border-stone/30 rounded-xl px-2.5 py-2 space-y-1.5">'
+      + '<div class="flex items-center gap-1.5">'
+      + '<input id="sch-add-s-'+d.key+'" type="time" class="shrink-0 w-[84px] text-[11px] bg-white border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+      + '<span class="shrink-0 text-stone text-[12px]">~</span>'
+      + '<input id="sch-add-e-'+d.key+'" type="time" class="shrink-0 w-[84px] text-[11px] bg-white border border-sand rounded-lg px-1.5 py-1.5 outline-none focus:border-stone/50">'
+      + '<button type="button" onclick="schAdd(\''+d.key+'\')" class="ml-auto shrink-0 text-[12px] font-bold text-white bg-accent hover:bg-red-700 rounded-lg px-2.5 py-1.5 transition">+ 추가</button>'
+      + '</div>'
+      + '<input id="sch-add-t-'+d.key+'" type="text" placeholder="새 일정 내용" class="w-full text-[13px] bg-white border border-sand rounded-lg px-2.5 py-1.5 outline-none focus:border-stone/50">'
+      + '</div>';
     html += '</div></div>';
   });
-  html += '<p class="text-[11px] text-stone/70 leading-relaxed mt-1">'
-    + (schEdit
-        ? '✏️ 편집 모드: 시작~종료 시간을 조정하면 소요시간이 자동 계산돼요. ▲▼로 순서 이동, ×로 삭제, 아래 칸으로 추가. 끝나면 ✓ 완료를 누르세요.'
-        : '👆 항목을 누르면 완료 표시(취소선)됩니다. 7/6~7/13 전체 8일 여정이에요. 융프라우·밀라노 등 도시별 상세는 각 도시 가이드도 참고하세요.')
-    + '</p>';
+  html += '<p class="text-[11px] text-stone/70 leading-relaxed mt-1">👆 <b>항목을 누르면</b> 시간·내용을 편집하고 <b>저장</b>하세요. 왼쪽 체크박스로 완료 표시, 편집창의 ▲▼로 순서·×로 삭제, 각 날짜 하단에서 추가. '
+    + (schCloud.on ? '변경은 저장 시 여러 기기에 공유돼요.' : '변경은 이 기기에 저장돼요.') + '</p>';
   body.innerHTML=html;
   schUpdateProgress();
 }
 function openSchedule(ev){
   if(ev && ev.stopPropagation) ev.stopPropagation();
-  schEdit=false; const b=document.getElementById('sch-edit-btn'); if(b) b.textContent='✏️ 편집';
+  schEditId=null;
   schLoad(); schRender();
-  schCloudInit(); schSyncBadge(); schSaveBtn(); schCloudLoad();  /* 클라우드 활성 시 최신본 불러오기 */
+  schCloudInit(); schSyncBadge(); schCloudLoad();  /* 클라우드 활성 시 최신본 불러오기 */
   document.getElementById('sch-overlay').classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
 }

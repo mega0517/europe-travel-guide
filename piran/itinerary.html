@@ -55,6 +55,13 @@
   .sch-foot{font-size:12px;color:var(--ink-soft);line-height:1.65;margin-top:14px;}
   .sch-wrap input:focus{outline:none;border-color:var(--alp-blue);}
   @media(max-width:560px){.sch-time{min-width:56px;}.sch-etop input[type=time]{width:92px;}}
+
+  .sch-cb{margin-top:11px;width:17px;height:17px;accent-color:#22a06b;flex:0 0 auto;cursor:pointer;}
+  .sch-tap{display:flex;align-items:flex-start;gap:11px;min-width:0;flex:1 1 auto;cursor:pointer;}
+  .sch-pencil{flex:0 0 auto;font-size:12px;opacity:.4;margin-top:2px;}
+  .sch-editbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding-top:2px;}
+  .sch-row .sch-tap:hover .sch-what{color:var(--alp-blue);}
+  .sch-edit-row.editing{border-color:var(--alp-blue);border-width:2px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
@@ -80,14 +87,12 @@
 <div class="note tip" style="margin-bottom:22px"><b>🌅 석양은 여유 있게</b> 7월 일몰이 ~21시라 서두르지 않아도 돼요. 구시가는 차량 진입 제한이니 외곽 주차+도보 동선을 감안해, 시간은 <b>편집</b>에서 현장에 맞게 조정하세요.</div>
 <!-- [B] BODY MARKUP — place where the schedule should render -->
 <div class="sch-wrap">
-  <span class="sch-savechip" id="sch-sync-badge">📱 변경 사항은 이 기기에 자동 저장돼요</span>
+  <span class="sch-savechip" id="sch-sync-badge">📱 변경 사항은 이 기기에 저장돼요</span>
   <div class="sch-toolbar">
     <div class="sch-prog">
       <div class="lab"><span>완료</span><span id="sch-prog-lab">0 / 0</span></div>
       <div class="bar"><i id="sch-prog-bar"></i></div>
     </div>
-    <button class="sch-btn" id="sch-save-btn" onclick="schManualSave()" style="display:none">저장</button>
-    <button class="sch-btn" id="sch-edit-btn" onclick="schToggleEdit()">✏️ 편집</button>
     <button class="sch-link" onclick="schRestore()">기본값 복원</button>
     <button class="sch-link" onclick="schReset()">완료 초기화</button>
   </div>
@@ -137,7 +142,7 @@ const SCH_SEED=[
 ];
 const SCH_ITEMS_KEY='sch-'+SCH_NS+'-items-v1';
 const SCH_DONE_KEY='sch-'+SCH_NS+'-done-v1';
-let schDays, schDone, schEdit=false;
+let schDays, schDone, schEditId=null;
 function schLoad(){
   try{schDays=JSON.parse(localStorage.getItem(SCH_ITEMS_KEY));}catch(e){schDays=null;}
   if(!Array.isArray(schDays)||!schDays.length) schDays=JSON.parse(JSON.stringify(SCH_SEED));
@@ -146,122 +151,82 @@ function schLoad(){
 }
 function schSaveItems(){try{localStorage.setItem(SCH_ITEMS_KEY,JSON.stringify(schDays));}catch(e){} schSetDirty();}
 function schSaveDone(){try{localStorage.setItem(SCH_DONE_KEY,JSON.stringify(schDone));}catch(e){} schSetDirty();}
-
-/* ===== 클라우드 동기화(여러 기기 공유) — 메인 사이트와 동일한 Supabase shared_state 재사용, 도시별 row id ===== */
+function schEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function schSplit(t){const p=String(t||'').split('~').map(function(s){return s.trim();});return[p[0]||'',p[1]||''];}
+function schJoin(s,e){s=(s||'').trim();e=(e||'').trim();return(s&&e)?s+'~'+e:(s||e||'');}
+function schMin(t){const m=/^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim());return m?(+m[1])*60+(+m[2]):null;}
+function schDur(t){var a=schSplit(t),ms=schMin(a[0]),me=schMin(a[1]);if(ms==null||me==null)return'';var d=me-ms;if(d<0)d+=1440;if(d<=0)return'';var h=Math.floor(d/60),m=d%60;return(h?h+'시간':'')+(h&&m?' ':'')+(m?m+'분':'');}
+function schCounts(){var t=0,d=0;schDays.forEach(function(x){x.items.forEach(function(it){t++;if(schDone[it.id])d++;});});return{t:t,d:d};}
+function schProg(){var c=schCounts(),pct=c.t?Math.round(c.d/c.t*100):0;var l=document.getElementById('sch-prog-lab'),b=document.getElementById('sch-prog-bar');if(l)l.textContent=c.d+' / '+c.t+(c.d===c.t&&c.t?'  ✅':'');if(b)b.style.width=pct+'%';}
+function schToggle(id){schDone[id]=!schDone[id];schSaveDone();var r=document.getElementById('sch-row-'+id);if(r)r.classList.toggle('done',!!schDone[id]);schProg();schCloudPush();}
+/* ===== 클라우드 동기화(여러 기기 공유) ===== */
 var SCH_SUPA_URL='https://ehwhvritnhffujvyfcod.supabase.co';
 var SCH_SUPA_KEY='sb_publishable_Jx-Hll2OSd4iii5fO5Ca5g_OR4OJH0D';
 var SCH_SYNC_ID='eurotrip2026-sch-'+SCH_NS;
 var schCloud={on:false,sb:null,dirty:false};
 function schCloudEnabled(){return !!(SCH_SUPA_URL&&SCH_SUPA_KEY);}
-function schCloudInit(){
-  if(schCloud.on)return true;
-  if(!schCloudEnabled())return false;
-  if(typeof window==='undefined'||!window.supabase||!window.supabase.createClient)return false;
-  try{schCloud.sb=window.supabase.createClient(SCH_SUPA_URL,SCH_SUPA_KEY);schCloud.on=true;return true;}
-  catch(e){schCloud.on=false;return false;}
-}
-function schSetDirty(){if(!schCloud.on)return;schCloud.dirty=true;schSaveBtn();}
-function schSyncBadge(){var el=document.getElementById('sch-sync-badge');if(!el)return;
-  el.textContent=schCloud.on?'☁︎ 클라우드 저장 · 여러 기기 공유':'📱 변경 사항은 이 기기에 자동 저장돼요';}
-function schSaveBtn(state){
-  var btn=document.getElementById('sch-save-btn');if(!btn)return;
-  if(!schCloud.on){btn.style.display='none';return;}
-  btn.style.display='';
-  if(state==='saving'){btn.disabled=true;btn.textContent='저장 중…';}
-  else if(state==='saved'){btn.disabled=false;btn.textContent='저장됨 ✓';}
-  else if(state==='error'){btn.disabled=false;btn.textContent='저장 실패';}
-  else if(schCloud.dirty){btn.disabled=false;btn.textContent='● 저장';}
-  else{btn.disabled=false;btn.textContent='저장됨';}
-  btn.className='sch-btn'+((schCloud.dirty&&state!=='saving'&&state!=='saved')?' primary':'');
-}
+function schCloudInit(){if(schCloud.on)return true;if(!schCloudEnabled())return false;if(typeof window==='undefined'||!window.supabase||!window.supabase.createClient)return false;try{schCloud.sb=window.supabase.createClient(SCH_SUPA_URL,SCH_SUPA_KEY);schCloud.on=true;return true;}catch(e){schCloud.on=false;return false;}}
+function schSetDirty(){if(!schCloud.on)return;schCloud.dirty=true;}
+function schCloudPush(){if(schCloud.on)schManualSave();}
+function schSyncBadge(){var el=document.getElementById('sch-sync-badge');if(!el)return;el.textContent=schCloud.on?'☁︎ 클라우드 저장 · 여러 기기 공유':'📱 변경 사항은 이 기기에 저장돼요';}
 var _schSavedTimer=null;
-function schManualSave(){
-  if(!schCloud.on||!schCloud.sb)return;
-  schSaveBtn('saving');
-  var row={id:SCH_SYNC_ID,items:schDays,checks:schDone,updated_at:new Date().toISOString()};
-  var p;try{p=schCloud.sb.from('shared_state').upsert(row);}catch(e){schSaveBtn('error');return;}
-  Promise.resolve(p).then(function(res){
-    if(res&&res.error){schSaveBtn('error');return;}
-    schCloud.dirty=false;schSaveBtn('saved');
-    if(_schSavedTimer)clearTimeout(_schSavedTimer);
-    _schSavedTimer=setTimeout(function(){schSaveBtn();},1500);
-  },function(){schSaveBtn('error');});
-}
-function schCloudLoad(){
-  if(!schCloud.on||!schCloud.sb||schCloud.dirty)return;
-  try{
-    schCloud.sb.from('shared_state').select('items,checks').eq('id',SCH_SYNC_ID).maybeSingle().then(function(res){
-      var data=res&&res.data;if(!data||schCloud.dirty)return;
-      if(Array.isArray(data.items)&&data.items.length){schDays=data.items;try{localStorage.setItem(SCH_ITEMS_KEY,JSON.stringify(schDays));}catch(e){}}
-      if(data.checks&&typeof data.checks==='object'){schDone=data.checks;try{localStorage.setItem(SCH_DONE_KEY,JSON.stringify(schDone));}catch(e){}}
-      schCloud.dirty=false;schRender();schSaveBtn();
-    },function(){});
-  }catch(e){}
-}
-function schEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function schSplit(t){const p=String(t||'').split('~').map(s=>s.trim());return[p[0]||'',p[1]||''];}
-function schJoin(s,e){s=(s||'').trim();e=(e||'').trim();return(s&&e)?s+'~'+e:(s||e||'');}
-function schMin(t){const m=/^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim());return m?(+m[1])*60+(+m[2]):null;}
-function schDur(t){const a=schSplit(t),ms=schMin(a[0]),me=schMin(a[1]);if(ms==null||me==null)return'';let d=me-ms;if(d<0)d+=1440;if(d<=0)return'';const h=Math.floor(d/60),m=d%60;return(h?h+'시간':'')+(h&&m?' ':'')+(m?m+'분':'');}
-function schCounts(){let t=0,d=0;schDays.forEach(x=>x.items.forEach(it=>{t++;if(schDone[it.id])d++;}));return{t:t,d:d};}
-function schProg(){const c=schCounts(),pct=c.t?Math.round(c.d/c.t*100):0;const l=document.getElementById('sch-prog-lab'),b=document.getElementById('sch-prog-bar');if(l)l.textContent=c.d+' / '+c.t+(c.d===c.t&&c.t?'  ✅':'');if(b)b.style.width=pct+'%';}
-function schToggle(id){if(schEdit)return;schDone[id]=!schDone[id];schSaveDone();const r=document.getElementById('sch-row-'+id);if(r)r.classList.toggle('done',!!schDone[id]);schProg();}
-function schSetTime(dk,id,which,v){const d=schDays.find(x=>x.key===dk);if(!d)return;const it=d.items.find(i=>i.id===id);if(!it)return;const a=schSplit(it.time);it.time=which==='start'?schJoin(v,a[1]):schJoin(a[0],v);schSaveItems();schRender();}
-function schEditText(dk,id,v){const d=schDays.find(x=>x.key===dk);if(!d)return;const it=d.items.find(i=>i.id===id);if(it){it.t=String(v).trim();schSaveItems();}}
-function schMove(dk,id,dir){const d=schDays.find(x=>x.key===dk);if(!d)return;const i=d.items.findIndex(it=>it.id===id);if(i<0)return;const j=i+dir;if(j<0||j>=d.items.length)return;const t=d.items[i];d.items[i]=d.items[j];d.items[j]=t;schSaveItems();schRender();}
-function schDel(dk,id){const d=schDays.find(x=>x.key===dk);if(!d)return;d.items=d.items.filter(it=>it.id!==id);delete schDone[id];schSaveItems();schSaveDone();schRender();}
-function schAdd(dk){const si=document.getElementById('sch-as-'+dk),ei=document.getElementById('sch-ae-'+dk),ci=document.getElementById('sch-at-'+dk);const time=schJoin(si&&si.value,ei&&ei.value),t=((ci&&ci.value)||'').trim();if(!t){if(ci)ci.focus();return;}const d=schDays.find(x=>x.key===dk);if(!d)return;d.items.push({id:'u'+Date.now().toString(36)+Math.floor(Math.random()*1000),time:time,t:t});schSaveItems();schRender();const n=document.getElementById('sch-as-'+dk);if(n)n.focus();}
-function schToggleEdit(){schEdit=!schEdit;const b=document.getElementById('sch-edit-btn');if(b){b.textContent=schEdit?'✓ 완료':'✏️ 편집';b.classList.toggle('primary',schEdit);}schRender();}
-function schReset(){if(!confirm('완료 표시를 모두 해제할까요?'))return;schDone={};schSaveDone();schRender();}
-function schRestore(){if(!confirm('일정을 기본값으로 되돌릴까요? (추가·삭제·시간 수정한 내용이 사라집니다)'))return;schDays=JSON.parse(JSON.stringify(SCH_SEED));schSaveItems();schRender();}
+function schBadgeStatus(state){var el=document.getElementById('sch-sync-badge');if(!el||!schCloud.on)return;if(state==='saving'){el.textContent='☁︎ 저장 중…';}else if(state==='saved'){el.textContent='☁︎ 저장됨';if(_schSavedTimer)clearTimeout(_schSavedTimer);_schSavedTimer=setTimeout(schSyncBadge,1500);}else if(state==='error'){el.textContent='⚠︎ 저장 실패';if(_schSavedTimer)clearTimeout(_schSavedTimer);_schSavedTimer=setTimeout(schSyncBadge,2500);}}
+function schManualSave(){if(!schCloud.on||!schCloud.sb)return;schBadgeStatus('saving');var row={id:SCH_SYNC_ID,items:schDays,checks:schDone,updated_at:new Date().toISOString()};var p;try{p=schCloud.sb.from('shared_state').upsert(row);}catch(e){schBadgeStatus('error');return;}Promise.resolve(p).then(function(res){if(res&&res.error){schBadgeStatus('error');return;}schCloud.dirty=false;schBadgeStatus('saved');},function(){schBadgeStatus('error');});}
+function schCloudLoad(){if(!schCloud.on||!schCloud.sb||schCloud.dirty)return;try{schCloud.sb.from('shared_state').select('items,checks').eq('id',SCH_SYNC_ID).maybeSingle().then(function(res){var data=res&&res.data;if(!data||schCloud.dirty)return;if(Array.isArray(data.items)&&data.items.length){schDays=data.items;try{localStorage.setItem(SCH_ITEMS_KEY,JSON.stringify(schDays));}catch(e){}}if(data.checks&&typeof data.checks==='object'){schDone=data.checks;try{localStorage.setItem(SCH_DONE_KEY,JSON.stringify(schDone));}catch(e){}}schCloud.dirty=false;schRender();},function(){});}catch(e){}}
+/* ===== 항목 탭 → 인라인 편집 ===== */
+function schOpenEdit(id){schEditId=id;schRender();var el=document.getElementById('sch-e-t');if(el)el.focus();}
+function schCloseEdit(){schEditId=null;schRender();}
+function schCommitEditInputs(){if(!schEditId)return;for(var k=0;k<schDays.length;k++){var it=schDays[k].items.find(function(i){return i.id===schEditId;});if(it){var s=document.getElementById('sch-e-s'),e=document.getElementById('sch-e-e'),t=document.getElementById('sch-e-t');if(s&&e)it.time=schJoin(s.value,e.value);if(t)it.t=String(t.value).trim();schSaveItems();break;}}}
+function schSaveEdit(dk,id){var d=schDays.find(function(x){return x.key===dk;});var it=d&&d.items.find(function(i){return i.id===id;});if(it){var s=document.getElementById('sch-e-s'),e=document.getElementById('sch-e-e'),t=document.getElementById('sch-e-t');if(s&&e)it.time=schJoin(s.value,e.value);if(t)it.t=String(t.value).trim();schSaveItems();}schEditId=null;schRender();schCloudPush();}
+function schMove(dk,id,dir){schCommitEditInputs();var d=schDays.find(function(x){return x.key===dk;});if(!d)return;var i=d.items.findIndex(function(it){return it.id===id;});if(i<0)return;var j=i+dir;if(j<0||j>=d.items.length)return;var t=d.items[i];d.items[i]=d.items[j];d.items[j]=t;schSaveItems();schRender();schCloudPush();}
+function schDel(dk,id){if(!confirm('이 일정을 삭제할까요?'))return;var d=schDays.find(function(x){return x.key===dk;});if(!d)return;d.items=d.items.filter(function(it){return it.id!==id;});delete schDone[id];if(schEditId===id)schEditId=null;schSaveItems();schSaveDone();schRender();schCloudPush();}
+function schAdd(dk){var si=document.getElementById('sch-as-'+dk),ei=document.getElementById('sch-ae-'+dk),ci=document.getElementById('sch-at-'+dk);var time=schJoin(si&&si.value,ei&&ei.value),t=((ci&&ci.value)||'').trim();if(!t){if(ci)ci.focus();return;}var d=schDays.find(function(x){return x.key===dk;});if(!d)return;d.items.push({id:'u'+Date.now().toString(36)+Math.floor(Math.random()*1000),time:time,t:t});schSaveItems();schRender();schCloudPush();var n=document.getElementById('sch-as-'+dk);if(n)n.focus();}
+function schReset(){if(!confirm('완료 표시를 모두 해제할까요?'))return;schDone={};schSaveDone();schRender();schCloudPush();}
+function schRestore(){if(!confirm('일정을 기본값으로 되돌릴까요? (추가·삭제·시간 수정한 내용이 사라집니다)'))return;schDays=JSON.parse(JSON.stringify(SCH_SEED));schEditId=null;schSaveItems();schRender();schCloudPush();}
 function schRender(){
-  const body=document.getElementById('sch-body');if(!body)return;let h='';
+  var body=document.getElementById('sch-body');if(!body)return;var h='';
   schDays.forEach(function(d,di){
     h+='<div class="sch-day">';
     h+='<div class="sch-day-head"><span class="sch-badge">DAY '+(di+1)+'</span><span class="sch-date">'+schEsc(d.date)+'</span>'+(d.title?'<span class="sch-dtitle">'+schEsc(d.title)+'</span>':'')+'</div>';
-    if(d.note) h+='<p class="sch-note">⚠️ '+schEsc(d.note)+'</p>';
+    if(d.note)h+='<p class="sch-note">⚠️ '+schEsc(d.note)+'</p>';
     h+='<div class="sch-list">';
     d.items.forEach(function(it,ii){
-      const on=!!schDone[it.id],a=schSplit(it.time),dur=schDur(it.time);
-      if(schEdit){
-        h+='<div class="sch-edit-row">'
+      var on=!!schDone[it.id],a=schSplit(it.time),dur=schDur(it.time);
+      if(schEditId===it.id){
+        h+='<div class="sch-edit-row editing">'
           +'<div class="sch-etop">'
-          +'<input type="time" value="'+schEsc(a[0])+'" onchange="schSetTime(\''+d.key+'\',\''+it.id+'\',\'start\',this.value)">'
+          +'<input id="sch-e-s" type="time" value="'+schEsc(a[0])+'">'
           +'<span class="sch-tilde">~</span>'
-          +'<input type="time" value="'+schEsc(a[1])+'" onchange="schSetTime(\''+d.key+'\',\''+it.id+'\',\'end\',this.value)">'
-          +(dur?'<span class="sch-edur">'+dur+'</span>':'')
+          +'<input id="sch-e-e" type="time" value="'+schEsc(a[1])+'">'
           +'<span class="sch-actions">'
           +'<button class="sch-ico" title="위로" '+(ii===0?'disabled':'')+' onclick="schMove(\''+d.key+'\',\''+it.id+'\',-1)">▲</button>'
           +'<button class="sch-ico" title="아래로" '+(ii===d.items.length-1?'disabled':'')+' onclick="schMove(\''+d.key+'\',\''+it.id+'\',1)">▼</button>'
           +'<button class="sch-ico del" title="삭제" onclick="schDel(\''+d.key+'\',\''+it.id+'\')">×</button>'
           +'</span></div>'
-          +'<input class="sch-erow-text" type="text" value="'+schEsc(it.t)+'" placeholder="내용" onchange="schEditText(\''+d.key+'\',\''+it.id+'\',this.value)">'
+          +'<input id="sch-e-t" class="sch-erow-text" type="text" value="'+schEsc(it.t)+'" placeholder="내용">'
+          +'<div class="sch-editbar"><button class="sch-link" onclick="schCloseEdit()">취소</button><button class="sch-btn primary" onclick="schSaveEdit(\''+d.key+'\',\''+it.id+'\')">저장</button></div>'
           +'</div>';
       } else {
-        h+='<div class="sch-row'+(on?' done':'')+'" id="sch-row-'+it.id+'" onclick="schToggle(\''+it.id+'\')">'
+        h+='<div class="sch-row'+(on?' done':'')+'" id="sch-row-'+it.id+'">'
+          +'<input type="checkbox" class="sch-cb" '+(on?'checked':'')+' onchange="schToggle(\''+it.id+'\')" title="완료 표시">'
+          +'<div class="sch-tap" onclick="schOpenEdit(\''+it.id+'\')" title="탭하여 편집">'
           +'<span class="sch-tcol"><span class="sch-time">'+schEsc(it.time||'—')+'</span>'+(dur?'<span class="sch-dur">'+dur+'</span>':'')+'</span>'
           +'<span class="sch-what">'+schEsc(it.t)+'</span>'
-          +'<span class="sch-check">✓</span>'
+          +'<span class="sch-pencil">✏️</span>'
+          +'</div>'
           +'</div>';
       }
     });
-    if(schEdit){
-      h+='<div class="sch-add">'
-        +'<div class="sch-etop">'
-        +'<input id="sch-as-'+d.key+'" type="time"><span class="sch-tilde">~</span><input id="sch-ae-'+d.key+'" type="time">'
-        +'<button class="sch-btn primary sch-addbtn" onclick="schAdd(\''+d.key+'\')">+ 추가</button>'
-        +'</div>'
-        +'<input id="sch-at-'+d.key+'" class="sch-add-text" type="text" placeholder="새 일정 내용">'
-        +'</div>';
-    }
+    h+='<div class="sch-add">'
+      +'<div class="sch-etop"><input id="sch-as-'+d.key+'" type="time"><span class="sch-tilde">~</span><input id="sch-ae-'+d.key+'" type="time"><button class="sch-btn primary sch-addbtn" onclick="schAdd(\''+d.key+'\')">+ 추가</button></div>'
+      +'<input id="sch-at-'+d.key+'" class="sch-add-text" type="text" placeholder="새 일정 내용">'
+      +'</div>';
     h+='</div></div>';
   });
-  h+='<p class="sch-foot">'+(schEdit
-      ?'✏️ 편집 모드: 시작~종료 시간을 조정하면 소요시간이 자동 계산돼요. ▲▼로 순서 이동, ×로 삭제, 아래 칸으로 추가. 끝나면 ✓ 완료를 누르세요.'
-      :'👆 항목을 누르면 완료 표시(취소선)돼요. ✏️ 편집에서 시간·내용을 바꾸고 항목을 추가·삭제·순서이동할 수 있어요. 편집 후 상단 저장 버튼을 누르면 여러 기기에 공유돼요(설정 시).')+'</p>';
+  h+='<p class="sch-foot">👆 <b>항목을 누르면</b> 시간·내용을 편집하고 <b>저장</b>하세요. 왼쪽 체크박스로 완료 표시, 편집창의 ▲▼로 순서·×로 삭제, 각 날짜 하단에서 추가. '+(schCloud.on?'변경은 저장 시 여러 기기에 공유돼요.':'변경은 이 기기에 저장돼요.')+'</p>';
   body.innerHTML=h;schProg();
 }
-document.addEventListener('DOMContentLoaded',function(){schLoad();schRender();schCloudInit();schSyncBadge();schSaveBtn();schCloudLoad();});
+document.addEventListener('DOMContentLoaded',function(){schLoad();schRender();schCloudInit();schSyncBadge();schCloudLoad();});
 </script>
 </body>
 </html>
