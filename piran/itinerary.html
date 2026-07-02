@@ -62,6 +62,19 @@
   .sch-editbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding-top:2px;}
   .sch-row .sch-tap:hover .sch-what{color:var(--alp-blue);}
   .sch-edit-row.editing{border-color:var(--alp-blue);border-width:2px;}
+
+  @media(max-width:640px){
+    .sch-day{margin-bottom:17px;}
+    .sch-day-head{margin-bottom:9px;gap:7px;}
+    .sch-row{padding:8px 10px;gap:8px;border-radius:11px;}
+    .sch-what{font-size:13.5px;}
+    .sch-time{min-width:54px;font-size:11px;padding:4px 6px;}
+    .sch-toolbar{margin-bottom:13px;gap:8px;}
+    .sch-savechip{margin-bottom:9px;font-size:11.5px;padding:3px 9px;}
+    .sch-note{padding:7px 10px;margin-bottom:9px;font-size:12px;}
+    .sch-list{gap:6px;}
+    .sch-add,.sch-edit-row{padding:8px 9px;}
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
@@ -84,7 +97,7 @@
 <header class="page-hero"><div class="wrap"><p class="breadcrumb"><a href="index.html">홈</a> › 상세 일정</p><h1>🗓️ 상세 일정 스케줄러</h1><p>피란 도착일(7/12)과 발라톤 호수를 경유해 부다페스트로 돌아가는 날(7/13)의 시간표예요. 시간을 조정하고 항목을 추가·삭제하거나 다녀온 항목을 눌러 체크할 수 있어요.</p></div></header>
 
 <main><section class="block"><div class="wrap">
-<div class="note tip" style="margin-bottom:22px"><b>🌅 석양은 여유 있게</b> 7월 일몰이 ~21시라 서두르지 않아도 돼요. 구시가는 차량 진입 제한이니 외곽 주차+도보 동선을 감안해, 시간은 <b>편집</b>에서 현장에 맞게 조정하세요.</div>
+<div class="note tip" style="margin-bottom:22px"><b>🌅 석양은 여유 있게</b> 7월 일몰이 ~21시라 서두르지 않아도 돼요. 구시가는 차량 진입 제한이니 외곽 주차+도보 동선을 감안해, 시간은 <b style="display:inline">항목을 눌러</b> 현장에 맞게 조정하세요.</div>
 <!-- [B] BODY MARKUP — place where the schedule should render -->
 <div class="sch-wrap">
   <span class="sch-savechip" id="sch-sync-badge">📱 변경 사항은 이 기기에 저장돼요</span>

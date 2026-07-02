@@ -62,6 +62,19 @@
   .sch-editbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding-top:2px;}
   .sch-row .sch-tap:hover .sch-what{color:var(--alp-blue);}
   .sch-edit-row.editing{border-color:var(--alp-blue);border-width:2px;}
+
+  @media(max-width:640px){
+    .sch-day{margin-bottom:17px;}
+    .sch-day-head{margin-bottom:9px;gap:7px;}
+    .sch-row{padding:8px 10px;gap:8px;border-radius:11px;}
+    .sch-what{font-size:13.5px;}
+    .sch-time{min-width:54px;font-size:11px;padding:4px 6px;}
+    .sch-toolbar{margin-bottom:13px;gap:8px;}
+    .sch-savechip{margin-bottom:9px;font-size:11.5px;padding:3px 9px;}
+    .sch-note{padding:7px 10px;margin-bottom:9px;font-size:12px;}
+    .sch-list{gap:6px;}
+    .sch-add,.sch-edit-row{padding:8px 9px;}
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
@@ -92,7 +105,7 @@
 <main>
   <section class="block">
     <div class="wrap">
-      <div class="note tip" style="margin-bottom:22px"><b>👫 여유로운 페이스</b> 1박 기착지라 도착 후 도보로 구시가만 알차게 도는 걸 추천해요. 시간은 대략의 기준이니 현장 상황에 맞게 <b>편집</b>에서 자유롭게 조정하세요.</div>
+      <div class="note tip" style="margin-bottom:22px"><b>👫 여유로운 페이스</b> 1박 기착지라 도착 후 도보로 구시가만 알차게 도는 걸 추천해요. 시간은 대략의 기준이니 현장 상황에 맞게 <b style="display:inline">항목을 눌러</b> 자유롭게 조정하세요.</div>
 
       <!-- [B] BODY MARKUP — place where the schedule should render -->
       <div class="sch-wrap">
