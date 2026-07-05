@@ -25,7 +25,10 @@
   .leaflet-popup-content .pt-day{font-weight:800;font-size:11px;padding:1px 7px;border-radius:999px;color:#fff;display:inline-block;margin-bottom:5px;}
   .leaflet-popup-content b{font-size:14px;}
   .leaflet-popup-content .pt-desc{color:#6f655d;font-size:12px;margin-top:2px;}
-  .leaflet-popup-content a.g{display:inline-block;margin-top:8px;font-weight:700;font-size:12px;color:#c0392b;text-decoration:none;border:1px solid #e6c9c3;background:#fdf0ee;border-radius:8px;padding:5px 10px;}
+  .leaflet-popup-content .gmaps{display:flex;gap:6px;margin-top:8px;}
+  .leaflet-popup-content a.g,.leaflet-popup-content a.a{display:inline-block;font-weight:700;font-size:12px;text-decoration:none;border-radius:8px;padding:5px 10px;}
+  .leaflet-popup-content a.g{color:#c0392b;border:1px solid #e6c9c3;background:#fdf0ee;}
+  .leaflet-popup-content a.a{color:#1d4ed8;border:1px solid #c3d0e6;background:#eef2fd;}
   .legend{background:rgba(255,255,255,.95);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.18);padding:9px 11px;font-size:12px;line-height:1.7;max-width:190px;}
   .legend b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a807a;margin-bottom:4px;}
   .legend .row{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;padding:1px 0;}
@@ -136,11 +139,13 @@ PLACES.forEach(function(p){
   allBounds.push([lat,lng]);
   var icon = L.divIcon({ className:'', iconSize:[22,22], iconAnchor:[11,11],
     html:'<div class="mk" style="background:'+color+'">'+num+'</div>' });
-  /* 명칭으로 구글맵 열기(좌표 대신 검색명) */
+  /* 명칭으로 지도 열기(좌표 대신 검색명 · 애플은 좌표+라벨) */
   var g = 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(gname);
+  var a = 'https://maps.apple.com/?ll='+lat+','+lng+'&q='+encodeURIComponent(gname);
   var html = '<span class="pt-day" style="background:'+color+'">DAY '+day+'</span><br>'
     + '<b>'+esc(name)+'</b><div class="pt-desc">'+esc(desc)+'</div>'
-    + '<a class="g" href="'+g+'" target="_blank" rel="noopener">📍 구글맵에서 열기 →</a>';
+    + '<div class="gmaps"><a class="g" href="'+g+'" target="_blank" rel="noopener">📍 구글맵</a>'
+    + '<a class="a" href="'+a+'" target="_blank" rel="noopener"> 애플지도</a></div>';
   L.marker([lat,lng], { icon:icon }).addTo(layers[day]).bindPopup(html);
 });
 
@@ -160,7 +165,7 @@ legend.onAdd = function(){
       + '</div>';
   }).join('');
   div.innerHTML = '<b>일자별 (색=켜기/끄기 · 🧭=구글맵)</b>'+rows
-    + '<div class="hint">🧭 = 그날 방문지 전체를 <b>구글맵 앱</b> 길찾기로 바로 열기. 핀을 누르면 개별 지점 구글맵 링크.</div>';
+    + '<div class="hint">🧭 = 그날 방문지 전체를 <b>구글맵 앱</b> 길찾기로 열기(다중 경유). 핀을 누르면 <b>구글맵·애플지도</b> 개별 열기 버튼이 떠요(애플은 경유지 미지원이라 지점별로).</div>';
   L.DomEvent.disableClickPropagation(div);
   div.querySelectorAll('.row').forEach(function(row){
     row.addEventListener('click', function(e){
