@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전체 여정 지도 · 유럽 자가용 여행 2026.7.6–7.13</title>
+<meta name="description" content="부다페스트→잘츠부르크→인터라켄→밀라노→피란 8일 42개 방문지를 일자별 색으로 표시한 전체 여정 지도">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root{ --ink:#2a2320; --paper:#faf6f0; --accent:#c0392b; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--paper);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+  header{flex:0 0 auto;background:#1b1714;color:#fff;display:flex;align-items:center;gap:12px;padding:10px 14px;box-shadow:0 2px 12px rgba(0,0,0,.2);z-index:5;}
+  header a.back{color:#fff;text-decoration:none;font-weight:700;font-size:13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 12px;white-space:nowrap;}
+  header a.back:hover{background:rgba(255,255,255,.26);}
+  header h1{font-size:15px;font-weight:800;letter-spacing:-.2px;}
+  header h1 small{display:block;font-size:11px;font-weight:500;opacity:.6;margin-top:1px;}
+  header .kml{margin-left:auto;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:6px 12px;text-decoration:none;white-space:nowrap;}
+  header .kml:hover{background:#a5311f;}
+  #map{flex:1 1 auto;width:100%;z-index:0;}
+  .mk{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px;}
+  .leaflet-popup-content{margin:10px 13px;font-size:13px;line-height:1.5;}
+  .leaflet-popup-content .pt-day{font-weight:800;font-size:11px;padding:1px 7px;border-radius:999px;color:#fff;display:inline-block;margin-bottom:5px;}
+  .leaflet-popup-content b{font-size:14px;}
+  .leaflet-popup-content .pt-desc{color:#6f655d;font-size:12px;margin-top:2px;}
+  .leaflet-popup-content a.g{display:inline-block;margin-top:8px;font-weight:700;font-size:12px;color:#c0392b;text-decoration:none;border:1px solid #e6c9c3;background:#fdf0ee;border-radius:8px;padding:5px 10px;}
+  .legend{background:rgba(255,255,255,.95);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.18);padding:9px 11px;font-size:12px;line-height:1.7;max-width:190px;}
+  .legend b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a807a;margin-bottom:4px;}
+  .legend .row{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;}
+  .legend .row.off{opacity:.35;}
+  .legend .dot{width:12px;height:12px;border-radius:50%;flex:0 0 auto;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);}
+  .legend .row:hover{color:#c0392b;}
+  .legend .hint{margin-top:6px;font-size:10.5px;color:#a89e97;line-height:1.4;}
+  @media(max-width:560px){ header h1{font-size:13px;} .legend{font-size:11px;max-width:150px;} }
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="index.html">← 유럽 가이드</a>
+  <h1>🗺️ 전체 여정 지도<small>2026.7.6–7.13 · 42개 방문지</small></h1>
+  <a class="kml" href="europe-trip-map.kml" download>⬇ 구글맵(KML)</a>
+</header>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/* 일자별 색상 */
+var DAY_META = [
+  { d:1, label:'7/6 부다페스트→잘츠부르크', color:'#e11d48' },
+  { d:2, label:'7/7 잘츠부르크→인터라켄',   color:'#ea580c' },
+  { d:3, label:'7/8 융프라우요흐+유람선',   color:'#d97706' },
+  { d:4, label:'7/9 고르너그라트',          color:'#16a34a' },
+  { d:5, label:'7/10 루체른→밀라노',        color:'#0d9488' },
+  { d:6, label:'7/11 밀라노 자유여행',       color:'#2563eb' },
+  { d:7, label:'7/12 미라마레성→피란',      color:'#7c3aed' },
+  { d:8, label:'7/13 발라톤→부다페스트',    color:'#db2777' }
+];
+/* 42개 방문지 (KML과 동일) */
+var PLACES = [
+ [1,'부다페스트 (출발)','집에서 07:00 출발',47.4979,19.0402],
+ [1,'할슈타트','13:30~15:30 관광 · 주차 P1/P2(만석 시 P3)',47.5622,13.6493],
+ [1,'할슈타트 P1 주차장','마을 입구 주차',47.5585,13.6447],
+ [1,'볼프강 호수 (St. Wolfgang)','16:10~17:00 호숫가 휴식·간식',47.7378,13.4489],
+ [1,'레오나르도 호텔 (숙소)','Leonardo Hotel Salzburg City Center · 7/6 1박',47.7973385,13.0378267],
+ [1,'호엔잘츠부르크 성','푸니쿨라 조망',47.79475,13.04774],
+ [1,'마카르트 다리','잘차흐 강 도보',47.80175,13.04378],
+ [1,'미라벨 정원','사운드 오브 뮤직 촬영지',47.80585,13.04255],
+ [1,'아우구스티너 브로이슈튀블 (양조장)','20:30~ 저녁 식사 겸 맥주',47.80853,13.03348],
+ [2,'오베르알프 패스','스위스 5대 패스 ①',46.6567,8.6710],
+ [2,'푸르카 패스','스위스 5대 패스 ②',46.5720,8.4130],
+ [2,'그림젤 패스','스위스 5대 패스 ③',46.5610,8.3410],
+ [2,'인터라켄 (숙소·베이스캠프)','3박 · 18:00 체크인',46.6863,7.8632],
+ [2,'인터라켄 동역 주차장','시내 관광 시 주차',46.6905,7.8690],
+ [3,'그린델발트 터미널','09:00 주차 · 아이거 익스프레스',46.6242,8.0430],
+ [3,'아이거글레처 (환승)','곤돌라→산악열차 환승',46.5773,7.9770],
+ [3,'융프라우요흐 (Top of Europe)','10:30~13:00 관광 · 3,454m',46.5474,7.9855],
+ [3,'브리엔츠 호수 유람선','15:00~16:30 · 65번 유람선',46.7538,8.0396],
+ [3,'하더쿨름 전망대','18:00~19:30 · Top of Interlaken',46.6941,7.8497],
+ [4,'칸더슈테그 (자동차열차)','뢰치베르크 카트레인 승차',46.4954,7.6740],
+ [4,'고펜슈타인 (하차)','자동차열차 하차',46.3733,7.8180],
+ [4,'테쉬 마터호른 터미널 주차','10:00 주차 · 셔틀열차',46.0680,7.7790],
+ [4,'체르마트','차 없는 산악마을 · GGB 등산열차',46.0207,7.7491],
+ [4,'고르너그라트 전망대','11:30~13:00 · 3,089m',45.9834,7.7860],
+ [4,'로텐보덴 역','리펠제 하이킹 시작',45.9910,7.7930],
+ [4,'리펠제','마터호른 반영 호수',45.9927,7.7808],
+ [5,'브뤼닉 패스','루체른행 경유',46.7570,8.1580],
+ [5,'루체른 (카펠교·구시가)','10:30~14:30 관광',47.0517,8.3076],
+ [5,'Parkhaus Altstadt 루체른','구시가 주차장',47.0533,8.3037],
+ [5,'빈사의 사자상','루체른 명소',47.0583,8.3110],
+ [5,'밀라노 (숙소)','2박 · 18:30 체크인 · ZTL 밖',45.4808,9.2010],
+ [6,'두오모 대성당','옥상 테라스 통합권',45.4641,9.1919],
+ [6,'갤러리아 비토리오 에마누엘레 2세','아케이드·명품가',45.4659,9.1900],
+ [6,'스포르체스코 성','성·공원',45.4706,9.1795],
+ [6,'최후의 만찬 (산타 마리아 델레 그라치에)','예약 시간 엄수',45.4659,9.1707],
+ [7,'밀라노 Eataly','09:30 식자재 쇼핑',45.4820,9.1910],
+ [7,'미라마레 성 (트리에스테)','15:30~17:00 투어',45.7024,13.7128],
+ [7,'피란 (숙소)','1박 · 타르티니 광장 인근',45.5285,13.5683],
+ [7,'그랜드호텔 근처 주차장','석양·해산물 저녁 동선',45.5245,13.5720],
+ [8,'피란 성벽 · 성 게오르기우스 종탑','09:30~12:00 투어·산책',45.5305,13.5665],
+ [8,'발라톤 호수 (Balaton)','18:00~20:00 투어·커피',46.9080,17.8890],
+ [8,'부다페스트 (도착·집)','22:00 여행 종료',47.4979,19.0402]
+];
+
+var map = L.map('map', { zoomControl:true }).setView([46.8, 11.5], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom:19, attribution:'© OpenStreetMap'
+}).addTo(map);
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var colorOf = {}, labelOf = {}, layers = {}, allBounds = [];
+DAY_META.forEach(function(m){ colorOf[m.d]=m.color; labelOf[m.d]=m.label; layers[m.d]=L.layerGroup().addTo(map); });
+
+/* 일자별 순번 계산 */
+var seq = {};
+PLACES.forEach(function(p){ var d=p[0]; seq[d]=(seq[d]||0)+1; p.push(seq[d]); });
+
+/* 일자별 경로선(같은 날 지점 순서 연결) */
+var dayPts = {};
+PLACES.forEach(function(p){ (dayPts[p[0]]=dayPts[p[0]]||[]).push([p[3],p[4]]); });
+Object.keys(dayPts).forEach(function(d){
+  if(dayPts[d].length>1) L.polyline(dayPts[d], { color:colorOf[d], weight:3, opacity:.55, dashArray:'5,6' }).addTo(layers[d]);
+});
+
+/* 마커 */
+PLACES.forEach(function(p){
+  var day=p[0], name=p[1], desc=p[2], lat=p[3], lng=p[4], num=p[5], color=colorOf[day];
+  allBounds.push([lat,lng]);
+  var icon = L.divIcon({ className:'', iconSize:[22,22], iconAnchor:[11,11],
+    html:'<div class="mk" style="background:'+color+'">'+num+'</div>' });
+  var g = 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng;
+  var html = '<span class="pt-day" style="background:'+color+'">DAY '+day+'</span><br>'
+    + '<b>'+esc(name)+'</b><div class="pt-desc">'+esc(desc)+'</div>'
+    + '<a class="g" href="'+g+'" target="_blank" rel="noopener">📍 구글맵에서 열기 →</a>';
+  L.marker([lat,lng], { icon:icon }).addTo(layers[day]).bindPopup(html);
+});
+
+map.fitBounds(L.latLngBounds(allBounds), { padding:[40,40] });
+
+/* 범례(일자 토글) */
+var legend = L.control({ position:'topright' });
+legend.onAdd = function(){
+  var div = L.DomUtil.create('div','legend');
+  var rows = DAY_META.map(function(m){
+    return '<div class="row" data-day="'+m.d+'"><span class="dot" style="background:'+m.color+'"></span><span>'+esc(m.label)+'</span></div>';
+  }).join('');
+  div.innerHTML = '<b>일자별 (탭하여 켜기/끄기)</b>'+rows+'<div class="hint">핀을 누르면 구글맵 링크가 떠요</div>';
+  L.DomEvent.disableClickPropagation(div);
+  div.querySelectorAll('.row').forEach(function(row){
+    row.addEventListener('click', function(){
+      var d = +row.getAttribute('data-day');
+      if(map.hasLayer(layers[d])){ map.removeLayer(layers[d]); row.classList.add('off'); }
+      else { map.addLayer(layers[d]); row.classList.remove('off'); }
+    });
+  });
+  return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
