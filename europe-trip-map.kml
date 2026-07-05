@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>유럽 자가용 여행 2026.7.6–7.13 · 전체 방문지</name>
+  <description>부다페스트→잘츠부르크→인터라켄→밀라노→피란→부다페스트</description>
+  <Folder>
+    <name>DAY1 · 7/6 (월) 부다페스트→할슈타트→잘츠부르크</name>
+    <Placemark>
+      <name>부다페스트 (출발)</name>
+      <description>집에서 07:00 출발</description>
+      <Point><coordinates>19.0402,47.4979,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>할슈타트</name>
+      <description>13:30~15:30 관광 · 주차 P1/P2(만석 시 P3)</description>
+      <Point><coordinates>13.6493,47.5622,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>할슈타트 P1 주차장</name>
+      <description>마을 입구 주차</description>
+      <Point><coordinates>13.6447,47.5585,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>볼프강 호수 (St. Wolfgang)</name>
+      <description>16:10~17:00 호숫가 휴식·간식</description>
+      <Point><coordinates>13.4489,47.7378,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>레오나르도 호텔 (숙소)</name>
+      <description>Leonardo Hotel Salzburg City Center · 7/6 1박</description>
+      <Point><coordinates>13.0378267,47.7973385,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>호엔잘츠부르크 성</name>
+      <description>푸니쿨라 조망</description>
+      <Point><coordinates>13.04774,47.79475,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>마카르트 다리</name>
+      <description>잘차흐 강 도보</description>
+      <Point><coordinates>13.04378,47.80175,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>미라벨 정원</name>
+      <description>사운드 오브 뮤직 촬영지</description>
+      <Point><coordinates>13.04255,47.80585,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>아우구스티너 브로이슈튀블 (양조장)</name>
+      <description>20:30~ 저녁 식사 겸 맥주</description>
+      <Point><coordinates>13.03348,47.80853,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY2 · 7/7 (화) 잘츠부르크→인터라켄</name>
+    <Placemark>
+      <name>오베르알프 패스</name>
+      <description>스위스 5대 패스 ①</description>
+      <Point><coordinates>8.671,46.6567,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>푸르카 패스</name>
+      <description>스위스 5대 패스 ②</description>
+      <Point><coordinates>8.413,46.572,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>그림젤 패스</name>
+      <description>스위스 5대 패스 ③</description>
+      <Point><coordinates>8.341,46.561,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>인터라켄 (숙소·베이스캠프)</name>
+      <description>3박 · 18:00 체크인</description>
+      <Point><coordinates>7.8632,46.6863,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>인터라켄 동역 주차장</name>
+      <description>시내 관광 시 주차</description>
+      <Point><coordinates>7.869,46.6905,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY3 · 7/8 (수) 융프라우요흐+브리엔츠+하더쿨름</name>
+    <Placemark>
+      <name>그린델발트 터미널</name>
+      <description>09:00 주차 · 아이거 익스프레스</description>
+      <Point><coordinates>8.043,46.6242,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>아이거글레처 (환승)</name>
+      <description>곤돌라→산악열차 환승</description>
+      <Point><coordinates>7.977,46.5773,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>융프라우요흐 (Top of Europe)</name>
+      <description>10:30~13:00 관광 · 3,454m</description>
+      <Point><coordinates>7.9855,46.5474,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>브리엔츠 호수 유람선</name>
+      <description>15:00~16:30 · 65번 유람선</description>
+      <Point><coordinates>8.0396,46.7538,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>하더쿨름 전망대</name>
+      <description>18:00~19:30 · Top of Interlaken</description>
+      <Point><coordinates>7.8497,46.6941,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY4 · 7/9 (목) 고르너그라트 (체르마트 당일)</name>
+    <Placemark>
+      <name>칸더슈테그 (자동차열차)</name>
+      <description>뢰치베르크 카트레인 승차</description>
+      <Point><coordinates>7.674,46.4954,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>고펜슈타인 (하차)</name>
+      <description>자동차열차 하차</description>
+      <Point><coordinates>7.818,46.3733,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>테쉬 마터호른 터미널 주차</name>
+      <description>10:00 주차 · 셔틀열차</description>
+      <Point><coordinates>7.779,46.068,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>체르마트</name>
+      <description>차 없는 산악마을 · GGB 등산열차</description>
+      <Point><coordinates>7.7491,46.0207,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>고르너그라트 전망대</name>
+      <description>11:30~13:00 · 3,089m</description>
+      <Point><coordinates>7.786,45.9834,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>로텐보덴 역</name>
+      <description>리펠제 하이킹 시작</description>
+      <Point><coordinates>7.793,45.991,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>리펠제</name>
+      <description>마터호른 반영 호수</description>
+      <Point><coordinates>7.7808,45.9927,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY5 · 7/10 (금) 인터라켄→루체른→밀라노</name>
+    <Placemark>
+      <name>브뤼닉 패스</name>
+      <description>루체른행 경유</description>
+      <Point><coordinates>8.158,46.757,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>루체른 (카펠교·구시가)</name>
+      <description>10:30~14:30 관광</description>
+      <Point><coordinates>8.3076,47.0517,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>Parkhaus Altstadt 루체른</name>
+      <description>구시가 주차장</description>
+      <Point><coordinates>8.3037,47.0533,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>빈사의 사자상</name>
+      <description>루체른 명소</description>
+      <Point><coordinates>8.311,47.0583,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>밀라노 (숙소)</name>
+      <description>2박 · 18:30 체크인 · ZTL 밖</description>
+      <Point><coordinates>9.201,45.4808,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY6 · 7/11 (토) 밀라노 자유여행</name>
+    <Placemark>
+      <name>두오모 대성당</name>
+      <description>옥상 테라스 통합권</description>
+      <Point><coordinates>9.1919,45.4641,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>갤러리아 비토리오 에마누엘레 2세</name>
+      <description>아케이드·명품가</description>
+      <Point><coordinates>9.19,45.4659,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>스포르체스코 성</name>
+      <description>성·공원</description>
+      <Point><coordinates>9.1795,45.4706,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>최후의 만찬 (산타 마리아 델레 그라치에)</name>
+      <description>예약 시간 엄수</description>
+      <Point><coordinates>9.1707,45.4659,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY7 · 7/12 (일) 밀라노→미라마레성→피란</name>
+    <Placemark>
+      <name>밀라노 Eataly</name>
+      <description>09:30 식자재 쇼핑</description>
+      <Point><coordinates>9.191,45.482,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>미라마레 성 (트리에스테)</name>
+      <description>15:30~17:00 투어</description>
+      <Point><coordinates>13.7128,45.7024,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>피란 (숙소)</name>
+      <description>1박 · 타르티니 광장 인근</description>
+      <Point><coordinates>13.5683,45.5285,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>그랜드호텔 근처 주차장</name>
+      <description>석양·해산물 저녁 동선</description>
+      <Point><coordinates>13.572,45.5245,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+  <Folder>
+    <name>DAY8 · 7/13 (월) 피란→발라톤→부다페스트</name>
+    <Placemark>
+      <name>피란 성벽 · 성 게오르기우스 종탑</name>
+      <description>09:30~12:00 투어·산책</description>
+      <Point><coordinates>13.5665,45.5305,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>발라톤 호수 (Balaton)</name>
+      <description>18:00~20:00 투어·커피</description>
+      <Point><coordinates>17.889,46.908,0</coordinates></Point>
+    </Placemark>
+    <Placemark>
+      <name>부다페스트 (도착·집)</name>
+      <description>22:00 여행 종료</description>
+      <Point><coordinates>19.0402,47.4979,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+</Document>
+</kml>
