@@ -4,24 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>전체 여정 지도 · 유럽 자가용 여행 2026.7.6–7.13</title>
-<meta name="description" content="부다페스트→잘츠부르크→인터라켄→밀라노→피란 8일 42개 방문지를 일자별 색으로 표시한 전체 여정 지도">
+<meta name="description" content="부다페스트→잘츠부르크→인터라켄→밀라노→피란 8일 42개 방문지를 실제 도로 경로·일자별 색으로 표시한 전체 여정 지도">
+<link rel="dns-prefetch" href="https://router.project-osrm.org">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
-  :root{ --ink:#2a2320; --paper:#faf6f0; --accent:#c0392b; }
+  :root{ --ink:#2a2320; --paper:#faf6f0; --accent:#c0392b; --line:#e6ddd0; }
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;}
   body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--paper);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-  header{flex:0 0 auto;background:#1b1714;color:#fff;display:flex;align-items:center;gap:12px;padding:10px 14px;box-shadow:0 2px 12px rgba(0,0,0,.2);z-index:5;}
+  header{flex:0 0 auto;background:#1b1714;color:#fff;z-index:5;box-shadow:0 2px 12px rgba(0,0,0,.22);}
+  header .top{display:flex;align-items:center;gap:12px;padding:9px 14px 7px;}
   header a.back{color:#fff;text-decoration:none;font-weight:700;font-size:13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 12px;white-space:nowrap;}
   header a.back:hover{background:rgba(255,255,255,.26);}
-  header h1{font-size:15px;font-weight:800;letter-spacing:-.2px;}
-  header h1 small{display:block;font-size:11px;font-weight:500;opacity:.6;margin-top:1px;}
+  header h1{font-size:15px;font-weight:800;letter-spacing:-.2px;line-height:1.1;}
   header .kml{margin-left:auto;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:6px 12px;text-decoration:none;white-space:nowrap;}
   header .kml:hover{background:#a5311f;}
+  header .stats{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 9px;}
+  header .stats span{font-size:11px;font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:3px 9px;color:#f0e9e2;}
   #map{flex:1 1 auto;width:100%;z-index:0;}
-  .mk{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px;}
-  .leaflet-popup-content{margin:10px 13px;font-size:13px;line-height:1.5;}
+  .mk{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+  .mk.dot{width:22px;height:22px;font-size:11px;}
+  .mk.base{width:32px;height:32px;font-size:15px;border-width:3px;box-shadow:0 2px 8px rgba(0,0,0,.45);}
+  .leaflet-popup-content{margin:10px 13px;font-size:13px;line-height:1.5;min-width:150px;}
   .leaflet-popup-content .pt-day{font-weight:800;font-size:11px;padding:1px 7px;border-radius:999px;color:#fff;display:inline-block;margin-bottom:5px;}
   .leaflet-popup-content b{font-size:14px;}
   .leaflet-popup-content .pt-desc{color:#6f655d;font-size:12px;margin-top:2px;}
@@ -29,24 +34,38 @@
   .leaflet-popup-content a.g,.leaflet-popup-content a.a{display:inline-block;font-weight:700;font-size:12px;text-decoration:none;border-radius:8px;padding:5px 10px;}
   .leaflet-popup-content a.g{color:#c0392b;border:1px solid #e6c9c3;background:#fdf0ee;}
   .leaflet-popup-content a.a{color:#1d4ed8;border:1px solid #c3d0e6;background:#eef2fd;}
-  .legend{background:rgba(255,255,255,.95);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.18);padding:9px 11px;font-size:12px;line-height:1.7;max-width:190px;}
-  .legend b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a807a;margin-bottom:4px;}
-  .legend .row{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;padding:1px 0;}
-  .legend .row.off{opacity:.35;}
-  .legend .dot{width:12px;height:12px;border-radius:50%;flex:0 0 auto;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);}
-  .legend .row .lbl{flex:1 1 auto;min-width:0;}
+  .legend{background:rgba(255,255,255,.96);border-radius:11px;box-shadow:0 3px 14px rgba(0,0,0,.2);padding:9px 11px;font-size:12px;line-height:1.4;max-width:240px;}
+  .legend .lhead{display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8a807a;font-weight:800;margin-bottom:6px;cursor:pointer;}
+  .legend .lhead .tg{margin-left:auto;font-size:11px;color:#c0392b;}
+  .legend .rows.collapsed{display:none;}
+  .legend .row{display:flex;align-items:center;gap:6px;padding:2px 0;}
+  .legend .row.off .lbl,.legend .row.off .dot{opacity:.32;}
+  .legend .dot{width:12px;height:12px;border-radius:50%;flex:0 0 auto;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);cursor:pointer;}
+  .legend .lbl{flex:1 1 auto;min-width:0;cursor:pointer;font-size:11.5px;}
   .legend .row:hover .lbl{color:#c0392b;}
-  .legend .gday{flex:0 0 auto;font-size:11px;font-weight:800;text-decoration:none;color:#fff;background:#c0392b;border-radius:6px;padding:2px 6px;}
+  .legend .zoom,.legend .gday{flex:0 0 auto;font-size:11px;font-weight:800;text-decoration:none;border-radius:6px;padding:2px 6px;cursor:pointer;}
+  .legend .zoom{color:#245f45;background:#e9f3ee;border:1px solid #cfe6d8;}
+  .legend .gday{color:#fff;background:#c0392b;}
   .legend .gday:hover{background:#a5311f;}
   .legend .hint{margin-top:7px;font-size:10.5px;color:#a89e97;line-height:1.45;}
-  @media(max-width:560px){ header h1{font-size:13px;} .legend{font-size:11px;max-width:150px;} }
+  .fsbtn{background:#fff;width:34px;height:34px;line-height:34px;text-align:center;font-size:16px;cursor:pointer;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+  @media(max-width:560px){ header h1{font-size:13px;} .legend{font-size:11px;max-width:186px;} }
 </style>
 </head>
 <body>
 <header>
-  <a class="back" href="index.html">← 유럽 가이드</a>
-  <h1>🗺️ 전체 여정 지도<small>2026.7.6–7.13 · 42개 방문지</small></h1>
-  <a class="kml" href="europe-trip-map.kml" download>⬇ 구글맵(KML)</a>
+  <div class="top">
+    <a class="back" href="index.html">← 유럽 가이드</a>
+    <h1>🗺️ 전체 여정 지도</h1>
+    <a class="kml" href="europe-trip-map.kml" download>⬇ KML</a>
+  </div>
+  <div class="stats">
+    <span>📅 7박 8일 (7/6–7/13)</span>
+    <span>🌍 5개국</span>
+    <span>🚗 약 2,600km</span>
+    <span>📍 42곳</span>
+    <span id="routeStat">🛣️ 도로 경로 불러오는 중…</span>
+  </div>
 </header>
 <div id="map"></div>
 
@@ -64,115 +83,159 @@ var DAY_META = [
   { d:7, label:'7/12 미라마레성→피란',      color:'#7c3aed' },
   { d:8, label:'7/13 발라톤→부다페스트',    color:'#db2777' }
 ];
-/* 42개 방문지 — [일자, 표시명, 설명, 위도, 경도, 구글검색명] */
+/* 42개 방문지 — [일자, 표시명, 설명, 위도, 경도, 구글검색명, 숙소/거점아이콘(없으면 0)] */
 var PLACES = [
- [1,'부다페스트 (출발)','집에서 07:00 출발',47.4979,19.0402,'Budapest'],
- [1,'할슈타트','13:30~15:30 관광 · 주차 P1/P2(만석 시 P3)',47.5622,13.6493,'Hallstatt'],
- [1,'할슈타트 P1 주차장','마을 입구 주차',47.5585,13.6447,'Parkplatz Hallstatt P1'],
- [1,'볼프강 호수 (St. Wolfgang)','16:10~17:00 호숫가 휴식·간식',47.7378,13.4489,'Sankt Wolfgang im Salzkammergut'],
- [1,'레오나르도 호텔 (숙소)','Leonardo Hotel Salzburg City Center · 7/6 1박',47.7973385,13.0378267,'Leonardo Hotel Salzburg City Center'],
- [1,'호엔잘츠부르크 성','푸니쿨라 조망',47.79475,13.04774,'Festung Hohensalzburg'],
- [1,'마카르트 다리','잘차흐 강 도보',47.80175,13.04378,'Makartsteg Salzburg'],
- [1,'미라벨 정원','사운드 오브 뮤직 촬영지',47.80585,13.04255,'Mirabellgarten Salzburg'],
- [1,'아우구스티너 브로이슈튀블 (양조장)','20:30~ 저녁 식사 겸 맥주',47.80853,13.03348,'Augustiner Bräustübl Mülln'],
- [2,'오베르알프 패스','스위스 5대 패스 ①',46.6567,8.6710,'Oberalppass'],
- [2,'푸르카 패스','스위스 5대 패스 ②',46.5720,8.4130,'Furkapass'],
- [2,'그림젤 패스','스위스 5대 패스 ③',46.5610,8.3410,'Grimselpass'],
- [2,'인터라켄 (숙소·베이스캠프)','3박 · 18:00 체크인',46.6863,7.8632,'Interlaken'],
- [2,'인터라켄 동역 주차장','시내 관광 시 주차',46.6905,7.8690,'Bahnhof Interlaken Ost'],
- [3,'그린델발트 터미널','09:00 주차 · 아이거 익스프레스',46.6242,8.0430,'Grindelwald Terminal'],
- [3,'아이거글레처 (환승)','곤돌라→산악열차 환승',46.5773,7.9770,'Eigergletscher'],
- [3,'융프라우요흐 (Top of Europe)','10:30~13:00 관광 · 3,454m',46.5474,7.9855,'Jungfraujoch'],
- [3,'브리엔츠 호수 유람선','15:00~16:30 · 65번 유람선',46.7538,8.0396,'Brienz Schiffstation'],
- [3,'하더쿨름 전망대','18:00~19:30 · Top of Interlaken',46.6941,7.8497,'Harder Kulm'],
- [4,'칸더슈테그 (자동차열차)','뢰치베르크 카트레인 승차',46.4954,7.6740,'Autoverlad Kandersteg'],
- [4,'고펜슈타인 (하차)','자동차열차 하차',46.3733,7.8180,'Goppenstein'],
- [4,'테쉬 마터호른 터미널 주차','10:00 주차 · 셔틀열차',46.0680,7.7790,'Matterhorn Terminal Täsch'],
- [4,'체르마트','차 없는 산악마을 · GGB 등산열차',46.0207,7.7491,'Zermatt'],
- [4,'고르너그라트 전망대','11:30~13:00 · 3,089m',45.9834,7.7860,'Gornergrat'],
- [4,'로텐보덴 역','리펠제 하이킹 시작',45.9910,7.7930,'Rotenboden'],
- [4,'리펠제','마터호른 반영 호수',45.9927,7.7808,'Riffelsee'],
- [5,'브뤼닉 패스','루체른행 경유',46.7570,8.1580,'Brünigpass'],
- [5,'루체른 (카펠교·구시가)','10:30~14:30 관광',47.0517,8.3076,'Kapellbrücke Luzern'],
- [5,'Parkhaus Altstadt 루체른','구시가 주차장',47.0533,8.3037,'Parkhaus Altstadt Luzern'],
- [5,'빈사의 사자상','루체른 명소',47.0583,8.3110,'Löwendenkmal Luzern'],
- [5,'밀라노 (숙소)','2박 · 18:30 체크인 · ZTL 밖',45.4808,9.2010,'Milano Centrale'],
- [6,'두오모 대성당','옥상 테라스 통합권',45.4641,9.1919,'Duomo di Milano'],
- [6,'갤러리아 비토리오 에마누엘레 2세','아케이드·명품가',45.4659,9.1900,'Galleria Vittorio Emanuele II'],
- [6,'스포르체스코 성','성·공원',45.4706,9.1795,'Castello Sforzesco'],
- [6,'최후의 만찬 (산타 마리아 델레 그라치에)','예약 시간 엄수',45.4659,9.1707,'Santa Maria delle Grazie Milano'],
- [7,'밀라노 Eataly','09:30 식자재 쇼핑',45.4820,9.1910,'Eataly Milano Smeraldo'],
- [7,'미라마레 성 (트리에스테)','15:30~17:00 투어',45.7024,13.7128,'Castello di Miramare'],
- [7,'피란 (숙소)','1박 · 타르티니 광장 인근',45.5285,13.5683,'Tartinijev trg Piran'],
- [7,'그랜드호텔 근처 주차장','석양·해산물 저녁 동선',45.5245,13.5720,'Parkirišče Fornače Piran'],
- [8,'피란 성벽 · 성 게오르기우스 종탑','09:30~12:00 투어·산책',45.5305,13.5665,'Cerkev sv. Jurija Piran'],
- [8,'발라톤 호수 (Balaton)','18:00~20:00 투어·커피',46.9080,17.8890,'Lake Balaton'],
- [8,'부다페스트 (도착·집)','22:00 여행 종료',47.4979,19.0402,'Budapest']
+ [1,'부다페스트 (출발)','집에서 07:00 출발',47.4979,19.0402,'Budapest','🏠'],
+ [1,'할슈타트','13:30~15:30 관광 · 주차 P1/P2(만석 시 P3)',47.5622,13.6493,'Hallstatt',0],
+ [1,'할슈타트 P1 주차장','마을 입구 주차',47.5585,13.6447,'Parkplatz Hallstatt P1',0],
+ [1,'볼프강 호수 (St. Wolfgang)','16:10~17:00 호숫가 휴식·간식',47.7378,13.4489,'Sankt Wolfgang im Salzkammergut',0],
+ [1,'레오나르도 호텔 (숙소)','Leonardo Hotel Salzburg City Center · 7/6 1박',47.7973385,13.0378267,'Leonardo Hotel Salzburg City Center','🛏'],
+ [1,'호엔잘츠부르크 성','푸니쿨라 조망',47.79475,13.04774,'Festung Hohensalzburg',0],
+ [1,'마카르트 다리','잘차흐 강 도보',47.80175,13.04378,'Makartsteg Salzburg',0],
+ [1,'미라벨 정원','사운드 오브 뮤직 촬영지',47.80585,13.04255,'Mirabellgarten Salzburg',0],
+ [1,'아우구스티너 브로이슈튀블 (양조장)','20:30~ 저녁 식사 겸 맥주',47.80853,13.03348,'Augustiner Bräustübl Mülln',0],
+ [2,'오베르알프 패스','스위스 5대 패스 ①',46.6567,8.6710,'Oberalppass',0],
+ [2,'푸르카 패스','스위스 5대 패스 ②',46.5720,8.4130,'Furkapass',0],
+ [2,'그림젤 패스','스위스 5대 패스 ③',46.5610,8.3410,'Grimselpass',0],
+ [2,'인터라켄 (숙소·베이스캠프)','3박 · 18:00 체크인',46.6863,7.8632,'Interlaken','🛏'],
+ [2,'인터라켄 동역 주차장','시내 관광 시 주차',46.6905,7.8690,'Bahnhof Interlaken Ost',0],
+ [3,'그린델발트 터미널','09:00 주차 · 아이거 익스프레스',46.6242,8.0430,'Grindelwald Terminal',0],
+ [3,'아이거글레처 (환승)','곤돌라→산악열차 환승',46.5773,7.9770,'Eigergletscher',0],
+ [3,'융프라우요흐 (Top of Europe)','10:30~13:00 관광 · 3,454m',46.5474,7.9855,'Jungfraujoch',0],
+ [3,'브리엔츠 호수 유람선','15:00~16:30 · 65번 유람선',46.7538,8.0396,'Brienz Schiffstation',0],
+ [3,'하더쿨름 전망대','18:00~19:30 · Top of Interlaken',46.6941,7.8497,'Harder Kulm',0],
+ [4,'칸더슈테그 (자동차열차)','뢰치베르크 카트레인 승차',46.4954,7.6740,'Autoverlad Kandersteg',0],
+ [4,'고펜슈타인 (하차)','자동차열차 하차',46.3733,7.8180,'Goppenstein',0],
+ [4,'테쉬 마터호른 터미널 주차','10:00 주차 · 셔틀열차',46.0680,7.7790,'Matterhorn Terminal Täsch',0],
+ [4,'체르마트','차 없는 산악마을 · GGB 등산열차',46.0207,7.7491,'Zermatt',0],
+ [4,'고르너그라트 전망대','11:30~13:00 · 3,089m',45.9834,7.7860,'Gornergrat',0],
+ [4,'로텐보덴 역','리펠제 하이킹 시작',45.9910,7.7930,'Rotenboden',0],
+ [4,'리펠제','마터호른 반영 호수',45.9927,7.7808,'Riffelsee',0],
+ [5,'브뤼닉 패스','루체른행 경유',46.7570,8.1580,'Brünigpass',0],
+ [5,'루체른 (카펠교·구시가)','10:30~14:30 관광',47.0517,8.3076,'Kapellbrücke Luzern',0],
+ [5,'Parkhaus Altstadt 루체른','구시가 주차장',47.0533,8.3037,'Parkhaus Altstadt Luzern',0],
+ [5,'빈사의 사자상','루체른 명소',47.0583,8.3110,'Löwendenkmal Luzern',0],
+ [5,'밀라노 (숙소)','2박 · 18:30 체크인 · ZTL 밖',45.4808,9.2010,'Milano Centrale','🛏'],
+ [6,'두오모 대성당','09:30~ 옥상 테라스 통합권',45.4641,9.1919,'Duomo di Milano',0],
+ [6,'갤러리아 비토리오 에마누엘레 2세','아케이드·명품가',45.4659,9.1900,'Galleria Vittorio Emanuele II',0],
+ [6,'스포르체스코 성','성·공원(그늘 휴식)',45.4706,9.1795,'Castello Sforzesco',0],
+ [6,'최후의 만찬 (산타 마리아 델레 그라치에)','예약 시간 엄수',45.4659,9.1707,'Santa Maria delle Grazie Milano',0],
+ [7,'밀라노 Eataly','09:30 식자재 쇼핑',45.4820,9.1910,'Eataly Milano Smeraldo',0],
+ [7,'미라마레 성 (트리에스테)','15:30~17:00 투어',45.7024,13.7128,'Castello di Miramare',0],
+ [7,'피란 (숙소)','1박 · 타르티니 광장 인근',45.5285,13.5683,'Tartinijev trg Piran','🛏'],
+ [7,'그랜드호텔 근처 주차장','석양·해산물 저녁 동선',45.5245,13.5720,'Parkirišče Fornače Piran',0],
+ [8,'피란 성벽 · 성 게오르기우스 종탑','09:30~12:00 투어·산책',45.5305,13.5665,'Cerkev sv. Jurija Piran',0],
+ [8,'발라톤 호수 (Balaton)','18:00~20:00 투어·커피',46.9080,17.8890,'Lake Balaton',0],
+ [8,'부다페스트 (도착·집)','22:00 여행 종료',47.4979,19.0402,'Budapest','🏠']
+];
+/* 자동차 실제 주행 경로 순서(도로로 이동하는 지점만 — 산악 정상/도심 도보 지점 제외) */
+var DRIVE = [
+ [47.4979,19.0402],[47.5622,13.6493],[47.7378,13.4489],[47.7973385,13.0378267],
+ [46.6567,8.6710],[46.5720,8.4130],[46.5610,8.3410],[46.6863,7.8632],
+ [46.7570,8.1580],[47.0517,8.3076],[45.4808,9.2010],
+ [45.7024,13.7128],[45.5285,13.5683],[46.9080,17.8890],[47.4979,19.0402]
 ];
 
 var map = L.map('map', { zoomControl:true }).setView([46.8, 11.5], 6);
+L.control.scale({ imperial:false }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom:19, attribution:'© OpenStreetMap'
 }).addTo(map);
 
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-var colorOf = {}, labelOf = {}, layers = {}, allBounds = [];
-DAY_META.forEach(function(m){ colorOf[m.d]=m.color; labelOf[m.d]=m.label; layers[m.d]=L.layerGroup().addTo(map); });
+var colorOf={}, labelOf={}, layers={}, dayBounds={}, dayNames={}, allBounds=[];
+DAY_META.forEach(function(m){ colorOf[m.d]=m.color; labelOf[m.d]=m.label; layers[m.d]=L.layerGroup().addTo(map); dayBounds[m.d]=[]; dayNames[m.d]=[]; });
 
-/* 일자별 순번 계산 (p[6] = num) */
-var seq = {};
+/* 여정 경로선: 우선 점선 직선(폴백) → OSRM 실도로 도착 시 실선 교체 */
+var fallbackLine = L.polyline(DRIVE, { color:'#6b4a1f', weight:3, opacity:.45, dashArray:'6,9' }).addTo(map);
+(function(){
+  var url='https://router.project-osrm.org/route/v1/driving/'+DRIVE.map(function(p){return p[1]+','+p[0];}).join(';')+'?overview=full&geometries=geojson';
+  var ctrl = ('AbortController' in window)? new AbortController() : null;
+  var to = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 7000);
+  fetch(url, ctrl?{signal:ctrl.signal}:{}).then(function(r){ return r.json(); }).then(function(j){
+    clearTimeout(to);
+    if(j && j.routes && j.routes[0]){
+      var g = j.routes[0].geometry.coordinates.map(function(c){ return [c[1],c[0]]; });
+      map.removeLayer(fallbackLine);
+      L.polyline(g, { color:'#5a3a15', weight:4, opacity:.6 }).addTo(map).bringToBack();
+      var km = Math.round((j.routes[0].distance||0)/1000);
+      var st=document.getElementById('routeStat'); if(st&&km) st.textContent='🛣️ 주행 약 '+km.toLocaleString()+'km';
+    }
+  }).catch(function(){ clearTimeout(to); var st=document.getElementById('routeStat'); if(st) st.textContent='🛣️ 약 2,600km (직선 표시)'; });
+})();
+
+/* 일자별 순번 */
+var seq={};
 PLACES.forEach(function(p){ var d=p[0]; seq[d]=(seq[d]||0)+1; p.push(seq[d]); });
-
-/* 일자별 경로선 좌표 + 구글맵 길찾기용 명칭 */
-var dayPts = {}, dayNames = {};
-PLACES.forEach(function(p){
-  (dayPts[p[0]]=dayPts[p[0]]||[]).push([p[3],p[4]]);
-  (dayNames[p[0]]=dayNames[p[0]]||[]).push(p[5]);
-});
-Object.keys(dayPts).forEach(function(d){
-  if(dayPts[d].length>1) L.polyline(dayPts[d], { color:colorOf[d], weight:3, opacity:.55, dashArray:'5,6' }).addTo(layers[d]);
-});
 
 /* 마커 */
 PLACES.forEach(function(p){
-  var day=p[0], name=p[1], desc=p[2], lat=p[3], lng=p[4], gname=p[5], num=p[6], color=colorOf[day];
-  allBounds.push([lat,lng]);
-  var icon = L.divIcon({ className:'', iconSize:[22,22], iconAnchor:[11,11],
-    html:'<div class="mk" style="background:'+color+'">'+num+'</div>' });
-  /* 명칭으로 지도 열기(좌표 대신 검색명 · 애플은 좌표+라벨) */
+  var day=p[0], name=p[1], desc=p[2], lat=p[3], lng=p[4], gname=p[5], badge=p[6], num=p[7], color=colorOf[day];
+  allBounds.push([lat,lng]); dayBounds[day].push([lat,lng]); dayNames[day].push(gname);
+  var isBase = !!badge;
+  var icon = L.divIcon({ className:'', iconSize:isBase?[32,32]:[22,22], iconAnchor:isBase?[16,16]:[11,11],
+    html:'<div class="mk '+(isBase?'base':'dot')+'" style="background:'+color+'">'+(isBase?badge:num)+'</div>' });
   var g = 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(gname);
   var a = 'https://maps.apple.com/?ll='+lat+','+lng+'&q='+encodeURIComponent(gname);
-  var html = '<span class="pt-day" style="background:'+color+'">DAY '+day+'</span><br>'
+  var html = '<span class="pt-day" style="background:'+color+'">DAY '+day+(isBase?' · 거점':'')+'</span><br>'
     + '<b>'+esc(name)+'</b><div class="pt-desc">'+esc(desc)+'</div>'
     + '<div class="gmaps"><a class="g" href="'+g+'" target="_blank" rel="noopener">📍 구글맵</a>'
     + '<a class="a" href="'+a+'" target="_blank" rel="noopener"> 애플지도</a></div>';
-  L.marker([lat,lng], { icon:icon }).addTo(layers[day]).bindPopup(html);
+  L.marker([lat,lng], { icon:icon, zIndexOffset:isBase?1000:0 }).addTo(layers[day]).bindPopup(html);
 });
+map.fitBounds(L.latLngBounds(allBounds), { padding:[42,42] });
 
-map.fitBounds(L.latLngBounds(allBounds), { padding:[40,40] });
+/* 전체화면 버튼 */
+var FsCtl = L.Control.extend({ options:{position:'topleft'},
+  onAdd:function(){
+    var b=L.DomUtil.create('div','fsbtn'); b.innerHTML='⛶'; b.title='전체화면';
+    L.DomEvent.disableClickPropagation(b);
+    b.onclick=function(){
+      var el=document.documentElement;
+      if(document.fullscreenElement){ document.exitFullscreen(); }
+      else if(el.requestFullscreen){ el.requestFullscreen(); }
+      setTimeout(function(){ map.invalidateSize(); }, 300);
+    };
+    return b;
+  }
+});
+map.addControl(new FsCtl());
 
-/* 범례(일자 토글) */
+/* 범례: 색=토글 · 확대=이 날로 줌 · 🧭=구글맵 · 접기 */
 var legend = L.control({ position:'topright' });
 legend.onAdd = function(){
   var div = L.DomUtil.create('div','legend');
   var rows = DAY_META.map(function(m){
-    var names = dayNames[m.d] || [];
-    var gurl = 'https://www.google.com/maps/dir/' + names.map(function(nm){ return encodeURIComponent(nm); }).join('/');
+    var gurl = 'https://www.google.com/maps/dir/' + (dayNames[m.d]||[]).map(encodeURIComponent).join('/');
     return '<div class="row" data-day="'+m.d+'">'
       + '<span class="dot" style="background:'+m.color+'"></span>'
       + '<span class="lbl">'+esc(m.label)+'</span>'
-      + '<a class="gday" href="'+gurl+'" target="_blank" rel="noopener" title="이 날 전체를 구글맵 길찾기로 열기">🧭</a>'
+      + '<span class="zoom" title="이 날 방문지로 지도 확대">확대</span>'
+      + '<a class="gday" href="'+gurl+'" target="_blank" rel="noopener" title="이 날 전체를 구글맵 길찾기">🧭</a>'
       + '</div>';
   }).join('');
-  div.innerHTML = '<b>일자별 (색=켜기/끄기 · 🧭=구글맵)</b>'+rows
-    + '<div class="hint">🧭 = 그날 방문지 전체를 <b>구글맵 앱</b> 길찾기로 열기(다중 경유). 핀을 누르면 <b>구글맵·애플지도</b> 개별 열기 버튼이 떠요(애플은 경유지 미지원이라 지점별로).</div>';
-  L.DomEvent.disableClickPropagation(div);
+  div.innerHTML = '<div class="lhead"><span>일자별</span><span class="tg">접기 ▾</span></div>'
+    + '<div class="rows">'+rows+'</div>'
+    + '<div class="hint">색 점=표시 켜기/끄기 · <b>확대</b>=그 날로 줌 · 🧭=구글맵 길찾기. 핀→구글맵·애플지도 열기. 🏠 출발/도착 · 🛏 숙소.</div>';
+  L.DomEvent.disableClickPropagation(div); L.DomEvent.disableScrollPropagation(div);
+  var rowsBox = div.querySelector('.rows'), tg = div.querySelector('.lhead');
+  tg.addEventListener('click', function(){
+    rowsBox.classList.toggle('collapsed');
+    tg.querySelector('.tg').textContent = rowsBox.classList.contains('collapsed') ? '펼치기 ▸' : '접기 ▾';
+  });
   div.querySelectorAll('.row').forEach(function(row){
-    row.addEventListener('click', function(e){
-      if(e.target && e.target.classList.contains('gday')) return; /* 🧭 링크는 토글 아님 */
-      var d = +row.getAttribute('data-day');
+    var d = +row.getAttribute('data-day');
+    function toggle(){
       if(map.hasLayer(layers[d])){ map.removeLayer(layers[d]); row.classList.add('off'); }
       else { map.addLayer(layers[d]); row.classList.remove('off'); }
+    }
+    row.querySelector('.dot').addEventListener('click', toggle);
+    row.querySelector('.lbl').addEventListener('click', function(){
+      if(dayBounds[d].length) map.fitBounds(L.latLngBounds(dayBounds[d]), { padding:[60,60], maxZoom:13 });
+    });
+    row.querySelector('.zoom').addEventListener('click', function(e){
+      e.stopPropagation();
+      if(dayBounds[d].length) map.fitBounds(L.latLngBounds(dayBounds[d]), { padding:[60,60], maxZoom:13 });
     });
   });
   return div;
