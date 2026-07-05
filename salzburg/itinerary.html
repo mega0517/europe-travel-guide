@@ -75,7 +75,27 @@
     .sch-list{gap:6px;}
     .sch-add,.sch-edit-row{padding:8px 9px;}
   }
+  /* 추천 도보 코스 */
+  .walk{margin-bottom:24px;}
+  #walk-map-el{width:100%;height:380px;border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--line);z-index:0;}
+  .walk-num{background:var(--alp-blue);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;}
+  .walk-num.start{background:var(--rose);}
+  .walk-num.end{background:var(--glacier);}
+  .leaflet-popup-content{font-size:13px;font-weight:600;margin:9px 12px;}
+  .walk-steps{list-style:none;margin:14px 0 0;padding:0;counter-reset:w;}
+  .walk-steps li{position:relative;padding:10px 12px 10px 44px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;box-shadow:var(--shadow);}
+  .walk-steps li::before{counter-increment:w;content:counter(w);position:absolute;left:10px;top:11px;width:24px;height:24px;border-radius:50%;background:var(--alp-blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .walk-steps b{display:block;font-size:14.5px;}
+  .walk-steps .leg{color:var(--alp-blue-d);font-weight:700;font-size:12px;}
+  .walk-steps small{color:var(--ink-soft);font-size:12.5px;display:block;margin-top:2px;line-height:1.5;}
+  .walk-open{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:700;background:var(--alp-blue);color:#fff;border-radius:999px;padding:8px 15px;}
+  .walk-open:hover{background:var(--alp-blue-d);text-decoration:none;}
+  @media(max-width:640px){ #walk-map-el{height:280px;} .walk-steps li{padding:9px 11px 9px 40px;} }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
@@ -106,6 +126,25 @@
   <section class="block">
     <div class="wrap">
       <div class="note tip" style="margin-bottom:22px"><b>👫 여유로운 페이스</b> 1박 기착지라 도착 후 도보로 구시가만 알차게 도는 걸 추천해요. 시간은 대략의 기준이니 현장 상황에 맞게 <b style="display:inline">항목을 눌러</b> 자유롭게 조정하세요.</div>
+
+      <!-- 추천 도보 코스 -->
+      <div class="walk">
+        <div class="section-head" style="margin-bottom:12px">
+          <span class="kicker">Walking Route</span>
+          <h2 style="font-size:clamp(20px,3.4vw,28px)">🚶 추천 도보 코스</h2>
+          <p>레오나르도 호텔에서 출발해 <b>호엔잘츠부르크 성 → 마카르트 다리 → 미라벨 정원 → 아우구스티너 양조장</b> 순으로 구시가 핵심을 도는 산책 동선이에요. (총 약 3.2km · 관람 제외 도보 45분)</p>
+        </div>
+        <div id="walk-map-el"></div>
+        <ol class="walk-steps">
+          <li><b>🏨 레오나르도 호텔 (출발)</b><small>Leonardo Hotel Salzburg City Center · 구시가·중앙역 인근. 차는 호텔 주차장에 두고 도보로 출발.</small></li>
+          <li><b>🏰 호엔잘츠부르크 성</b> <span class="leg">· 약 700m / 도보 10분 + 푸니쿨라</span><small>페스퉁스가세 언덕 아래에서 <b>푸니쿨라</b>로 올라 도시·알프스 조망. 통합권에 왕복 포함.</small></li>
+          <li><b>🌉 마카르트 다리</b> <span class="leg">· 약 1.2km / 도보 16분</span><small>잘차흐 강을 건너 신시가로. '사랑의 자물쇠' 다리, 강변 야경 포인트.</small></li>
+          <li><b>🌷 미라벨 정원</b> <span class="leg">· 약 600m / 도보 8분</span><small>Mirabellgarten · '사운드 오브 뮤직' 도레미 송 촬영지. 무료, 야간에도 개방.</small></li>
+          <li><b>🍺 아우구스티너 브로이슈튀블 (수도원 양조장)</b> <span class="leg">· 약 700m / 도보 10분</span><small>Augustiner Bräustübl Mülln · 500년 전통 수도원 맥주홀에서 저녁 식사 겸 맥주로 마무리. 셀프로 맥주잔 받는 방식.</small></li>
+        </ol>
+        <a class="walk-open" target="_blank" rel="noopener"
+          href="https://www.google.com/maps/dir/Leonardo+Hotel+Salzburg+City+Center/Festung+Hohensalzburg/Makartsteg,+Salzburg/Mirabellgarten,+Salzburg/Augustiner+Br%C3%A4ust%C3%BCbl,+Salzburg/data=!4m2!4m1!3e2">🗺️ 구글 지도에서 도보 길찾기 열기 →</a>
+      </div>
 
       <!-- [B] BODY MARKUP — place where the schedule should render -->
       <div class="sch-wrap">
@@ -254,6 +293,37 @@ function schRender(){
   body.innerHTML=h;schProg();
 }
 document.addEventListener('DOMContentLoaded',function(){schLoad();schRender();schCloudInit();schSyncBadge();schCloudLoad();});
+</script>
+<script>
+/* 추천 도보 코스 지도(Leaflet) — 5지점 번호 마커 + 순서 경로선 */
+(function(){
+  var WALK = [
+    { n:'1', cls:'walk-num start', name:'🏨 레오나르도 호텔 (출발)', lat:47.7973385, lng:13.0378267 },
+    { n:'2', cls:'walk-num',       name:'🏰 호엔잘츠부르크 성', lat:47.79475, lng:13.04774 },
+    { n:'3', cls:'walk-num',       name:'🌉 마카르트 다리', lat:47.80175, lng:13.04378 },
+    { n:'4', cls:'walk-num',       name:'🌷 미라벨 정원', lat:47.80585, lng:13.04255 },
+    { n:'5', cls:'walk-num end',   name:'🍺 아우구스티너 양조장', lat:47.80853, lng:13.03348 }
+  ];
+  function init(){
+    var el = document.getElementById('walk-map-el');
+    if(!el || typeof L === 'undefined'){ return setTimeout(init, 300); }
+    var map = L.map(el, { scrollWheelZoom:false, zoomControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19, attribution:'© OpenStreetMap'
+    }).addTo(map);
+    var pts = WALK.map(function(w){ return [w.lat, w.lng]; });
+    /* 순서 경로선(실도로 근사 — 실제 도보 길찾기는 아래 버튼) */
+    L.polyline(pts, { color:'#245f45', weight:4, opacity:.75, dashArray:'7,7' }).addTo(map);
+    WALK.forEach(function(w){
+      L.marker([w.lat, w.lng], {
+        icon: L.divIcon({ className:'', html:'<div class="'+w.cls+'">'+w.n+'</div>', iconSize:[26,26], iconAnchor:[13,13] })
+      }).addTo(map).bindPopup(w.name);
+    });
+    map.fitBounds(L.latLngBounds(pts), { padding:[38,38] });
+  }
+  if(document.readyState === 'complete') init();
+  else window.addEventListener('load', init);
+})();
 </script>
 </body>
 </html>
