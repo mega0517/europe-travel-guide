@@ -3,14 +3,14 @@
 <Document>
   <name>유럽 자가용 여행 2026.7.6–7.13 · 전체 방문지</name>
   <description>부다페스트→잘츠부르크→인터라켄→밀라노→피란→부다페스트 · 42곳</description>
-  <Style id="day1"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/red-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day2"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/orange-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day3"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/yellow-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day4"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/green-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day5"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/ltblue-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day6"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/blue-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day7"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/purple-dot.png</href></Icon></IconStyle></Style>
-  <Style id="day8"><IconStyle><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/pink-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day1"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/red-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day2"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/orange-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day3"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/yellow-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day4"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/green-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day5"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/ltblue-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day6"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/blue-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day7"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/purple-dot.png</href></Icon></IconStyle></Style>
+  <Style id="day8"><IconStyle><scale>1.1</scale><Icon><href>https://maps.google.com/mapfiles/ms/icons/pink-dot.png</href></Icon></IconStyle></Style>
   <Folder>
     <name>DAY 1 · 7/6 부다페스트→잘츠부르크</name>
     <Placemark>
