@@ -1645,9 +1645,17 @@ function clIsEditingFocused(){
   return !!(a && a.tagName === 'INPUT' && a.type === 'text' && a.closest && a.closest('#cl-list'));
 }
 
+/* 보안: 항목 id는 onclick/data 속성에 삽입되므로 안전한 문자만 허용(클라우드 주입 → 저장형 XSS 차단) */
+function clSafeId(v){ return (typeof v==='string' && /^[A-Za-z0-9_-]{1,60}$/.test(v)) ? v : ('it_'+Math.random().toString(36).slice(2,12)); }
+function clSanitizeItems(arr){
+  if(!Array.isArray(arr)) return arr;
+  arr.forEach(c=>{ if(c && Array.isArray(c.items)) c.items.forEach(it=>{ if(it&&typeof it==='object') it.id = clSafeId(it.id); }); });
+  return arr;
+}
 /* 원격에서 받은 items 적용 (로컬 캐시·스토리지 갱신 + 조건부 리렌더) */
 function clApplyRemoteItems(val){
   if(!Array.isArray(val) || !val.length) return;
+  clSanitizeItems(val);
   const next = JSON.stringify(val);
   if(next === JSON.stringify(_clItems)) return; /* 동일 값이면 스킵 */
   _clItems = val;
@@ -1783,7 +1791,7 @@ function clLoadItems(){
     const raw = localStorage.getItem(CL_ITEMS_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
-      if(Array.isArray(parsed) && parsed.length){ _clItems = parsed; return _clItems; }
+      if(Array.isArray(parsed) && parsed.length){ _clItems = clSanitizeItems(parsed); return _clItems; }
     }
   } catch(e){}
   _clItems = clSeedToItems();
@@ -2525,9 +2533,21 @@ const SCH_SEED = [
 const SCH_ITEMS_KEY = 'sch-items-v2';
 const SCH_DONE_KEY  = 'sch-done-v2';
 let schDays, schDone, schEditId = null;
+/* 보안: id/key는 onclick·id 속성에 삽입되므로 안전한 문자만 허용(외부/클라우드 주입 → 저장형 XSS 차단) */
+function schSafeId(v, p){ return (typeof v==='string' && /^[A-Za-z0-9_-]{1,40}$/.test(v)) ? v : (p+Math.random().toString(36).slice(2,10)); }
+function schSanitize(){
+  if(!Array.isArray(schDays)) return;
+  schDays.forEach(d=>{
+    if(d && typeof d==='object'){
+      d.key = schSafeId(d.key,'d');
+      if(Array.isArray(d.items)) d.items.forEach(it=>{ if(it&&typeof it==='object') it.id = schSafeId(it.id,'u'); });
+    }
+  });
+}
 function schLoad(){
   try { schDays = JSON.parse(localStorage.getItem(SCH_ITEMS_KEY)); } catch(e){ schDays = null; }
   if(!Array.isArray(schDays) || !schDays.length) schDays = JSON.parse(JSON.stringify(SCH_SEED));
+  schSanitize();
   try { schDone = JSON.parse(localStorage.getItem(SCH_DONE_KEY) || 'null'); } catch(e){ schDone = null; }
   if(!schDone || typeof schDone!=='object') schDone = {};
 }
@@ -2583,7 +2603,7 @@ function schCloudLoad(){
   try{
     schCloud.sb.from('shared_state').select('items,checks').eq('id', SCH_SYNC_ID).maybeSingle().then(res=>{
       const data = res && res.data; if(!data || schCloud.dirty) return;
-      if(Array.isArray(data.items) && data.items.length){ schDays = data.items; try{ localStorage.setItem(SCH_ITEMS_KEY, JSON.stringify(schDays)); }catch(e){} }
+      if(Array.isArray(data.items) && data.items.length){ schDays = data.items; schSanitize(); try{ localStorage.setItem(SCH_ITEMS_KEY, JSON.stringify(schDays)); }catch(e){} }
       if(data.checks && typeof data.checks==='object'){ schDone = data.checks; try{ localStorage.setItem(SCH_DONE_KEY, JSON.stringify(schDone)); }catch(e){} }
       schCloud.dirty=false; schRender(); schSaveBtn();
     }, ()=>{});
