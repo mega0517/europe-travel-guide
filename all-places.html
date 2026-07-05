@@ -82,20 +82,20 @@
     <a class="back" href="index.html">← 유럽 가이드</a>
     <h1>🗺️ 전체 여정 지도</h1>
     <button type="button" class="hbtn" id="listToggle" style="margin-left:auto">📋 리스트</button>
-    <a class="kml" href="europe-trip-map.kml" download>⬇ KML</a>
+    <a class="kml" id="kmlBtn" href="europe-trip-map.kml" download target="_blank" rel="noopener">⬇ KML</a>
   </div>
   <div class="stats">
     <span>📅 7박 8일 (7/6–7/13)</span>
     <span>🌍 5개국</span>
     <span>🚗 약 2,600km</span>
-    <span>📍 42곳</span>
+    <span id="placeCount">📍 41곳</span>
     <span id="routeStat">🛣️ 도로 경로 불러오는 중…</span>
   </div>
 </header>
 <div class="maparea">
   <div id="map"></div>
   <aside id="listPanel" aria-label="방문지 리스트">
-    <div class="lp-head"><b>📋 방문지 리스트</b><span class="cnt">42곳 · 8일</span><button type="button" class="lp-close" id="listClose" title="닫기">×</button></div>
+    <div class="lp-head"><b>📋 방문지 리스트</b><span class="cnt" id="lpCount">41곳 · 8일</span><button type="button" class="lp-close" id="listClose" title="닫기">×</button></div>
     <div class="lp-body" id="listBody"></div>
   </aside>
 </div>
@@ -117,8 +117,7 @@ var DAY_META = [
 /* 42개 방문지 — [일자, 표시명, 설명, 위도, 경도, 구글검색명, 숙소/거점아이콘(없으면 0)] */
 var PLACES = [
  [1,'부다페스트 (출발)','집에서 07:00 출발',47.4979,19.0402,'Budapest','🏠'],
- [1,'할슈타트','13:30~15:30 관광 · 주차 P1/P2(만석 시 P3)',47.5622,13.6493,'Hallstatt',0],
- [1,'할슈타트 P1 주차장','마을 입구 주차',47.5585,13.6447,'Parkplatz Hallstatt P1',0],
+ [1,'할슈타트','13:30~15:30 관광 · 주차 P1/P2(만석 시 P3, 마을 입구)',47.5622,13.6493,'Hallstatt',0],
  [1,'볼프강 호수 (St. Wolfgang)','16:10~17:00 호숫가 휴식·간식',47.7378,13.4489,'Sankt Wolfgang im Salzkammergut',0],
  [1,'레오나르도 호텔 (숙소)','Leonardo Hotel Salzburg City Center · 7/6 1박',47.7973385,13.0378267,'Leonardo Hotel Salzburg City Center','🛏'],
  [1,'호엔잘츠부르크 성','푸니쿨라 조망',47.79475,13.04774,'Festung Hohensalzburg',0],
@@ -296,6 +295,9 @@ legend.addTo(map);
     });
   });
   body.innerHTML=html;
+  /* 동적 개수 반영 */
+  var pc=document.getElementById('placeCount'); if(pc) pc.textContent='📍 '+PLACES.length+'곳';
+  var lpc=document.getElementById('lpCount'); if(lpc) lpc.textContent=PLACES.length+'곳 · '+DAY_META.length+'일';
 
   function openList(){ panel.classList.add('open'); }
   function closeList(){ panel.classList.remove('open'); }
@@ -315,6 +317,19 @@ legend.addTo(map);
     mk.openPopup();
     if(window.innerWidth<=560) closeList();
   });
+
+  /* KML: 페이지 이동 없이 파일만 저장(되돌아올 수 없는 문제 방지) */
+  var kbtn=document.getElementById('kmlBtn');
+  if(kbtn && 'fetch' in window){
+    kbtn.addEventListener('click', function(e){
+      e.preventDefault();
+      fetch(kbtn.href).then(function(r){ if(!r.ok) throw 0; return r.blob(); }).then(function(b){
+        var u=URL.createObjectURL(b), a=document.createElement('a');
+        a.href=u; a.download='europe-trip-map.kml'; document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 1500);
+      }).catch(function(){ window.open(kbtn.href,'_blank','noopener'); });
+    });
+  }
 })();
 </script>
 </body>
