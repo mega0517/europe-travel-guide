@@ -6,6 +6,16 @@
 <title>2박3일 상세 일정 · 밀라노 시티 가이드</title>
 <meta name="description" content="융프라우에서 알프스를 넘어 도착–밀라노 2박3일–피란으로 출발, 날짜별 동선과 플랜B">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  .milan-map{height:400px;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);margin:6px 0;}
+  .mi-num{width:27px;height:27px;border-radius:50%;background:var(--alp-blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);}
+  .mi-num.star{background:#c0392b;} .mi-num.night{background:#7c3aed;}
+  .milan-map .leaflet-popup-content{font-size:13px;font-weight:600;margin:9px 12px;}
+  .map-dir{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#fff;background:var(--alp-blue);border-radius:999px;padding:7px 15px;text-decoration:none;box-shadow:var(--shadow);}
+  .map-dir:hover{background:var(--alp-blue-d);}
+</style>
 <!-- [A] CSS BLOCK — place inside <head> after the stylesheet link -->
 <style id="SCH_CSS">
   .sch-wrap{max-width:780px;margin:0 auto;}
@@ -114,6 +124,18 @@
         <b>👫 부부 두 쌍을 위한 페이스 가이드</b>
         무리한 강행군보다 <b style="font-weight:400;display:inline">하루 2~3개 핵심 명소 + 충분한 휴식</b>이 원칙이에요. 한낮 더위가 심한 7월엔 정오~오후를 실내·카페·아페리티보로 쉬어 가고, 도심 이동은 <b style="font-weight:400;display:inline">지하철·트램</b>을 적극 활용해 다리 부담을 줄이세요. 두오모 옥상은 엘리베이터, 명소 간 거리는 대부분 도보 15~25분이라 천천히 다녀도 충분합니다.
       </div>
+
+      <!-- DAY MAP (7/11 city sights) -->
+      <div class="section-head" style="margin-top:8px">
+        <span class="kicker">Day Map · 7/11 (토)</span>
+        <h2>🗺️ 밀라노 시내 관광 지도</h2>
+        <p>토요일 자유여행 동선 — 오전 야외(스포르체스코·셈피오네 공원) → 브레라·몬테나폴레오네 쇼핑 → ⭐ 13:30 두오모(박물관·테라스) → 갤러리아·스칼라 → 저녁 나빌리 아페리티보. 핀을 누르면 명소명이 뜨고, 아래 버튼으로 구글맵에서 순서대로 길찾기가 열려요.</p>
+      </div>
+      <div id="milan-map" class="milan-map"></div>
+      <p style="text-align:center;margin:10px 0 4px">
+        <a class="map-dir" target="_blank" rel="noopener"
+           href="https://www.google.com/maps/dir/Castello+Sforzesco+Milano/Parco+Sempione+Milano/Pinacoteca+di+Brera/Via+Montenapoleone+Milano/Duomo+di+Milano/Galleria+Vittorio+Emanuele+II/Teatro+alla+Scala/Navigli+Milano">🧭 구글맵으로 순서대로 열기</a>
+      </p>
 
       <!-- [B] BODY MARKUP — place where the schedule should render -->
       <div class="sch-wrap">
@@ -275,6 +297,40 @@ function schRender(){
   body.innerHTML=h;schProg();
 }
 document.addEventListener('DOMContentLoaded',function(){schLoad();schRender();schCloudInit();schSyncBadge();schCloudLoad();});
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+  var PTS = [
+    { n:'1', cls:'mi-num',      name:'🏰 스포르체스코 성 (09:30 시작)', lat:45.4706, lng:9.1795 },
+    { n:'2', cls:'mi-num',      name:'🌳 셈피오네 공원', lat:45.4735, lng:9.1755 },
+    { n:'3', cls:'mi-num',      name:'🖼️ 브레라 미술관·지구', lat:45.4719, lng:9.1881 },
+    { n:'4', cls:'mi-num',      name:'🛍️ 몬테나폴레오네 (쇼핑)', lat:45.4685, lng:9.1946 },
+    { n:'5', cls:'mi-num star', name:'⛪ 두오모 대성당+박물관+테라스 (⭐13:30 예약)', lat:45.4641, lng:9.1919 },
+    { n:'6', cls:'mi-num',      name:'🏛️ 갤러리아 비토리오 에마누엘레 2세', lat:45.4659, lng:9.1900 },
+    { n:'7', cls:'mi-num',      name:'🎭 스칼라 극장 광장', lat:45.4675, lng:9.1895 },
+    { n:'8', cls:'mi-num night',name:'🍹 나빌리 운하 (18:30 아페리티보)', lat:45.4515, lng:9.1745 }
+  ];
+  function init(){
+    var el = document.getElementById('milan-map');
+    if(!el || typeof L === 'undefined'){ return setTimeout(init, 300); }
+    var map = L.map(el, { scrollWheelZoom:false, zoomControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19, attribution:'© OpenStreetMap'
+    }).addTo(map);
+    var pts = PTS.map(function(p){ return [p.lat, p.lng]; });
+    L.polyline(pts, { color:'#9c3848', weight:4, opacity:.65, dashArray:'7,8' }).addTo(map);
+    PTS.forEach(function(p){
+      L.marker([p.lat, p.lng], {
+        icon: L.divIcon({ className:'', html:'<div class="'+p.cls+'">'+p.n+'</div>', iconSize:[27,27], iconAnchor:[13,13] })
+      }).addTo(map).bindPopup(p.name);
+    });
+    map.fitBounds(L.latLngBounds(pts), { padding:[40,40] });
+  }
+  if(document.readyState === 'complete') init();
+  else window.addEventListener('load', init);
+})();
 </script>
 </body>
 </html>
