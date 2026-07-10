@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7/10 루체른 4시간 관광 완전정복 · 융프라우 자동차 여행</title>
+<meta name="description" content="7월 10일 라우터브룬넨→밀라노 경유길에 들르는 루체른을 약 4시간에 알차게 도는 추천 도보 코스·명소·주차·점심·쇼핑 가이드">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  .route-map{height:400px;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);margin:4px 0 6px;}
+  .lz-num{width:27px;height:27px;border-radius:50%;background:var(--alp-blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);}
+  .lz-num.start{background:#16a34a;} .lz-num.lunch{background:#d97706;} .lz-num.star{background:#c0392b;}
+  .leaflet-popup-content{font-size:13px;font-weight:600;margin:9px 12px;}
+  .tx{width:100%;border-collapse:collapse;}
+  .tx th,.tx td{border:1px solid var(--line);padding:9px 11px;font-size:13.5px;text-align:left;vertical-align:top;}
+  .tx th{background:var(--snow);white-space:nowrap;}
+  .tx .k{white-space:nowrap;font-weight:700;color:var(--alp-blue-d);width:96px;}
+  .step-badge{display:inline-block;background:var(--alp-blue);color:#fff;border-radius:999px;font-weight:800;font-size:12px;padding:2px 9px;margin-right:7px;}
+  .ok{color:var(--pine);font-weight:800;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">🏔️ 융프라우 <span>로드트립</span></a>
+    <button class="nav-toggle" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-back">← 유럽 가이드</a>
+      <a href="index.html">홈</a>
+      <a href="itinerary.html">📅 상세 일정</a>
+      <a href="matterhorn.html">⛰️ 마터호른 교통</a>
+      <a href="luzern.html" class="active">🦢 루체른 관광</a>
+      <a href="attractions.html">코스·볼거리</a>
+      <a href="driving.html">자동차·주차</a>
+      <a href="food-tips.html">맛집·준비물</a>
+      <a href="official-guide.html">📌 공식 요약</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">홈</a> › 🦢 루체른 관광</p>
+    <h1>🦢 7/10 루체른 4시간 관광 완전정복</h1>
+    <p>라우터브룬넨에서 밀라노로 가는 길에 들르는 <b>루체른(Luzern)</b>. 약 <b>4시간(10:30~14:30)</b> 경유지만, 카펠교·빈사의 사자상·구시가·무제크 성벽이 <b>도보 15분 반경</b>에 모여 있어 알차게 돌 수 있어요. 아래는 주차→핵심 도보 코스→점심→출발까지의 추천 동선입니다.</p>
+  </div>
+</header>
+
+<main>
+  <!-- 개요 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Overview</span>
+        <h2>🗺️ 왜 4시간이면 충분한가</h2>
+        <p>루체른의 하이라이트는 <b>구시가·강변(로이스강)</b>에 밀집해 있습니다. 차는 구시가 지하주차장에 두고 도보로만 돌면 됩니다. 필라투스·리기 산행은 반나절 이상 필요해 이번 경유에는 넣지 않았어요(시간이 남거나 별도로 오는 날 추천).</p>
+      </div>
+      <div class="note warn"><b>⚠️ 금요일 오후 고타드 정체</b> 7/10은 금요일 — <b>고타드 터널 남행이 상습 정체(+1~2시간)</b>입니다. 되도록 <b>13:30 전에는 루체른을 출발</b>하고, 정체 시 고타드 <b>구도로(패스)</b>로 우회하세요. 이탈리아보다 스위스 주유가 싸니 <b>출발 전 급유</b> 권장.</div>
+    </div>
+  </section>
+
+  <!-- 추천 도보 코스 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Walking Route</span>
+        <h2>🥾 추천 도보 코스 (약 2.5km · 실보행 40분)</h2>
+        <p>주차장 → 카펠교 → 구시가 → 무제크 성벽 → 빈사의 사자상 → 쇼핑·점심 → 출발. 명소 사이는 대부분 도보 5~10분입니다.</p>
+      </div>
+      <div id="route-map" class="route-map"></div>
+      <div class="table-wrap">
+        <table class="tx">
+          <tr><th>시간</th><th>지점</th><th>메모</th></tr>
+          <tr><td>10:30</td><td><span class="step-badge">1</span>Parkhaus Altstadt 주차</td><td>구시가 지하주차장. 여기 세우고 전부 도보</td></tr>
+          <tr><td>10:40</td><td><span class="step-badge">2</span>카펠교 &amp; 바서투름</td><td>루체른의 상징. 다리 위 회화·강변 백조 사진</td></tr>
+          <tr><td>11:00</td><td><span class="step-badge">3</span>구시가 (바인마르크트·콘마르크트)</td><td>프레스코 벽화 골목·광장, 예수회 교회</td></tr>
+          <tr><td>11:30</td><td><span class="step-badge">4</span>무제크 성벽 (선택)</td><td>중세 성벽·탑에 올라 구시가 조망(무료)</td></tr>
+          <tr><td>12:00</td><td><span class="step-badge">5</span>빈사의 사자상</td><td>도보 8분. 빙하공원 인접(선택)</td></tr>
+          <tr><td>12:30</td><td><span class="step-badge">6</span>점심 (향토 요리)</td><td>Wirtshaus Galliker · Old Swiss House 등</td></tr>
+          <tr><td>13:30</td><td><span class="step-badge">7</span>슈바넨광장 쇼핑·초콜릿 → 출발</td><td>시계·기념품·Bachmann. 정체 대비 13:30 출발</td></tr>
+        </table>
+      </div>
+      <div class="note tip"><b>💡 동선 팁</b> 주차장·카펠교·구시가·쇼핑가는 로이스강 <b>양안 5분 거리</b>에 붙어 있고, 빈사의 사자상만 북동쪽으로 도보 8~10분 떨어져 있어요. 사자상까지 갔다가 슈바넨광장으로 내려오며 쇼핑·점심을 붙이면 동선이 깔끔합니다.</div>
+    </div>
+  </section>
+
+  <!-- 핵심 명소 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Highlights</span>
+        <h2>⭐ 핵심 명소</h2>
+      </div>
+      <div class="grid cols-2">
+        <div class="card"><h3>🌉 카펠교 (Kapellbrücke)</h3><p>1333년 지어진 <b>유럽에서 가장 오래된 지붕 있는 목조 다리</b>. 다리 안 삼각 패널에 옛 회화가 걸려 있고, 옆의 팔각 <b>바서투름(물탑)</b>과 함께 루체른의 상징. <b>무료·상시</b>. 아침 햇살·저녁 조명이 예뻐요.</p></div>
+        <div class="card"><h3>🦁 빈사의 사자상 (Löwendenkmal)</h3><p>바위에 새긴 <b>죽어가는 사자</b> 조각 — 프랑스 혁명 때 전사한 스위스 용병을 기림. 마크 트웨인이 "세상에서 가장 슬프고 감동적인 돌"이라 표현. <b>무료·야외</b>, 도보 8분.</p></div>
+        <div class="card"><h3>🏯 무제크 성벽 (Museggmauer)</h3><p>구시가를 감싼 <b>중세 성벽과 9개 탑</b>. 일부 탑은 <b>올라가 조망</b> 가능(무료). 대략 <b>4~11월 개방</b>(탑별 상이). 츠티(Zyt) 탑의 옛 시계가 명물.</p></div>
+        <div class="card"><h3>🏘️ 구시가 (Altstadt)</h3><p><b>바인마르크트·콘마르크트·힐셔가세</b> 등 프레스코 벽화로 뒤덮인 골목·광장. 강변 <b>예수회 교회(Jesuitenkirche)</b> 바로크 내부도 잠깐 들러볼 만해요.</p></div>
+        <div class="card"><h3>🌊 슈프로이어교 &amp; 로이스강</h3><p>카펠교 상류의 또 다른 지붕 목조 다리 <b>슈프로이어교</b>(다리 안 '죽음의 무도' 연작). 강변 <b>라트하우스 슈테크</b>에서 백조·물살 사진이 좋아요.</p></div>
+        <div class="card"><h3>⛵ 루체른 호수 유람선 (선택)</h3><p>시간이 남으면 <b>피어발트슈테터 호수</b> 짧은 유람(1시간권). 역 앞 선착장 출발. 스위스 트래블 패스 포함. 4시간 일정엔 빠듯하니 <b>여유 있을 때만</b>.</p></div>
+      </div>
+      <div class="note tip"><b>🏔️ 필라투스·리기는 별도 반나절</b> 필라투스(황금 라운드트립)·리기 산행은 <b>왕복 3~5시간</b>이라 이번 경유엔 부적합. 산을 꼭 원하면 인터라켄 3박 중 하루를 루체른+필라투스로 잡는 편이 낫습니다.</div>
+    </div>
+  </section>
+
+  <!-- 주차 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Parking</span>
+        <h2>🅿️ 주차</h2>
+        <p>구시가는 차량 진입이 제한적이라 <b>지하주차장</b>에 세우고 도보로 도는 게 정석입니다.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="tx">
+          <tr><td class="k">추천</td><td><b>Parkhaus Altstadt</b> — 카펠교·구시가 도보 2~3분, 이번 코스 시작점</td></tr>
+          <tr><td class="k">대안</td><td>Parkhaus Kesselturm · Parkhaus Bahnhofplatz(역) · P1 National — 모두 구시가/호수 접근 양호</td></tr>
+          <tr><td class="k">요금</td><td>시간당 대략 CHF 2~2.5, 4시간 약 CHF 8~11(주차장별 상이, 현장 카드 결제)</td></tr>
+          <tr><td class="k">팁</td><td>층·구역 번호를 사진으로. 주차장 이름을 내비에 정확히 입력(구시가 진입로 협소).</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 점심 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Lunch</span>
+        <h2>🍽️ 점심 · 먹거리</h2>
+        <p>루체른 향토 요리(뢰스티·치즈 퐁뒤·비너슈니첼)와 명물 초콜릿. 성수기 인기집은 <b>예약</b>이 안전합니다.</p>
+      </div>
+      <div class="grid cols-2">
+        <div class="card"><h3>Wirtshaus Galliker</h3><p>100년 전통 <b>루체른 향토 요리</b>. 현지인에게 사랑받는 클래식. €€</p></div>
+        <div class="card"><h3>Restaurant Old Swiss House</h3><p>테이블에서 굽는 <b>비너슈니첼</b>로 유명한 명소 식당. €€€ · 예약 권장</p></div>
+        <div class="card"><h3>Restaurant Schiff</h3><p>강변 테라스의 <b>치즈 퐁뒤·라클렛</b>. 전망 좋은 점심. €€</p></div>
+        <div class="card"><h3>Bachmann Confiserie</h3><p>루체른 명물 <b>초콜릿·페이스트리</b> — 간단 점심·간식·기념품 겸용. €</p></div>
+      </div>
+      <div class="note tip"><b>🍫 테이크아웃 아이디어</b> 오후 이동이 길어 <b>Bachmann·베이커리</b>에서 샌드위치·초콜릿을 사서 차에서 먹고, 절약한 시간에 명소를 더 보는 것도 방법. 고타드 정체 대비 <b>물·간식</b> 챙기기.</div>
+    </div>
+  </section>
+
+  <!-- 쇼핑 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Shopping</span>
+        <h2>🛍️ 쇼핑 (슈바넨광장 일대)</h2>
+      </div>
+      <div class="grid cols-3">
+        <div class="card"><h3>⌚ 시계</h3><p><b>Bucherer·Gübelin·Embassy</b> 등 대형 시계점이 슈바넨광장에 밀집. 관세 환급(Global Blue) 서류 챙기기.</p></div>
+        <div class="card"><h3>🔪 기념품</h3><p><b>빅토리녹스</b> 스위스 아미 나이프, 카우벨, 자수 손수건. 카펠교 주변 기념품점.</p></div>
+        <div class="card"><h3>🧀 식료품</h3><p>스위스 <b>초콜릿·치즈·라클렛</b>. 냉장 필요 품목은 폭염 이동을 고려해 아이스백 활용.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 실전 팁 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Tips</span>
+        <h2>✅ 실전 팁</h2>
+      </div>
+      <ul class="check">
+        <li><b>13:30 전 출발</b> — 금요일 고타드 남행 정체 대비. 늦으면 구도로(패스) 우회.</li>
+        <li><b>도보 위주</b> — 명소가 다 붙어 있어 대중교통 불필요. 편한 신발.</li>
+        <li><b>무제크 성벽 개방 시간</b> 확인 — 탑은 대략 4~11월·오전~저녁, 탑별로 다름.</li>
+        <li><b>현금 소량 + 카드</b> — 주차·화장실(유료)·소액 결제용. 통화는 CHF.</li>
+        <li><b>출발 전 스위스에서 급유</b> — 이탈리아 연료가 더 비쌈.</li>
+        <li><b>백조·물살 사진</b>은 카펠교·라트하우스 슈테크 강변이 명당.</li>
+      </ul>
+      <div class="note tip"><b>🔁 대안</b> 인터라켄 3박 중 <a href="itinerary.html">7/8·7/9</a>에 루체른을 미리 다녀왔다면, 7/10엔 루체른을 생략하고 <b>바로 밀라노로</b> 이동해 고타드 정체를 피하는 것도 좋은 선택입니다.</div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><strong>융프라우 로드트립 가이드</strong><br>2026.7.7–7.10 · 7/10 루체른 경유</div>
+    <div>출처: luzern.com · myswissalps.com · 현지 관광정보</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+  var PTS = [
+    { n:'1', cls:'lz-num start', name:'🅿️ Parkhaus Altstadt (주차·출발)', lat:47.0533, lng:8.3037 },
+    { n:'2', cls:'lz-num',       name:'🌉 카펠교 & 바서투름', lat:47.05166, lng:8.30751 },
+    { n:'3', cls:'lz-num',       name:'🏘️ 구시가 (바인마르크트)', lat:47.0524, lng:8.3059 },
+    { n:'4', cls:'lz-num',       name:'🏯 무제크 성벽', lat:47.0560, lng:8.3040 },
+    { n:'5', cls:'lz-num star',  name:'🦁 빈사의 사자상', lat:47.0583, lng:8.3110 },
+    { n:'6', cls:'lz-num lunch', name:'🍽️ 점심 (Galliker 인근)', lat:47.0505, lng:8.3020 },
+    { n:'7', cls:'lz-num',       name:'🛍️ 슈바넨광장 (쇼핑·출발)', lat:47.0527, lng:8.3090 }
+  ];
+  function init(){
+    var el = document.getElementById('route-map');
+    if(!el || typeof L === 'undefined'){ return setTimeout(init, 300); }
+    var map = L.map(el, { scrollWheelZoom:false, zoomControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19, attribution:'© OpenStreetMap'
+    }).addTo(map);
+    var pts = PTS.map(function(p){ return [p.lat, p.lng]; });
+    L.polyline(pts, { color:'#245f45', weight:4, opacity:.7, dashArray:'7,8' }).addTo(map);
+    PTS.forEach(function(p){
+      L.marker([p.lat, p.lng], {
+        icon: L.divIcon({ className:'', html:'<div class="'+p.cls+'">'+p.n+'</div>', iconSize:[27,27], iconAnchor:[13,13] })
+      }).addTo(map).bindPopup(p.name);
+    });
+    map.fitBounds(L.latLngBounds(pts), { padding:[40,40] });
+  }
+  if(document.readyState === 'complete') init();
+  else window.addEventListener('load', init);
+})();
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>
