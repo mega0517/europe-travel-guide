@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7/11 밀라노 하루 가이드 (현위치 출발) · 밀라노 시티 가이드</title>
+<meta name="description" content="숙소(현재 위치)에서 오전 10시 출발, 13:30 두오모 예약 일정 소화, 저녁 예약까지 — 지도·팝업·길찾기가 있는 인터랙티브 하루 가이드">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  .dg-map{height:420px;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);margin:6px 0;}
+  .dg-num{width:28px;height:28px;border-radius:50%;background:var(--alp-blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);}
+  .dg-num.star{background:#c0392b;} .dg-num.night{background:#7c3aed;}
+  .dg-home{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#16a34a;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;}
+  .dg-home span{transform:rotate(45deg);font-size:15px;}
+  .dg-map .leaflet-popup-content{font-size:13px;font-weight:600;margin:9px 12px;}
+  .locbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:4px 0 2px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 16px;text-decoration:none;cursor:pointer;border:none;}
+  .btn.pri{color:#fff;background:var(--alp-blue);box-shadow:var(--shadow);} .btn.pri:hover{background:var(--alp-blue-d);}
+  .btn.gho{color:var(--alp-blue-d);background:var(--snow);border:1px solid var(--line);}
+  .locstat{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+  .tl{list-style:none;position:relative;margin:6px 0 0;padding-left:8px;}
+  .tl li{position:relative;padding:0 0 16px 30px;border-left:2px solid var(--line);}
+  .tl li:last-child{border-left:2px solid transparent;}
+  .tl li::before{content:"";position:absolute;left:-8px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--alp-blue);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);}
+  .tl li.hot::before{background:#c0392b;} .tl li.eve::before{background:#7c3aed;}
+  .tl .tm{font-weight:800;color:var(--alp-blue-d);font-size:13.5px;}
+  .tl .ttl{font-weight:700;font-size:14.5px;margin:1px 0 2px;}
+  .tl .ds{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  .tl li.hot .ttl,.tl li.eve .ttl{color:#7a2a38;}
+  .rez{border:2px solid var(--rose);background:#fdf1f4;border-radius:var(--radius);padding:14px 16px;margin:6px 0;}
+  .rez h3{color:var(--rose);font-size:16px;margin-bottom:4px;}
+  .rcard a{font-weight:700;color:var(--alp-blue-d);text-decoration:none;font-size:12.5px;border:1px solid var(--line);background:var(--snow);border-radius:8px;padding:3px 9px;display:inline-block;margin:4px 4px 0 0;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">🏛️ 밀라노 <span>시티 가이드</span></a>
+    <button class="nav-toggle" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-back">← 유럽 가이드</a>
+      <a href="index.html">홈</a>
+      <a href="itinerary.html">📅 상세 일정</a>
+      <a href="day-guide.html" class="active">🧭 하루 가이드</a>
+      <a href="attractions.html">볼거리·명소</a>
+      <a href="driving.html">🚗 운전·ZTL·주차</a>
+      <a href="food.html">맛집·쇼핑</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">홈</a> › 🧭 하루 가이드</p>
+    <h1>🧭 7/11 밀라노 하루 가이드</h1>
+    <p><b>숙소(현재 위치)에서 오전 10시 출발</b> → 낮 <b>13:30 두오모(박물관·옥상 테라스) 예약</b> 일정 소화 → <b>저녁 예약</b>까지. 아래 "내 위치에서 시작"을 누르면 현재 위치가 지도에 뜨고, 첫 목적지까지 길찾기가 열립니다.</p>
+  </div>
+</header>
+
+<main>
+  <!-- 현재 위치 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Start</span>
+        <h2>📍 지금 내 위치(숙소)에서 시작</h2>
+        <p>숙소: <b>Home in Milan · via Parravicini 3</b> (중앙역 인근). 위치 권한을 허용하면 실제 현재 위치를 사용합니다.</p>
+      </div>
+      <div class="locbar">
+        <button class="btn pri" id="locBtn">📍 내 위치에서 시작</button>
+        <a class="btn gho" id="dirBtn" target="_blank" rel="noopener"
+           href="https://www.google.com/maps/dir/?api=1&origin=Via+Parravicini+3+Milano&destination=Castello+Sforzesco+Milano&travelmode=transit">🧭 첫 목적지 길찾기(대중교통)</a>
+        <span class="locstat" id="locStat">위치 권한을 허용하면 현재 위치가 지도에 표시됩니다.</span>
+      </div>
+      <div id="dg-map" class="dg-map"></div>
+      <p style="text-align:center;margin:8px 0 2px">
+        <a class="btn gho" target="_blank" rel="noopener"
+           href="https://www.google.com/maps/dir/Castello+Sforzesco+Milano/Duomo+di+Milano/Galleria+Vittorio+Emanuele+II/Navigli+Milano">🗺️ 하루 전체 순서로 구글맵 열기</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- 타임라인 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Timeline · 10:00 → 저녁</span>
+        <h2>🕙 하루 흐름</h2>
+        <p>오전은 시원할 때 야외, 낮 13:30은 예약한 두오모, 저녁은 예약한 식당으로 마무리합니다.</p>
+      </div>
+      <ul class="tl">
+        <li><div class="tm">10:00</div><div class="ttl">🏠 숙소 출발</div><div class="ds">현재 위치에서 지하철·트램으로 카이롤리(스포르체스코)·두오모 방면 이동. 물·선크림·모자·예약 QR·여권 챙기기.</div></li>
+        <li><div class="tm">10:30~12:00</div><div class="ttl">🏰 스포르체스코 성 &amp; 셈피오네 공원</div><div class="ds">오전 시원할 때 야외. 성 안뜰·미술관, 공원 그늘 산책. 여유 있으면 브레라 골목까지.</div></li>
+        <li><div class="tm">12:00~13:15</div><div class="ttl">🍽️ 두오모 방면 이동 + 이른 점심</div><div class="ds">예약 전에 두오모 근처 <b>에어컨 식당</b>에서 가볍게 — Luini 판제로티(간편)·Trattoria Milanese(정통)·Spontini(피자).</div></li>
+        <li class="hot"><div class="tm">13:30~15:30</div><div class="ttl">⭐ 두오모 대성당 + 박물관 + 옥상 테라스 【예약】</div><div class="ds">예약 시간 엄수. <b>예약 QR·여권</b>, 어깨·무릎 가리는 복장, 테라스 뙤약볕 대비 <b>선크림·모자·물</b>. 통합권으로 대성당→박물관→옥상 순.</div></li>
+        <li><div class="tm">15:30~16:30</div><div class="ttl">🏛️ 갤러리아 · 스칼라 광장</div><div class="ds">두오모 옆 실내 아케이드(그늘)·황소 모자이크 행운 의식, 스칼라 극장 광장.</div></li>
+        <li><div class="tm">16:30~17:30</div><div class="ttl">🍦 젤라토 · 카페 휴식</div><div class="ds">더위 식히고 자유 산책·쇼핑. 관심 있으면 브레라 미술관.</div></li>
+        <li><div class="tm">17:30~18:45</div><div class="ttl">🚇 숙소 재정비 또는 저녁 장소로 이동</div><div class="ds">잠깐 숙소에서 쉬거나, 바로 예약한 식당/나빌리로. 러시아워라 이동 시간 여유.</div></li>
+        <li class="eve"><div class="tm">19:00~21:00</div><div class="ttl">🍽️ 저녁 【예약 필수】</div><div class="ds">토요일 저녁은 인기 식당이 빨리 차요. 아래에서 골라 <b>미리 예약</b>하세요. 나빌리 아페리티보는 18시대 도착이 자리 잡기 유리.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 저녁 예약 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Dinner Reservation</span>
+        <h2>🍽️ 저녁 예약하기</h2>
+        <p>토요일 저녁 인기 식당은 <b>당일엔 자리가 없을 수</b> 있어요. <b>TheFork 앱</b>이나 구글에서 원하는 시간(예: 19:30, 4인)으로 예약하세요.</p>
+      </div>
+      <div class="rez">
+        <h3>⏰ 저녁 예약을 아직 안 했다면 지금!</h3>
+        <div class="ds" style="font-size:13.5px;color:var(--ink)">원하는 시간·인원(4명)으로 아래 후보 중 한 곳을 예약 → 예약 확인 문자를 저장해 두세요.</div>
+      </div>
+      <div class="grid cols-2">
+        <div class="card rcard"><h3>Ratanà <span style="color:var(--ink-soft);font-weight:600;font-size:12px">· €€ 모던 밀라노</span></h3><p>전통 밀라노 요리를 모던하게. <b>중앙역·포르타누오바 근처라 숙소에서 가까움</b> — 저녁 후 귀가 편함.</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Ratan%C3%A0%20Milano" target="_blank" rel="noopener">🔎 구글맵</a>
+          <a href="https://www.thefork.it/restaurant/ratana" target="_blank" rel="noopener">🍴 TheFork</a></div>
+        <div class="card rcard"><h3>Navigli 아페리티보 <span style="color:var(--ink-soft);font-weight:600;font-size:12px">· €€ 분위기</span></h3><p>운하변에서 즐기는 토요 저녁 아페리티보(음료+안주 뷔페). 활기찬 분위기. 인기 바는 예약 또는 이른 도착.</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Navigli%20aperitivo%20Milano" target="_blank" rel="noopener">🔎 구글맵</a></div>
+        <div class="card rcard"><h3>Trattoria del Nuovo Macello <span style="color:var(--ink-soft);font-weight:600;font-size:12px">· €€ 미슐랭 비브구르망</span></h3><p>현지인이 사랑하는 정통 밀라노. <b>예약 필수</b>. 코톨레타·리소토 강추.</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Trattoria%20del%20Nuovo%20Macello%20Milano" target="_blank" rel="noopener">🔎 구글맵</a>
+          <a href="https://www.thefork.it/restaurant/trattoria-del-nuovo-macello" target="_blank" rel="noopener">🍴 TheFork</a></div>
+        <div class="card rcard"><h3>Ristorante Cracco <span style="color:var(--ink-soft);font-weight:600;font-size:12px">· €€€ 갤러리아 미슐랭</span></h3><p>특별한 날을 위한 파인다이닝(갤러리아 내). 며칠 전 예약 권장·드레스코드.</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Ristorante%20Cracco%20Milano" target="_blank" rel="noopener">🔎 구글맵</a></div>
+      </div>
+      <div class="note tip"><b>💡 예약 팁</b> TheFork(유럽판 예약 앱)는 시간대별 <b>할인·확정</b>이 편리. 구글맵 식당 페이지의 <b>"예약(Reserve a table)"</b> 버튼으로도 바로 예약돼요. 예약 시 <b>4인·시간·이름</b> 확인, 확정 문자를 캡처해 두세요.</div>
+    </div>
+  </section>
+
+  <!-- 팁 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head"><span class="kicker">Tips</span><h2>✅ 오늘의 준비물·팁</h2></div>
+      <ul class="check">
+        <li><b>두오모 예약 QR + 여권</b> — 13:30 입장 시 필요. 캡처해 두면 안전.</li>
+        <li><b>복장·햇빛 대비</b> — 성당은 어깨·무릎 가리기, 옥상 테라스는 선크림·모자·물.</li>
+        <li><b>저녁 예약 확인</b> — 4인·시간, 확정 문자 저장.</li>
+        <li><b>지하철 티켓</b> — ATM 앱·자판기. 소매치기 주의(가방 앞으로).</li>
+        <li><b>더위 관리</b> — 한낮은 실내(성당·아케이드·식당), 야외는 오전·저녁.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><strong>밀라노 시티 가이드</strong><br>7/11(토) 하루 가이드 · 현위치 출발</div>
+    <div>지도: OpenStreetMap · 예약: TheFork·Google</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+  var HOTEL = { lat:45.4845, lng:9.2125, name:'🏠 숙소 (via Parravicini 3, 대략)' };
+  var PTS = [
+    { n:'1', cls:'dg-num',      name:'🏰 스포르체스코 성 (10:30)', lat:45.4706, lng:9.1795 },
+    { n:'2', cls:'dg-num',      name:'🌳 셈피오네 공원 (11:15)', lat:45.4735, lng:9.1755 },
+    { n:'3', cls:'dg-num star', name:'⛪ 두오모+박물관+테라스 (⭐13:30 예약)', lat:45.4641, lng:9.1919 },
+    { n:'4', cls:'dg-num',      name:'🏛️ 갤러리아·스칼라 (15:30)', lat:45.4665, lng:9.1898 },
+    { n:'5', cls:'dg-num night',name:'🍹 저녁·나빌리 (19:00 예약)', lat:45.4515, lng:9.1745 }
+  ];
+  var map, homeMarker, homeLine;
+  function homeIcon(){ return L.divIcon({ className:'', html:'<div class="dg-home"><span>🏠</span></div>', iconSize:[30,30], iconAnchor:[15,28] }); }
+  function init(){
+    var el = document.getElementById('dg-map');
+    if(!el || typeof L === 'undefined'){ return setTimeout(init, 300); }
+    map = L.map(el, { scrollWheelZoom:false, zoomControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
+    var pts = PTS.map(function(p){ return [p.lat, p.lng]; });
+    L.polyline(pts, { color:'#9c3848', weight:4, opacity:.6, dashArray:'7,8' }).addTo(map);
+    PTS.forEach(function(p){
+      L.marker([p.lat, p.lng], { icon: L.divIcon({ className:'', html:'<div class="'+p.cls+'">'+p.n+'</div>', iconSize:[28,28], iconAnchor:[14,14] }) })
+        .addTo(map).bindPopup(p.name);
+    });
+    map.fitBounds(L.latLngBounds(pts), { padding:[45,45] });
+  }
+  function setHome(lat, lng, label){
+    if(!map) return;
+    if(homeMarker) map.removeLayer(homeMarker);
+    if(homeLine) map.removeLayer(homeLine);
+    homeMarker = L.marker([lat,lng], { icon:homeIcon(), zIndexOffset:1000 }).addTo(map).bindPopup(label).openPopup();
+    homeLine = L.polyline([[lat,lng],[PTS[0].lat,PTS[0].lng]], { color:'#16a34a', weight:3, opacity:.7, dashArray:'4,7' }).addTo(map);
+    map.fitBounds(L.latLngBounds([[lat,lng]].concat(PTS.map(function(p){return [p.lat,p.lng];}))), { padding:[45,45] });
+    // 직선 거리
+    var R=6371, dLat=(PTS[0].lat-lat)*Math.PI/180, dLng=(PTS[0].lng-lng)*Math.PI/180;
+    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat*Math.PI/180)*Math.cos(PTS[0].lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    var km=(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1);
+    document.getElementById('locStat').textContent='현재 위치 표시됨 · 첫 목적지(스포르체스코)까지 직선 약 '+km+'km';
+    document.getElementById('dirBtn').href='https://www.google.com/maps/dir/?api=1&origin='+lat+','+lng+'&destination=Castello+Sforzesco+Milano&travelmode=transit';
+  }
+  function locate(){
+    var stat=document.getElementById('locStat');
+    if(!('geolocation' in navigator)){ stat.textContent='이 브라우저는 위치를 지원하지 않아요. 숙소 대략 위치로 표시합니다.'; setHome(HOTEL.lat,HOTEL.lng,HOTEL.name); return; }
+    stat.textContent='위치 확인 중…';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      setHome(pos.coords.latitude, pos.coords.longitude, '🏠 현재 위치(숙소)');
+    }, function(err){
+      stat.textContent='위치 권한이 없어 숙소 대략 위치(via Parravicini 3)로 표시합니다.';
+      setHome(HOTEL.lat,HOTEL.lng,HOTEL.name);
+    }, { enableHighAccuracy:true, timeout:8000, maximumAge:60000 });
+  }
+  if(document.readyState === 'complete') init(); else window.addEventListener('load', init);
+  document.getElementById('locBtn').addEventListener('click', locate);
+})();
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>
