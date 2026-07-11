@@ -32,8 +32,36 @@
       <span class="chip">📅 7/10(금) – 7/12(일) · 2박3일</span>
       <span class="chip">🏛️ 두오모 · 갤러리아 · 나빌리</span>
     </div>
+    <div style="margin-top:16px;display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+      <button id="shareBtn" type="button"
+        style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:800;color:var(--alp-blue-d);background:#fff;border:none;border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)">🔗 이 가이드 공유하기</button>
+      <span id="shareMsg" style="font-size:12.5px;color:#fff;opacity:.9"></span>
+    </div>
   </div>
 </header>
+<div id="shareToast" style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#1b1714;color:#fff;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:.25s;z-index:9999">링크가 복사되었어요 📋</div>
+<script>
+(function(){
+  var URL='https://mega0517.github.io/europe-travel-guide/milan/';
+  var TITLE='밀라노 여행 미니 가이드';
+  var TEXT='밀라노 2박3일 여행 가이드 — 일정·지도·명소·저녁 예약까지';
+  function toast(m){ var t=document.getElementById('shareToast'); if(!t)return; t.textContent=m; t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 2200); }
+  function copy(){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(URL).then(function(){ toast('링크가 복사되었어요 📋 붙여넣기로 공유하세요'); },
+        function(){ prompt('아래 주소를 복사해 공유하세요', URL); });
+    } else { prompt('아래 주소를 복사해 공유하세요', URL); }
+  }
+  var btn=document.getElementById('shareBtn');
+  if(btn) btn.addEventListener('click', function(){
+    if(navigator.share){
+      navigator.share({ title:TITLE, text:TEXT, url:URL }).catch(function(){});
+    } else { copy(); }
+  });
+  var msg=document.getElementById('shareMsg');
+  if(msg) msg.textContent = navigator.share ? '카톡·문자로 바로 공유' : '주소가 복사돼요';
+})();
+</script>
 
 <main>
   <section class="block">
@@ -48,7 +76,7 @@
         <a class="card" href="day-guide.html" style="text-decoration:none;color:inherit">
           <div class="ico">🧭</div>
           <h3>7/11 하루 가이드 (현위치 출발)</h3>
-          <p>숙소에서 10시 출발 → 13:30 두오모 → 저녁 예약까지. 내 위치 지도·길찾기·저녁 예약 링크.</p>
+          <p>숙소에서 12시 출발 → 13:30 두오모 → 저녁 예약까지. 내 위치 지도·길찾기·저녁 예약 링크.</p>
           <span class="more">하루 가이드 →</span>
         </a>
         <a class="card" href="attractions.html" style="text-decoration:none;color:inherit">
