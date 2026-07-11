@@ -91,6 +91,19 @@
       </div>
     </div>
   </section>
+
+  <!-- 나빌리오 운하 바 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Navigli Bars</span>
+        <h2>🍸 나빌리오 운하 바 &amp; 아페리티보</h2>
+        <p>운하변 저녁 분위기의 바 추천. 대부분 <b style="font-weight:800;display:inline">예약 없이 워크인</b>이며, 18~20시 아페리티보 타임이 활기차요(인기집은 자리 잡기 경쟁).</p>
+      </div>
+      <div id="blist"></div>
+      <div class="note tip"><b>🍹 아페리티보란</b> 음료 한 잔(스프리츠·네그로니 등) 값에 <b style="font-weight:800;display:inline">간단 안주·뷔페</b>가 딸려 나오는 저녁 전 문화. 보통 €8~12. 운하 양옆(Naviglio Grande·Pavese)을 걸으며 마음에 드는 곳에 앉으면 됩니다.</div>
+    </div>
+  </section>
 </main>
 
 <footer class="foot">
@@ -178,6 +191,31 @@
   }
   document.getElementById('moreBtn').addEventListener('click', render);
   render();
+
+  // 나빌리오 운하 바
+  var B=[
+    ['Mag Café','크래프트 칵테일','빈티지 인테리어의 나빌리 대표 칵테일 바. 완성도 높은 시그니처'],
+    ['Rita & Cocktails','클래식 칵테일 바','20년 넘은 명소. 정통 칵테일과 편안한 분위기'],
+    ['Ugo Cocktail & Bistrot','크래프트 칵테일','아늑·트렌디, 시즌 재료 칵테일. 가벼운 안주도'],
+    ['Rebelot','칵테일 + 소접시','내추럴 와인·크리에이티브 안주, 미식가 취향'],
+    ['Backdoor 43','초소형 테이크아웃 바','"세계에서 가장 작은 바" — 창문으로 칵테일 픽업, 운하 산책하며'],
+    ['Spritz Navigli','캐주얼 아페리티보','운하변 스프리츠·간단 안주. 활기차고 가성비'],
+    ['Temakinho Navigli','브라질·일식 아페리티보','카이피리냐+스시, 왁자한 분위기. 그룹에 인기'],
+    ['Officina 12','운하 테라스','피자·칵테일, 운하뷰 야외 자리'],
+    ['El Brellin','역사 운하변','1700년대 세탁장 자리, 로맨틱. 식사 겸 한잔'],
+    ['Chatulle','아페리티보 뷔페','한 잔 값에 안주 뷔페, 가성비로 배부른 저녁']
+  ];
+  var bl=document.getElementById('blist');
+  if(bl) B.forEach(function(x,i){
+    var q=encodeURIComponent(x[0]+' Navigli Milano');
+    var g='https://www.google.com/maps/search/?api=1&query='+q;
+    var el=document.createElement('div'); el.className='r';
+    el.innerHTML='<div class="top"><span class="no">'+(i+1)+'</span><span class="nm">'+x[0]+'</span></div>'
+      +'<div class="chips"><span class="c">'+x[1]+'</span><span class="c">📍 나빌리오</span></div>'
+      +'<div class="nt">'+x[2]+'</div>'
+      +'<div class="acts"><a class="g" target="_blank" rel="noopener" href="'+g+'">🔎 구글맵</a></div>';
+    bl.appendChild(el);
+  });
 })();
 </script>
 <script src="js/main.js"></script>
