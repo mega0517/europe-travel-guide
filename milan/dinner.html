@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘 저녁 예약 (4명·19:00) · 밀라노 시티 가이드</title>
+<meta name="description" content="오늘 밀라노 저녁 성인 4명·오후 7시 예약 후보 식당 리스트 — 구글맵 예약·전화 링크와 10개씩 더 보기">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .ctx{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px;}
+  .ctx .pill{background:var(--alp-blue);color:#fff;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:800;}
+  .ctx .pill.alt{background:var(--snow);color:var(--alp-blue-d);border:1px solid var(--line);}
+  .cta{display:flex;flex-wrap:wrap;gap:9px;margin:8px 0 2px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 15px;text-decoration:none;cursor:pointer;border:none;}
+  .btn.pri{color:#fff;background:var(--alp-blue);box-shadow:var(--shadow);} .btn.pri:hover{background:var(--alp-blue-d);}
+  .btn.gho{color:var(--alp-blue-d);background:var(--snow);border:1px solid var(--line);}
+  #rlist{display:grid;gap:11px;margin:6px 0;}
+  .r{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;}
+  .r .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .r .nm{font-size:15.5px;font-weight:800;color:var(--ink);}
+  .r .no{font-size:11.5px;font-weight:700;color:#fff;background:var(--alp-blue);border-radius:999px;padding:1px 8px;flex:0 0 auto;}
+  .r .chips{margin:5px 0 3px;display:flex;flex-wrap:wrap;gap:5px;}
+  .r .c{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--snow);color:var(--alp-blue-d);border:1px solid var(--line);}
+  .r .c.price{color:#b06b00;background:#fff6e6;border-color:#f0e0a8;}
+  .r .nt{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:3px 0 7px;}
+  .r .acts{display:flex;flex-wrap:wrap;gap:6px;}
+  .r a{font-size:12px;font-weight:700;text-decoration:none;border-radius:8px;padding:5px 10px;}
+  .r a.g{color:#245f45;background:#e9f3ee;border:1px solid #cfe6d8;}
+  .r a.b{color:#1d4ed8;background:#eef2fd;border:1px solid #c3d0e6;}
+  .more-wrap{text-align:center;margin:10px 0 2px;}
+  #moreBtn{font-size:14px;font-weight:800;color:#fff;background:var(--alp-blue);border:none;border-radius:999px;padding:11px 22px;cursor:pointer;box-shadow:var(--shadow);}
+  #moreBtn:hover{background:var(--alp-blue-d);}
+  #shown{font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-top:8px;}
+  .ext{margin-top:12px;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">🏛️ 밀라노 <span>시티 가이드</span></a>
+    <button class="nav-toggle" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-back">← 유럽 가이드</a>
+      <a href="index.html">홈</a>
+      <a href="itinerary.html">📅 상세 일정</a>
+      <a href="day-guide.html">🧭 하루 가이드</a>
+      <a href="dinner.html" class="active">🍽️ 오늘 저녁 예약</a>
+      <a href="attractions.html">볼거리·명소</a>
+      <a href="driving.html">🚗 운전·ZTL·주차</a>
+      <a href="food.html">맛집·쇼핑</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">홈</a> › 🍽️ 오늘 저녁 예약</p>
+    <h1>🍽️ 오늘 밀라노 저녁 예약</h1>
+    <p><b id="ctxLine">오늘 · 성인 4명 · 오후 7시(19:00)</b> 기준 예약 후보 리스트입니다. 각 식당의 <b>구글맵</b>을 열면 <b>예약(Reserve)·전화·영업시간</b>을 바로 확인할 수 있어요. 아래에서 <b>10개씩 더</b> 볼 수 있습니다.</p>
+  </div>
+</header>
+
+<main>
+  <section class="block">
+    <div class="wrap">
+      <div class="ctx">
+        <span class="pill" id="pillDate">📅 오늘</span>
+        <span class="pill">🕖 19:00</span>
+        <span class="pill">👥 성인 4명</span>
+        <span class="pill alt">📍 밀라노</span>
+      </div>
+      <div class="note warn"><b>⚠️ 실시간 예약 가능 여부는 확인 필요</b> 아래는 <b style="font-weight:800;display:inline">4인 저녁에 좋은 추천 후보</b>이며, 오늘 19시 자리 여부는 <b style="font-weight:800;display:inline">각 식당 구글맵의 예약 버튼·전화</b>나 <b style="font-weight:800;display:inline">TheFork 앱</b>에서 최종 확인·예약하세요. 토요일 저녁은 빨리 차니 서두르는 게 좋아요.</div>
+
+      <div class="cta">
+        <a class="btn pri" id="theforkBtn" target="_blank" rel="noopener" href="https://www.thefork.com/">🍴 TheFork에서 검색·예약</a>
+        <a class="btn gho" id="googleBtn" target="_blank" rel="noopener" href="https://www.google.com/search?q=Milano+ristorante+prenota+stasera+4+persone+19:00">🔎 구글에서 오늘 예약 검색</a>
+        <a class="btn gho" href="day-guide.html">🧭 하루 가이드로</a>
+      </div>
+
+      <div id="rlist"></div>
+      <div class="more-wrap">
+        <button id="moreBtn" type="button">+ 10개 더 보기</button>
+        <div id="shown"></div>
+        <div class="ext" id="extBox" style="display:none">
+          <div class="note tip"><b>🔎 더 찾기</b> 후보를 다 봤어요. <b>TheFork 앱</b>(오늘·19:00·4명 필터)이나 아래 구글 검색으로 더 찾을 수 있어요.</div>
+          <div class="cta">
+            <a class="btn pri" target="_blank" rel="noopener" href="https://www.thefork.com/">🍴 TheFork 더 보기</a>
+            <a class="btn gho" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=ristoranti+Milano+cena">🗺️ 구글맵에서 밀라노 식당 더 보기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><strong>밀라노 시티 가이드</strong><br>오늘 저녁 예약 후보 (4명·19:00)</div>
+    <div>예약·전화: 각 식당 구글맵 · TheFork. 가격/영업은 변동될 수 있어요.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // 오늘 날짜 표시
+  try{
+    var d=new Date(); var wd=['일','월','화','수','목','금','토'][d.getDay()];
+    var label=(d.getMonth()+1)+'/'+d.getDate()+'('+wd+')';
+    var pd=document.getElementById('pillDate'); if(pd) pd.textContent='📅 오늘 '+label;
+    var cl=document.getElementById('ctxLine'); if(cl) cl.textContent='오늘('+label+') · 성인 4명 · 오후 7시(19:00)';
+  }catch(e){}
+
+  // 추천 식당 (4인 저녁 기준 · 지역/가격/요리 다양) — g: 구글 검색명
+  var R = [
+    ['Ratanà','모던 밀라노','€€','포르타 누오바·숙소 근처','전통을 모던하게. 정원 테라스, 저녁 후 귀가 편함'],
+    ['Trattoria Milanese','정통 밀라노','€€','중심가','리소토 알라 밀라네제·코톨레타 클래식'],
+    ['Trattoria del Nuovo Macello','미슐랭 비브구르망','€€','오르티카','현지인 사랑. 예약 필수'],
+    ['Osteria del Treno','정통·리버티 홀','€€','중앙역 근처·숙소 근처','슬로우푸드, 단체석 좋음'],
+    ['Masuelli San Marco','역사 트라토리아','€€','포르타 로마나','1921년, 롬바르디아 정통'],
+    ['Antica Trattoria della Pesa','역사 정통','€€€','포르타 볼타','1880년, 오소부코·리소토'],
+    ['Dry Milano','피자·칵테일','€€','브레라','미슐랭 셰프의 피자와 칵테일'],
+    ['Berberè','사워도우 피자','€€','이솔라·나빌리','발효 피자, 나눠먹기 좋음'],
+    ['Rita & Cocktails','비스트로·칵테일','€€','나빌리','저녁 활기, 칵테일 명소'],
+    ['El Brellin','운하뷰 정통','€€€','나빌리','운하변 로맨틱 저녁'],
+    ['Ugo','모던 비스트로','€€','나빌리','트렌디, 예약 권장'],
+    ['Al Pont de Ferr','미슐랭','€€€','나빌리','운하변 고급 코스'],
+    ['Langosteria','고급 해산물','€€€€','포르타 제노바','밀라노 대표 해산물, 예약 필수'],
+    ['Da Giacomo','해산물','€€€','포르타 베네치아','클래식 생선요리'],
+    ['Pescaria','캐주얼 해산물','€€','브레라','바리식 생선 플레이트'],
+    ['Giacomo Arengario','두오모뷰','€€€','두오모(노베첸토)','테라스에서 두오모 전망'],
+    ['Terrazza Aperol','두오모뷰 바','€€','두오모 광장','두오모 보며 가벼운 저녁'],
+    ['Boeucc','밀라노 최고(古)','€€€','두오모 근처','1696년, 격식 있는 저녁'],
+    ['Don Lisander','클래식','€€€','두오모 근처','안뜰 다이닝'],
+    ['La Brisa','세련된 이탈리안','€€€','중심가','안뜰 정원, 특별한 저녁'],
+    ['Paper Moon','이탈리안','€€€','몬테나폴레오네','명품가 근처 인기 피자·파스타'],
+    ['Bice','브레라 클래식','€€€','브레라','토스카나·밀라노 요리'],
+    ['Pastamadre','모던 파스타','€€','포르타 로마나','시칠리아 감성 파스타'],
+    ['Miscusi','캐주얼 파스타','€','여러 지점','합리적, 단체 편함'],
+    ['Trippa','모던 트라토리아','€€','포르타 로마나','초인기(예약 어려움)'],
+    ['Al Garghet','전통 정원','€€','남부','정원, 롬바르디아 가정식'],
+    ['Lievità','나폴리 피자','€€','여러 지점','인기 화덕 피자'],
+    ['Piz','나폴리 피자','€','중심가','저렴·활기, 웨이팅'],
+    ['Spontini','밀라노식 조각피자','€','여러 지점','두툼·간편(예약 불필요)'],
+    ['Ceresio 7','루프탑','€€€€','포르타 볼타','수영장·스카이라인, 예약 필수'],
+    ['Ristorante Cracco','미슐랭 파인다이닝','€€€€','갤러리아','갤러리아 내, 드레스코드'],
+    ['Seta Mandarin Oriental','미슐랭 2★','€€€€','몬테나폴레오네','특별한 날 파인다이닝'],
+    ['Contraste','미슐랭 1★','€€€€','남부','창의적 코스'],
+    ['Iyo','미슐랭 일식','€€€€','사르피','이탈리아 첫 일식 미슐랭'],
+    ['Joia','미슐랭 채식','€€€€','포르타 베네치아','유럽 첫 채식 미슐랭'],
+    ['La Bullona','해산물 비스트로','€€€','사르피','트렌디, 생선'],
+    ['Spirit de Milan','저녁+라이브','€€','북부','재즈·스윙 있는 분위기 저녁'],
+    ['Latteria San Marco','아이코닉 소형','€€','브레라','예약불가·현장(소규모)'],
+    ['Flower Burger','비건 버거','€','여러 지점','채식·가성비'],
+    ['Exit Bistrot','캐주얼','€','여러 지점','가벼운 저녁·젤라토']
+  ];
+
+  var PAGE=10, shown=0;
+  var list=document.getElementById('rlist');
+  function card(x, i){
+    var name=x[0], cui=x[1], price=x[2], area=x[3], nt=x[4];
+    var q=encodeURIComponent(name+' Milano');
+    var g='https://www.google.com/maps/search/?api=1&query='+q;
+    var b='https://www.google.com/search?q='+encodeURIComponent(name+' Milano prenota');
+    var el=document.createElement('div'); el.className='r';
+    el.innerHTML='<div class="top"><span class="no">'+(i+1)+'</span><span class="nm">'+name+'</span></div>'
+      +'<div class="chips"><span class="c">'+cui+'</span><span class="c price">'+price+'</span><span class="c">📍 '+area+'</span></div>'
+      +'<div class="nt">'+nt+'</div>'
+      +'<div class="acts"><a class="g" target="_blank" rel="noopener" href="'+g+'">🔎 구글맵 예약·전화</a>'
+      +'<a class="b" target="_blank" rel="noopener" href="'+b+'">🍴 예약 검색</a></div>';
+    return el;
+  }
+  function render(){
+    var end=Math.min(shown+PAGE, R.length);
+    for(var i=shown;i<end;i++){ list.appendChild(card(R[i], i)); }
+    shown=end;
+    document.getElementById('shown').textContent=shown+' / '+R.length+' 곳 표시됨';
+    if(shown>=R.length){ document.getElementById('moreBtn').style.display='none'; document.getElementById('extBox').style.display='block'; }
+  }
+  document.getElementById('moreBtn').addEventListener('click', render);
+  render();
+})();
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>
