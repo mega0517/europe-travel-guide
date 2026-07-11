@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>포르토로주 숙소 추천 (7/12~7/13 · 4인) · 피란 시티 가이드</title>
+<meta name="description" content="7월 12일 슬로베니아 포르토로주(Portorož) 숙소 추천 리스트 — 자동차 여행 2쌍 부부 기준 등급별 호텔·아파트, 주차·스파·해변, 부킹닷컴/구글맵 예약 링크와 위치 지도">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  .stay-map{height:380px;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);margin:6px 0;}
+  .sm-num{width:26px;height:26px;border-radius:50%;background:var(--alp-blue);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);}
+  .sm-num.piran{background:#c0392b;} .sm-num.park{background:#0d9488;}
+  .stay-map .leaflet-popup-content{font-size:13px;font-weight:600;margin:9px 12px;}
+  .cta{display:flex;flex-wrap:wrap;gap:9px;margin:8px 0 2px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 15px;text-decoration:none;cursor:pointer;border:none;}
+  .btn.pri{color:#fff;background:var(--alp-blue);box-shadow:var(--shadow);} .btn.pri:hover{background:var(--alp-blue-d);}
+  .btn.gho{color:var(--alp-blue-d);background:var(--snow);border:1px solid var(--line);}
+  .h{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:11px;}
+  .h .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .h .no{font-size:11.5px;font-weight:800;color:#fff;background:var(--alp-blue);border-radius:999px;padding:1px 8px;flex:0 0 auto;}
+  .h .nm{font-size:15.5px;font-weight:800;color:var(--ink);}
+  .h .chips{margin:5px 0 3px;display:flex;flex-wrap:wrap;gap:5px;}
+  .h .c{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--snow);color:var(--alp-blue-d);border:1px solid var(--line);}
+  .h .c.price{color:#b06b00;background:#fff6e6;border-color:#f0e0a8;}
+  .h .c.star{color:#a15; background:#fdeef2;border-color:#f0c8d4;}
+  .h .nt{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:3px 0 7px;}
+  .h .acts{display:flex;flex-wrap:wrap;gap:6px;}
+  .h a{font-size:12px;font-weight:700;text-decoration:none;border-radius:8px;padding:5px 10px;}
+  .h a.bk{color:#0a3d91;background:#e9f0fb;border:1px solid #c3d4ef;}
+  .h a.g{color:#245f45;background:#e9f3ee;border:1px solid #cfe6d8;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">🌅 피란 <span>시티 가이드</span></a>
+    <button class="nav-toggle" aria-label="메뉴">☰</button>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-back">← 유럽 가이드</a>
+      <a href="index.html">홈</a>
+      <a href="itinerary.html">📅 상세 일정</a>
+      <a href="portoroz-stay.html" class="active">🏨 포르토로주 숙소</a>
+      <a href="attractions.html">볼거리·명소</a>
+      <a href="driving.html">🚗 운전·주차</a>
+      <a href="food.html">맛집</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">홈</a> › 🏨 포르토로주 숙소</p>
+    <h1>🏨 포르토로주 숙소 추천</h1>
+    <p><b>7/12(일) 체크인 ~ 7/13(월) 체크아웃 · 성인 4명(2쌍 부부)</b> 기준. 피란 구시가는 차량 진입이 제한적이라, 바로 옆 <b>포르토로주(Portorož)</b>는 대형 호텔·스파·해변·<b>주차</b>가 갖춰져 자동차 여행 베이스로 좋아요. 피란까지 차로 3~5분·버스로도 연결됩니다.</p>
+  </div>
+</header>
+
+<main>
+  <section class="block">
+    <div class="wrap">
+      <div class="note tip"><b>👫 2쌍 부부 팁</b> 호텔은 <b style="font-weight:800;display:inline">더블룸 2개</b>로 잡으면 되고, 주방이 필요하면 <b style="font-weight:800;display:inline">2침실 아파트</b>가 경제적이에요. 한여름이라 <b style="font-weight:800;display:inline">에어컨</b>은 필수, 자동차라 <b style="font-weight:800;display:inline">무료/호텔 주차</b> 여부를 꼭 확인하세요.</div>
+      <div class="cta">
+        <a class="btn pri" target="_blank" rel="noopener" href="https://www.booking.com/searchresults.html?ss=Portoro%C5%BE&checkin=2026-07-12&checkout=2026-07-13&group_adults=4&no_rooms=2&group_children=0">🏨 부킹닷컴 — 포르토로주 전체 (7/12~13·4인·2실)</a>
+        <a class="btn gho" target="_blank" rel="noopener" href="https://www.airbnb.co.kr/s/Portoro%C5%BE--Slovenia/homes?adults=4&checkin=2026-07-12&checkout=2026-07-13">🏡 에어비앤비 — 포르토로주 4인</a>
+      </div>
+      <div id="stay-map" class="stay-map"></div>
+      <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0">🔴 피란 구시가 · 🟢 Fornače 환승주차 · 🔵 추천 숙소 위치. 핀을 누르면 이름이 떠요.</p>
+    </div>
+  </section>
+
+  <!-- 5성 럭셔리 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head"><span class="kicker">5★ Luxury</span><h2>✨ 5성 럭셔리 · 특별한 하룻밤</h2></div>
+      <div id="cat-lux"></div>
+    </div>
+  </section>
+
+  <!-- 4성 리조트 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head"><span class="kicker">4★ Resort</span><h2>🏖️ 4성 리조트 · 해변·스파·가족형</h2></div>
+      <div id="cat-res"></div>
+    </div>
+  </section>
+
+  <!-- 가성비·부티크 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head"><span class="kicker">Value &amp; Boutique</span><h2>💶 가성비 · 부티크 · 소형</h2></div>
+      <div id="cat-val"></div>
+    </div>
+  </section>
+
+  <!-- 아파트 -->
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head"><span class="kicker">Apartments</span><h2>🍳 2침실 아파트 · 2쌍에 경제적</h2></div>
+      <div id="cat-apt"></div>
+      <div class="cta">
+        <a class="btn gho" target="_blank" rel="noopener" href="https://www.booking.com/searchresults.html?ss=Portoro%C5%BE&checkin=2026-07-12&checkout=2026-07-13&group_adults=4&no_rooms=1&group_children=0&nflt=ht_id%3D220">🏨 부킹닷컴 아파트만 보기</a>
+        <a class="btn gho" target="_blank" rel="noopener" href="https://www.airbnb.co.kr/s/Portoro%C5%BE--Slovenia/homes?adults=4&checkin=2026-07-12&checkout=2026-07-13&min_bedrooms=2">🏡 에어비앤비 2침실+</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 팁 -->
+  <section class="block section-alt">
+    <div class="wrap">
+      <div class="section-head"><span class="kicker">Tips</span><h2>✅ 예약 전 체크</h2></div>
+      <ul class="check">
+        <li><b>주차</b> — 호텔 자체 주차/요금 확인. 포르토로주는 대부분 주차장 보유(유료 많음).</li>
+        <li><b>피란 접근</b> — 차로 3~5분이나 <b>구시가 진입 제한</b>. Fornače 주차 후 무료 셔틀 또는 포르토로주↔피란 버스.</li>
+        <li><b>에어컨·바다 전망</b> — 한여름 필수. "sea view"는 요금이 올라가요.</li>
+        <li><b>스파·해변</b> — LifeClass·Bernardin 리조트는 테르메(온천)·수영장 이용권 포함 여부 확인.</li>
+        <li><b>취소 규정</b> — 무료 취소 가능한 요금으로 잡으면 일정 변동에 안전.</li>
+        <li><b>1박이라 동선</b> — 다음 날 부다페스트行이면 주차·출차가 편한 곳이 유리.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><strong>피란 시티 가이드</strong><br>포르토로주 숙소 추천 · 7/12~7/13 · 4인</div>
+    <div>예약: booking.com · airbnb · 각 호텔. 요금은 시즌·날짜에 따라 변동.</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+  var CI='2026-07-12', CO='2026-07-13';
+  // [이름, 등급, 가격, 특징, 위도, 경도, 지도표시(true면 핀)]
+  var LUX=[
+    ['Kempinski Palace Portorož','5성','€€€€','역사적 팰리스 호텔. 스파·야외 수영장·정원, 격조 있는 하룻밤',45.5133,13.5905,true],
+    ['Grand Hotel Portorož (LifeClass)','5성S','€€€','해변 앞. 테르메&윌니스 스파(터키탕·수영장) 연결, 위치 최고',45.5145,13.5870,true],
+    ['Grand Hotel Bernardin','5성','€€€','바다 전망·대형 수영장. 피란 방향, 반도 끝 리조트',45.5075,13.5960,true]
+  ];
+  var RES=[
+    ['Hotel Slovenija (LifeClass)','5성','€€€','해변 바로 앞, LifeClass 스파 허브. 가족·커플 인기',45.5150,13.5885,true],
+    ['Hotel Riviera (LifeClass)','4성S','€€€','해변가·야외 수영장. 스파 리조트 단지 내',45.5140,13.5860,true],
+    ['Hotel Histrion (Bernardin)','4성','€€','라구나 워터파크 인접, 피란 근처 가족형',45.5080,13.5952,true],
+    ['Remisens Hotel Metropol','4성S','€€','넓은 소나무 공원·바다 전망, 조용한 분위기',45.5125,13.5920,true],
+    ['Hotel Marko','4성','€€','조용한 정원·수영장, 주차 넉넉·가성비 리조트',45.5168,13.5978,true]
+  ];
+  var VAL=[
+    ['Hotel Mirna (LifeClass)','4성','€€','LifeClass 스파와 연결, 합리적인 4성',45.5148,13.5878,false],
+    ['Vile Park (LifeClass)','3성','€€','소나무 공원 속 빌라동, 조용하고 위치 좋음',45.5155,13.5862,false],
+    ['Remisens Hotel Roze','3성','€€','해변 근처 가성비, 심플·깔끔',45.5136,13.5898,false],
+    ['Barbara Piran Beach Hotel','4성','€€','파추크(Pacug) 해변·수영장. 피란·포르토로주 중간, 조용',45.5228,13.5748,true]
+  ];
+  var APT=[
+    ['Portorož 2침실 아파트 (부킹/에어비앤비)','아파트','€€','주방·세탁·2침실. 2쌍이 나눠 쓰기 경제적, 주차 확인',45.5150,13.5905,false],
+    ['Lucija/Seča 아파트','아파트','€€','포르토로주 남쪽 조용한 주거지, 주차 쉬움·마리나 인근',45.5100,13.6010,false]
+  ];
+
+  function bk(name){ return 'https://www.booking.com/searchresults.html?ss='+encodeURIComponent(name+' Portoroz')+'&checkin='+CI+'&checkout='+CO+'&group_adults=4&no_rooms=2&group_children=0'; }
+  function gm(name){ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(name+' Portoroz'); }
+  var idx=0;
+  function render(arr, elId){
+    var box=document.getElementById(elId);
+    arr.forEach(function(x){
+      idx++;
+      var name=x[0], star=x[1], price=x[2], nt=x[3];
+      var el=document.createElement('div'); el.className='h';
+      el.innerHTML='<div class="top"><span class="no">'+idx+'</span><span class="nm">'+name+'</span></div>'
+        +'<div class="chips"><span class="c star">'+star+'</span><span class="c price">'+price+'</span></div>'
+        +'<div class="nt">'+nt+'</div>'
+        +'<div class="acts"><a class="bk" target="_blank" rel="noopener" href="'+bk(name)+'">🏨 부킹닷컴 (7/12~13·4인)</a>'
+        +'<a class="g" target="_blank" rel="noopener" href="'+gm(name)+'">🔎 구글맵</a></div>';
+      box.appendChild(el);
+    });
+  }
+  render(LUX,'cat-lux'); render(RES,'cat-res'); render(VAL,'cat-val'); render(APT,'cat-apt');
+
+  // 지도
+  var PINS=[]; var n=0;
+  [LUX,RES,VAL,APT].forEach(function(g){ g.forEach(function(x){ n++; if(x[6]) PINS.push({n:n,name:x[0],lat:x[4],lng:x[5]}); }); });
+  var LAND=[
+    { name:'🔴 피란 구시가 (타르티니 광장)', lat:45.5285, lng:13.5683, cls:'sm-num piran', lbl:'P' },
+    { name:'🟢 Fornače 환승주차 (무료 셔틀)', lat:45.5245, lng:13.5720, cls:'sm-num park', lbl:'🅿' }
+  ];
+  function init(){
+    var el=document.getElementById('stay-map');
+    if(!el || typeof L==='undefined'){ return setTimeout(init,300); }
+    var map=L.map(el,{scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+    var all=[];
+    LAND.forEach(function(p){ all.push([p.lat,p.lng]);
+      L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<div class="'+p.cls+'">'+p.lbl+'</div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(map).bindPopup(p.name);
+    });
+    PINS.forEach(function(p){ all.push([p.lat,p.lng]);
+      L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<div class="sm-num">'+p.n+'</div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(map).bindPopup(p.n+'. '+p.name);
+    });
+    map.fitBounds(L.latLngBounds(all),{padding:[40,40]});
+  }
+  if(document.readyState==='complete') init(); else window.addEventListener('load', init);
+})();
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>
